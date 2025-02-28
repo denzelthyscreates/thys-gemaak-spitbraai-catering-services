@@ -89,9 +89,9 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold mb-6">Contact</h4>
             <ul className="space-y-4 text-gray-400">
-              <li>Cape Town, South Africa</li>
-              <li>+27 21 555 7890</li>
-              <li>bookings@thysgemaak.co.za</li>
+              <li>75 School Street, Kylemore, Stellenbosch, 7600</li>
+              <li>+27 60 461 3766</li>
+              <li>wade@thysgemaak.com</li>
               <li>Available 9am-5pm, Monday-Friday</li>
             </ul>
           </div>

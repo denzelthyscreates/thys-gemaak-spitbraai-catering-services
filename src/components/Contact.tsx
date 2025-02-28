@@ -67,8 +67,8 @@ const Contact = () => {
                 </div>
                 <div>
                   <h4 className="font-semibold mb-1">Location</h4>
-                  <p className="text-muted-foreground">Cape Town, South Africa</p>
-                  <p className="text-muted-foreground">Serving the entire Western Cape region</p>
+                  <p className="text-muted-foreground">75 School Street, Kylemore</p>
+                  <p className="text-muted-foreground">Stellenbosch, 7600</p>
                 </div>
               </div>
               
@@ -78,7 +78,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h4 className="font-semibold mb-1">Phone</h4>
-                  <p className="text-muted-foreground">+27 21 555 7890</p>
+                  <p className="text-muted-foreground">+27 60 461 3766</p>
                   <p className="text-muted-foreground">Available 9am-5pm, Monday-Friday</p>
                 </div>
               </div>
@@ -89,7 +89,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h4 className="font-semibold mb-1">Email</h4>
-                  <p className="text-muted-foreground">bookings@thysgemaak.co.za</p>
+                  <p className="text-muted-foreground">wade@thysgemaak.com</p>
                   <p className="text-muted-foreground">We respond within 24 hours</p>
                 </div>
               </div>
