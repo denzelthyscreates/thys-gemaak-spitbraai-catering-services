@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -53,7 +52,10 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				// Custom colors for Thys Gemaak
+				thysbrand: {
+					blue: '#0066a4',
+					red: '#ea384c'
+				},
 				earth: {
 					50: '#FEF7ED',
 					100: '#FDF0DB',

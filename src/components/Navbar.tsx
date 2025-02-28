@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { ChefHat, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -35,10 +35,10 @@ const Navbar = () => {
           className="flex items-center gap-2 group"
           aria-label="Thys Gemaak Spitbraai Catering"
         >
-          <ChefHat 
-            className={`h-8 w-8 transition-colors duration-300 ${
-              isScrolled ? 'text-primary' : 'text-primary'
-            }`} 
+          <img 
+            src="/logo.png" 
+            alt="Thys Gemaak Logo" 
+            className="h-10 w-auto transition-transform duration-300 group-hover:scale-105"
           />
           <span className={`font-serif text-xl font-semibold tracking-tight transition-colors duration-300 ${
             isScrolled ? 'text-foreground' : 'text-foreground'
