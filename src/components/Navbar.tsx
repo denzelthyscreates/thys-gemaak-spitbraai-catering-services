@@ -39,6 +39,7 @@ const Navbar = () => {
             src="/logo.png" 
             alt="Thys Gemaak Logo" 
             className="h-10 w-auto transition-transform duration-300 group-hover:scale-105"
+            onError={(e) => console.error("Logo failed to load:", e)}
           />
           <span className={`font-serif text-xl font-semibold tracking-tight transition-colors duration-300 ${
             isScrolled ? 'text-foreground' : 'text-foreground'

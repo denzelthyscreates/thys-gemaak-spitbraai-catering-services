@@ -15,6 +15,7 @@ const Footer = () => {
                 src="/logo.png" 
                 alt="Thys Gemaak Logo" 
                 className="h-10 w-auto"
+                onError={(e) => console.error("Logo failed to load in footer:", e)}
               />
               <span className="font-serif text-xl font-semibold tracking-tight">
                 Thys Gemaak
