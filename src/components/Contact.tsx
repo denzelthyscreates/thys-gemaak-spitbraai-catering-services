@@ -95,12 +95,12 @@ const Contact = () => {
               </div>
             </div>
             
-            {/* Map or Image */}
-            <div className="rounded-xl overflow-hidden shadow-subtle border border-border h-64">
+            {/* Logo Image */}
+            <div className="rounded-xl overflow-hidden shadow-subtle border border-border">
               <img 
-                src="https://images.unsplash.com/photo-1570168007204-dfb528c6958f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="Cape Town, South Africa" 
-                className="w-full h-full object-cover"
+                src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788540/TGS_Logo_v2_Long_qqrzkn.png" 
+                alt="Thys Gemaak Spitbraai Catering Services Logo" 
+                className="w-full h-auto object-contain p-4"
               />
             </div>
           </div>
