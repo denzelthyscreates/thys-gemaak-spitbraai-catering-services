@@ -36,7 +36,7 @@ const Navbar = () => {
           aria-label="Thys Gemaak Spitbraai Catering Services"
         >
           <img 
-            src="/logo.png" 
+            src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788542/TGS_Icon_t4gc9n.png" 
             alt="Thys Gemaak Spitbraai Catering Services Logo" 
             className="h-10 w-auto transition-transform duration-300 group-hover:scale-105"
             onError={(e) => console.error("Logo failed to load:", e)}

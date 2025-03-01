@@ -12,7 +12,7 @@ const Footer = () => {
           <div className="space-y-6">
             <div className="flex items-center gap-2">
               <img 
-                src="/logo.png" 
+                src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788542/TGS_Icon_t4gc9n.png" 
                 alt="Thys Gemaak Spitbraai Catering Services Logo" 
                 className="h-10 w-auto"
                 onError={(e) => console.error("Logo failed to load in footer:", e)}

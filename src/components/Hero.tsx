@@ -43,7 +43,7 @@ const Hero = () => {
         <div className="relative mt-16 lg:mt-24 overflow-hidden rounded-xl border border-border shadow-prominent animate-scale-in">
           <div className="aspect-video relative overflow-hidden">
             <img 
-              src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788454/IMG-20241110-WA0005_i9asfu.jpg" 
+              src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740792199/unnamed_ffvctc.jpg" 
               alt="Traditional South African Spitbraai" 
               className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
             />
