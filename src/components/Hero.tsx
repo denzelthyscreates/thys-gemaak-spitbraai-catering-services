@@ -38,14 +38,15 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* Featured Image - Modified for full width */}
-        <div className="relative mt-16 lg:mt-24 w-full overflow-hidden rounded-xl border border-border shadow-prominent animate-scale-in">
-          <div className="w-full aspect-video relative overflow-hidden">
-            <img 
-              src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740791600/IMG-20240826-WA0043_zlnaci.jpg" 
-              alt="Traditional South African Spitbraai" 
-              className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
-            />
+{/* For a full viewport width image that breaks out of container */}
+<div className="mt-16 lg:mt-24">
+  <div className="relative w-screen left-1/2 right-1/2 -mx-[50vw] overflow-hidden rounded-xl border border-border shadow-prominent animate-scale-in">
+    <div className="aspect-video relative overflow-hidden">
+      <img 
+        src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740791600/IMG-20240826-WA0043_zlnaci.jpg" 
+        alt="Traditional South African Spitbraai" 
+        className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
+      />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
             <div className="absolute bottom-6 left-6 right-6 md:bottom-8 md:left-8 md:right-8">
               <span className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-white text-foreground mb-3">
