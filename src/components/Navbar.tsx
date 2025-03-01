@@ -1,10 +1,12 @@
 
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,6 +25,31 @@ const Navbar = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  // Function to handle smooth scrolling for hash links on the home page
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, target: string) => {
+    e.preventDefault();
+    
+    // If we're not on the home page, navigate to home first
+    if (location.pathname !== '/') {
+      window.location.href = `/${target}`;
+      return;
+    }
+    
+    // If we're already on the home page, just scroll to the section
+    const element = document.getElementById(target);
+    if (element) {
+      window.scrollTo({
+        top: element.offsetTop - 80, // Offset for navbar
+        behavior: 'smooth'
+      });
+    }
+    
+    // Close mobile menu if open
+    if (isMenuOpen) {
+      setIsMenuOpen(false);
+    }
+  };
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -31,7 +58,7 @@ const Navbar = () => {
     >
       <div className="container-width flex items-center justify-between">
         <a 
-          href="#" 
+          href="/" 
           className="flex items-center gap-2 group"
           aria-label="Thys Gemaak Spitbraai Catering Services"
         >
@@ -54,17 +81,24 @@ const Navbar = () => {
             {['Home', 'About', 'Services', 'Testimonials', 'Contact'].map((item) => (
               <li key={item}>
                 <a
-                  href={`#${item.toLowerCase()}`}
+                  href={item.toLowerCase() === 'home' ? '/' : `/#${item.toLowerCase()}`}
                   className={`text-base font-medium transition-colors duration-200 hover:text-primary ${
                     isScrolled ? 'text-foreground' : 'text-foreground'
                   }`}
+                  onClick={(e) => item.toLowerCase() === 'home' 
+                    ? null 
+                    : handleNavClick(e, item.toLowerCase())}
                 >
                   {item}
                 </a>
               </li>
             ))}
           </ul>
-          <a href="#contact" className="button-primary">
+          <a 
+            href="/#contact" 
+            className="button-primary"
+            onClick={(e) => handleNavClick(e, 'contact')}
+          >
             Book Now
           </a>
         </nav>
@@ -94,9 +128,15 @@ const Navbar = () => {
             {['Home', 'About', 'Services', 'Testimonials', 'Contact'].map((item, index) => (
               <li key={item} className={`w-full slide-in-bottom delay-${index * 100}`}>
                 <a
-                  href={`#${item.toLowerCase()}`}
+                  href={item.toLowerCase() === 'home' ? '/' : `/#${item.toLowerCase()}`}
                   className="block py-3 text-center text-lg font-medium text-foreground hover:text-primary transition-colors"
-                  onClick={toggleMenu}
+                  onClick={(e) => {
+                    if (item.toLowerCase() === 'home') {
+                      setIsMenuOpen(false);
+                    } else {
+                      handleNavClick(e, item.toLowerCase());
+                    }
+                  }}
                 >
                   {item}
                 </a>
@@ -104,9 +144,9 @@ const Navbar = () => {
             ))}
             <li className="w-full mt-4 slide-in-bottom delay-500">
               <a
-                href="#contact"
+                href="/#contact"
                 className="block w-full text-center button-primary"
-                onClick={toggleMenu}
+                onClick={(e) => handleNavClick(e, 'contact')}
               >
                 Book Now
               </a>
