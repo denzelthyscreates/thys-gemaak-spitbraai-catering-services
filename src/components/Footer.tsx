@@ -1,5 +1,5 @@
 
-import { Instagram, Facebook, Twitter } from 'lucide-react';
+import { Facebook } from 'lucide-react';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -13,12 +13,12 @@ const Footer = () => {
             <div className="flex items-center gap-2">
               <img 
                 src="/logo.png" 
-                alt="Thys Gemaak Logo" 
+                alt="Thys Gemaak Spitbraai Catering Services Logo" 
                 className="h-10 w-auto"
                 onError={(e) => console.error("Logo failed to load in footer:", e)}
               />
               <span className="font-serif text-xl font-semibold tracking-tight">
-                Thys Gemaak
+                Thys Gemaak Spitbraai Catering Services
               </span>
             </div>
             <p className="text-blue-100">
@@ -27,25 +27,13 @@ const Footer = () => {
             </p>
             <div className="flex gap-4">
               <a 
-                href="#" 
-                className="p-2 rounded-full bg-blue-800 hover:bg-secondary transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a 
-                href="#" 
+                href="https://www.facebook.com/share/15vy455DHt/" 
                 className="p-2 rounded-full bg-blue-800 hover:bg-secondary transition-colors"
                 aria-label="Facebook"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <Facebook className="h-5 w-5" />
-              </a>
-              <a 
-                href="#" 
-                className="p-2 rounded-full bg-blue-800 hover:bg-secondary transition-colors"
-                aria-label="Twitter"
-              >
-                <Twitter className="h-5 w-5" />
               </a>
             </div>
           </div>
@@ -105,13 +93,13 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-blue-800 text-center md:flex md:justify-between md:items-center">
           <p className="text-blue-200">
-            &copy; {currentYear} Thys Gemaak Spitbraai Catering. All rights reserved.
+            &copy; {currentYear} Thys Gemaak Spitbraai Catering Services. All rights reserved.
           </p>
           <div className="mt-4 md:mt-0">
             <ul className="flex flex-wrap justify-center md:justify-end gap-6 text-sm text-blue-200">
-              <li><a href="#" className="hover:text-secondary transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-secondary transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-secondary transition-colors">Cookie Policy</a></li>
+              <li><a href="/privacy-policy" className="hover:text-secondary transition-colors">Privacy Policy</a></li>
+              <li><a href="/terms-of-service" className="hover:text-secondary transition-colors">Terms of Service</a></li>
+              <li><a href="/cookie-policy" className="hover:text-secondary transition-colors">Cookie Policy</a></li>
             </ul>
           </div>
         </div>

@@ -111,7 +111,7 @@ const Services = () => {
             </div>
             <div className="flex-1 flex justify-center">
               <img 
-                src="https://images.unsplash.com/photo-1507146153580-69a1fe6d8aa1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788466/IMG-20241110-WA0033_vcwpvp.jpg" 
                 alt="Custom Catering Solutions" 
                 className="rounded-lg shadow-subtle max-w-full h-auto"
               />

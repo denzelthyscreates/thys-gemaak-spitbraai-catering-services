@@ -31,8 +31,8 @@ const About = () => {
           <div className="relative">
             <div className="relative z-10 rounded-xl overflow-hidden shadow-prominent">
               <img 
-                src="https://images.unsplash.com/photo-1593467549516-2164a24c4310?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
-                alt="Thys Gemaak Team Preparing Spitbraai" 
+                src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788458/IMG-20241110-WA0049_esye9b.jpg" 
+                alt="Thys Gemaak Spitbraai Catering Services Team Preparing Spitbraai" 
                 className="w-full h-auto object-cover aspect-[4/3]"
               />
             </div>
@@ -51,7 +51,7 @@ const About = () => {
             
             <div className="space-y-6 text-muted-foreground">
               <p>
-                Thys Gemaak Spitbraai Catering was founded with a vision to democratize premium spitbraai experiences. 
+                Thys Gemaak Spitbraai Catering Services was founded with a vision to democratize premium spitbraai experiences. 
                 We combine South African culinary traditions with innovative booking and operational systems to make 
                 exceptional catering accessible to all.
               </p>
