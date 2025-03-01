@@ -14,7 +14,7 @@ const Footer = () => {
               <img 
                 src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788541/TGS_Logo_v2_es4u0x.png" 
                 alt="Thys Gemaak Spitbraai Catering Services Logo" 
-                className="h-50 w-auto"
+                className="h-80 w-auto"
                 onError={(e) => console.error("Logo failed to load in footer:", e)}
               />
               <span className="font-serif text-xl font-semibold tracking-tight">
