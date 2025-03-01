@@ -17,6 +17,9 @@ const Footer = () => {
                 className="h-10 w-auto"
                 onError={(e) => console.error("Logo failed to load in footer:", e)}
               />
+              <span className="font-serif text-xl font-semibold tracking-tight">
+              Thys Gemaak Spitbraai Catering Services
+
               </span>
             </div>
             <p className="text-blue-100">
