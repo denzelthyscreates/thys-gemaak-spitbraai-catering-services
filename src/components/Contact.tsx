@@ -98,7 +98,7 @@ const Contact = () => {
             {/* Logo Image */}
             <div className="rounded-xl overflow-hidden shadow-subtle border border-border">
               <img 
-                src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788540/TGS_Logo_v2_Long_qqrzkn.png" 
+                src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740792199/unnamed_ffvctc.jpg" 
                 alt="Thys Gemaak Spitbraai Catering Services Logo" 
                 className="w-full h-auto object-contain p-4"
               />
