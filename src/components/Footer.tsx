@@ -9,7 +9,7 @@ const Footer = () => {
       <div className="container-width">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Brand Column */}
-          <div className="space-y-6">
+          <div className="space-y-10">
             <div className="flex items-center gap-2">
               <img 
                 src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788541/TGS_Logo_v2_es4u0x.png" 
