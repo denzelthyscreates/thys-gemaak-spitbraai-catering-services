@@ -1,12 +1,13 @@
 
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,19 +30,28 @@ const Navbar = () => {
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, target: string) => {
     e.preventDefault();
     
-    // If we're not on the home page, navigate to home first
+    // If we're not on the home page, navigate to home first then to the target section
     if (location.pathname !== '/') {
-      window.location.href = `/${target}`;
-      return;
-    }
-    
-    // If we're already on the home page, just scroll to the section
-    const element = document.getElementById(target);
-    if (element) {
-      window.scrollTo({
-        top: element.offsetTop - 80, // Offset for navbar
-        behavior: 'smooth'
-      });
+      navigate('/', { replace: true });
+      // We need to wait a bit for the navigation to complete before scrolling
+      setTimeout(() => {
+        const element = document.getElementById(target);
+        if (element) {
+          window.scrollTo({
+            top: element.offsetTop - 80, // Offset for navbar
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+    } else {
+      // If we're already on the home page, just scroll to the section
+      const element = document.getElementById(target);
+      if (element) {
+        window.scrollTo({
+          top: element.offsetTop - 80, // Offset for navbar
+          behavior: 'smooth'
+        });
+      }
     }
     
     // Close mobile menu if open
@@ -57,8 +67,8 @@ const Navbar = () => {
       }`}
     >
       <div className="container-width flex items-center justify-between">
-        <a 
-          href="/" 
+        <Link 
+          to="/" 
           className="flex items-center gap-2 group"
           aria-label="Thys Gemaak Spitbraai Catering Services"
         >
@@ -73,34 +83,43 @@ const Navbar = () => {
           }`}>
             Thys Gemaak Spitbraai Catering Services
           </span>
-        </a>
+        </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8">
           <ul className="flex items-center gap-8">
             {['Home', 'About', 'Services', 'Testimonials', 'Contact'].map((item) => (
               <li key={item}>
-                <a
-                  href={item.toLowerCase() === 'home' ? '/' : `/#${item.toLowerCase()}`}
-                  className={`text-base font-medium transition-colors duration-200 hover:text-primary ${
-                    isScrolled ? 'text-foreground' : 'text-foreground'
-                  }`}
-                  onClick={(e) => item.toLowerCase() === 'home' 
-                    ? null 
-                    : handleNavClick(e, item.toLowerCase())}
-                >
-                  {item}
-                </a>
+                {item.toLowerCase() === 'home' ? (
+                  <Link
+                    to="/"
+                    className={`text-base font-medium transition-colors duration-200 hover:text-primary ${
+                      isScrolled ? 'text-foreground' : 'text-foreground'
+                    }`}
+                  >
+                    {item}
+                  </Link>
+                ) : (
+                  <Link
+                    to="/"
+                    className={`text-base font-medium transition-colors duration-200 hover:text-primary ${
+                      isScrolled ? 'text-foreground' : 'text-foreground'
+                    }`}
+                    onClick={(e) => handleNavClick(e, item.toLowerCase())}
+                  >
+                    {item}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
-          <a 
-            href="/#contact" 
+          <Link 
+            to="/"
             className="button-primary"
             onClick={(e) => handleNavClick(e, 'contact')}
           >
             Book Now
-          </a>
+          </Link>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -127,29 +146,33 @@ const Navbar = () => {
           <ul className="flex flex-col items-center gap-6">
             {['Home', 'About', 'Services', 'Testimonials', 'Contact'].map((item, index) => (
               <li key={item} className={`w-full slide-in-bottom delay-${index * 100}`}>
-                <a
-                  href={item.toLowerCase() === 'home' ? '/' : `/#${item.toLowerCase()}`}
-                  className="block py-3 text-center text-lg font-medium text-foreground hover:text-primary transition-colors"
-                  onClick={(e) => {
-                    if (item.toLowerCase() === 'home') {
-                      setIsMenuOpen(false);
-                    } else {
-                      handleNavClick(e, item.toLowerCase());
-                    }
-                  }}
-                >
-                  {item}
-                </a>
+                {item.toLowerCase() === 'home' ? (
+                  <Link
+                    to="/"
+                    className="block py-3 text-center text-lg font-medium text-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item}
+                  </Link>
+                ) : (
+                  <Link
+                    to="/"
+                    className="block py-3 text-center text-lg font-medium text-foreground hover:text-primary transition-colors"
+                    onClick={(e) => handleNavClick(e, item.toLowerCase())}
+                  >
+                    {item}
+                  </Link>
+                )}
               </li>
             ))}
             <li className="w-full mt-4 slide-in-bottom delay-500">
-              <a
-                href="/#contact"
+              <Link
+                to="/"
                 className="block w-full text-center button-primary"
                 onClick={(e) => handleNavClick(e, 'contact')}
               >
                 Book Now
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
