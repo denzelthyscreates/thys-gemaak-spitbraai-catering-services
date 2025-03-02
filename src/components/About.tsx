@@ -33,7 +33,7 @@ const About = () => {
               Our Story
             </span>
             
-            <h2 className="h2 mb-3">Revolutionizing Spitbraai Catering in South Africa</h2>
+            <h2 className="h2 mb-1.5">Revolutionizing Spitbraai Catering in South Africa</h2>
             
             <div className="relative z-10 rounded-xl overflow-hidden shadow-prominent mb-8">
               <img 
