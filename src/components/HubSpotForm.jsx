@@ -1,8 +1,8 @@
 
 import React, { useEffect } from 'react';
 
-// HubSpotForm component with your specific IDs and menu selection field
-const HubSpotForm = () => {
+// Updated HubSpotForm component with menu selection prop
+const HubSpotForm = ({ menuSelection }) => {
   useEffect(() => {
     // Create a script element
     const script = document.createElement('script');
@@ -27,7 +27,7 @@ const HubSpotForm = () => {
               name: "menu_selection",
               label: "Menu Selection",
               fieldType: "hidden",
-              defaultValue: ""
+              defaultValue: menuSelection ? JSON.stringify(menuSelection.fullSelection) : ""
             }
           ],
           onFormReady: function(form) {
@@ -37,8 +37,18 @@ const HubSpotForm = () => {
               const hiddenField = document.createElement('input');
               hiddenField.type = 'hidden';
               hiddenField.name = 'menu_selection';
+              if (menuSelection) {
+                hiddenField.value = menuSelection.fullSelection;
+              }
               form.appendChild(hiddenField);
+            } else if (menuSelection) {
+              existingField.value = menuSelection.fullSelection;
             }
+            
+            // Add listener for form submission
+            form.addEventListener('submit', function() {
+              console.log('Form submitted with menu selection:', menuSelection);
+            });
           }
         });
       }
@@ -57,7 +67,7 @@ const HubSpotForm = () => {
         formContainer.innerHTML = '';
       }
     };
-  }, []); // Empty dependency array means this effect runs once on mount
+  }, [menuSelection]); // Added menuSelection to dependency array
 
   return (
     <div
