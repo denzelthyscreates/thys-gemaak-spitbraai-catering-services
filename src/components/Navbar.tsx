@@ -62,7 +62,7 @@ const Navbar = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full ${
         isScrolled ? 'py-3 bg-white shadow-subtle' : 'py-5 bg-transparent'
       }`}
     >
@@ -136,9 +136,9 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Updated to be full viewport width */}
       <div
-        className={`md:hidden fixed top-[60px] left-0 right-0 h-screen bg-white transform transition-transform duration-300 ease-in-out ${
+        className={`md:hidden fixed top-[60px] left-0 right-0 w-full h-screen bg-white transform transition-transform duration-300 ease-in-out ${
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
