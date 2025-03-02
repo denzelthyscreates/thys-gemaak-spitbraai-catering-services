@@ -33,7 +33,7 @@ const About = () => {
               Our Story
             </span>
             
-<h2 className="text-3xl md:text-4xl font-serif font-semibold tracking-tight text-foreground mb-3">Revolutionizing Spitbraai Catering in South Africa</h2>
+<h2 className="text-4xl md:text-5xl font-serif font-semibold tracking-tight text-foreground mb-3">Revolutionizing Spitbraai Catering in South Africa</h2>
             
             <div className="relative z-10 rounded-xl overflow-hidden shadow-prominent mb-8">
               <img 
