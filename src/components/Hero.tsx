@@ -41,12 +41,12 @@ const Hero = () => {
       </div>
 
       <div className="container-width">
-        <div className="mx-auto max-w-4xl text-center">
+        <div className="mx-auto max-w-8xl text-center">
           <span className="inline-block px-4 py-1.5 mb-6 text-sm font-medium rounded-full bg-primary/10 text-primary animate-fade-in">
             Revolutionizing Traditional Spitbraai
           </span>
           
-          <h1 className="text-8xl md:text-9xl font-serif font-semibold tracking-tight text-foreground mb-6 animate-slide-down">
+          <h1 className="text-4xl md:text-5xl font-serif font-semibold tracking-tight text-foreground mb-6 animate-slide-down">
             Premium South African Spitbraai for Every Occasion
           </h1>
           
