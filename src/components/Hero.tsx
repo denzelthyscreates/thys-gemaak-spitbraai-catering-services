@@ -1,12 +1,38 @@
 
 import { ArrowRight } from 'lucide-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 const Hero = () => {
+  useEffect(() => {
+    // Add intersection observer for scroll animations
+    const sections = document.querySelectorAll('section[id]');
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-enter');
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+    
+    sections.forEach((section) => {
+      observer.observe(section);
+    });
+    
+    return () => {
+      sections.forEach((section) => {
+        observer.unobserve(section);
+      });
+    };
+  }, []);
+  
   return (
     <section 
       id="home" 
-      className="relative pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden"
+      className="relative pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden scroll-mt-20 transition-all duration-700 transform"
     >
       {/* Background Pattern */}
       <div className="absolute inset-0 -z-10 opacity-10">
@@ -20,7 +46,7 @@ const Hero = () => {
             Revolutionizing Traditional Spitbraai
           </span>
           
-          <h1 className="h1 mb-6 animate-slide-down">
+          <h1 className="text-8xl md:text-9xl font-serif font-semibold tracking-tight text-foreground mb-6 animate-slide-down">
             Premium South African Spitbraai for Every Occasion
           </h1>
           
@@ -30,10 +56,10 @@ const Hero = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-down delay-200">
-            <a href="#contact" className="button-primary">
+            <a href="#contact" className="button-primary transform transition-transform hover:scale-105">
               Book Your Experience
             </a>
-            <a href="#services" className="button-outline flex items-center justify-center gap-2 group">
+            <a href="#services" className="button-outline flex items-center justify-center gap-2 group transform transition-transform hover:scale-105">
               Explore Services
               <ArrowRight className="h-4 w-4 transform transition-transform group-hover:translate-x-1" />
             </a>
@@ -61,15 +87,15 @@ const Hero = () => {
             </div>
             
             <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-border">
-              <div className="p-6 flex-1">
+              <div className="p-6 flex-1 hover:bg-primary/5 transition-colors duration-300">
                 <span className="block text-sm font-medium text-muted-foreground mb-1">Private Events</span>
                 <span className="text-lg font-medium">Intimate gatherings with personalized service</span>
               </div>
-              <div className="p-6 flex-1">
+              <div className="p-6 flex-1 hover:bg-primary/5 transition-colors duration-300">
                 <span className="block text-sm font-medium text-muted-foreground mb-1">Corporate Functions</span>
                 <span className="text-lg font-medium">Professional catering for business events</span>
               </div>
-              <div className="p-6 flex-1">
+              <div className="p-6 flex-1 hover:bg-primary/5 transition-colors duration-300">
                 <span className="block text-sm font-medium text-muted-foreground mb-1">Large Celebrations</span>
                 <span className="text-lg font-medium">Scalable solutions for hundreds of guests</span>
               </div>

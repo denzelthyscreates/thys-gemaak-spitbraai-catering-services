@@ -1,25 +1,51 @@
 
 import { MapPin, Phone, Mail } from 'lucide-react';
-import HubSpotForm from './HubSpotForm'; // Import the new component
+import { useState } from 'react';
+import HubSpotForm from './HubSpotForm';
+import MenuBuilder from './MenuBuilder';
 
 const Contact = () => {
+  const [menuSelection, setMenuSelection] = useState<any>(null);
+  const [showMenuBuilder, setShowMenuBuilder] = useState(false);
+
+  const handleMenuSelectionChange = (selection: any) => {
+    setMenuSelection(selection);
+    
+    // Update hidden field in HubSpot form if it exists
+    if (selection && window.hbspt) {
+      const form = document.querySelector('form.hs-form');
+      if (form) {
+        // Try to find the hidden field for menu selection
+        const hiddenFields = form.querySelectorAll('input[type="hidden"]');
+        
+        hiddenFields.forEach((field: any) => {
+          if (field.name === 'menu_selection') {
+            field.value = selection.fullSelection;
+          }
+        });
+      }
+    }
+  };
+
   return (
-    <section id="contact" className="section">
+    <section id="contact" className="section scroll-mt-20 transition-all duration-700 transform">
       <div className="container-width">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           {/* Contact Information */}
-          <div>
+          <div className="animate-fade-in">
             <span className="inline-block px-4 py-1.5 mb-6 text-sm font-medium rounded-full bg-primary/10 text-primary">
               Get In Touch
             </span>
-            <h2 className="h2 mb-6">Book Your Spitbraai Experience</h2>
+            <h2 className="text-8xl md:text-9xl font-serif font-semibold tracking-tight text-foreground mb-6 animate-slide-down">
+              Book Your Spitbraai Experience
+            </h2>
             <p className="text-lg text-muted-foreground mb-10">
               Ready to elevate your event with authentic South African spitbraai? Fill out the form to discuss your 
               catering needs, or contact us directly using the information below.
             </p>
             
             {/* Contact Details */}
-            <div className="space-y-6 mb-10">
+            <div className="space-y-6 mb-10 animate-slide-in-right">
               <div className="flex items-start gap-4">
                 <div className="bg-secondary/50 p-3 rounded-full">
                   <MapPin className="h-6 w-6 text-primary" />
@@ -37,7 +63,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h4 className="font-semibold mb-1">Phone</h4>
-                  <p className="text-muted-foreground">+27 82 788 4168</p>
+                  <p className="text-muted-foreground">+27 60 461 3766</p>
                   <p className="text-muted-foreground">+27 81 768 8884</p>
                 </div>
               </div>
@@ -48,14 +74,14 @@ const Contact = () => {
                 </div>
                 <div>
                   <h4 className="font-semibold mb-1">Email</h4>
+                  <p className="text-muted-foreground">wade@thysgemaak.com</p>
                   <p className="text-muted-foreground">info@thysgemaak.co.za</p>
-                  <p className="text-muted-foreground">bookings@thysgemaak.co.za</p>
                 </div>
               </div>
             </div>
             
             {/* Logo Image */}
-            <div className="rounded-xl overflow-hidden shadow-subtle border border-border">
+            <div className="rounded-xl overflow-hidden shadow-subtle border border-border animate-scale-in">
               <img 
                 src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740792199/unnamed_ffvctc.jpg" 
                 alt="Thys Gemaak Spitbraai Catering Services Logo" 
@@ -64,12 +90,40 @@ const Contact = () => {
             </div>
           </div>
           
-          {/* HubSpot Form */}
-          <div className="bg-white rounded-xl p-8 shadow-prominent border border-border">
-            <h3 className="text-xl font-semibold mb-6">Inquiry Form</h3>
+          <div className="space-y-8">
+            {/* Menu Builder Toggle */}
+            <div className="bg-white rounded-xl p-6 shadow-prominent border border-border animate-fade-in">
+              <button 
+                onClick={() => setShowMenuBuilder(!showMenuBuilder)}
+                className="w-full button-secondary flex items-center justify-center gap-2"
+              >
+                {showMenuBuilder ? "Hide Menu Builder" : "Build Your Custom Menu"}
+              </button>
+              
+              {showMenuBuilder && (
+                <div className="mt-6 animate-scale-in">
+                  <MenuBuilder onSelectionChange={handleMenuSelectionChange} />
+                </div>
+              )}
+            </div>
             
-            {/* HubSpot Form Component */}
-            <HubSpotForm />
+            {/* HubSpot Form */}
+            <div className="bg-white rounded-xl p-8 shadow-prominent border border-border animate-fade-in delay-200">
+              <h3 className="text-xl font-semibold mb-6">Inquiry Form</h3>
+              
+              {/* HubSpot Form Component */}
+              <HubSpotForm />
+              
+              {/* Menu Selection Summary (if available) */}
+              {menuSelection && (
+                <div className="mt-6 p-4 bg-primary/5 rounded-lg animate-scale-in">
+                  <h4 className="font-semibold mb-2">Your Menu Selection</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Your menu selection will be included with your inquiry.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
 @tailwind base;
@@ -55,19 +56,19 @@
 
 @layer components {
   .h1 {
-    @apply text-5xl md:text-6xl lg:text-7xl font-serif font-semibold tracking-tight text-foreground;
+    @apply text-8xl md:text-9xl font-serif font-semibold tracking-tight text-foreground;
   }
 
   .h2 {
-    @apply text-4xl md:text-5xl font-serif font-semibold tracking-tight text-foreground;
+    @apply text-8xl md:text-9xl font-serif font-semibold tracking-tight text-foreground;
   }
 
   .h3 {
-    @apply text-3xl md:text-4xl font-serif font-semibold tracking-tight text-foreground;
+    @apply text-6xl md:text-7xl font-serif font-semibold tracking-tight text-foreground;
   }
 
   .h4 {
-    @apply text-2xl md:text-3xl font-serif font-medium tracking-tight text-foreground;
+    @apply text-4xl md:text-5xl font-serif font-medium tracking-tight text-foreground;
   }
 
   .text-balance {
@@ -139,6 +140,50 @@
   }
 }
 
+/* Enhanced scroll animations */
+.animate-enter {
+  animation: enterAnimation 0.8s ease-out forwards;
+}
+
+@keyframes enterAnimation {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Page transitions */
+section {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+section.animate-enter {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Section transitions */
+section {
+  scroll-margin-top: 80px;
+}
+
+/* Scroll indicator */
+.scroll-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 4px;
+  background-color: hsl(var(--primary));
+  z-index: 100;
+  transition: width 0.3s ease-out;
+}
+
 /* Staggered animations delay classes */
 .delay-100 {
   animation-delay: 100ms;
@@ -158,4 +203,85 @@
 
 .delay-500 {
   animation-delay: 500ms;
+}
+
+/* New animation classes */
+.slide-in-right {
+  animation: slideInRight 0.6s ease-out forwards;
+}
+
+@keyframes slideInRight {
+  from { 
+    transform: translateX(40px);
+    opacity: 0;
+  }
+  to { 
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.6s ease-out forwards;
+}
+
+@keyframes slideInLeft {
+  from { 
+    transform: translateX(-40px);
+    opacity: 0;
+  }
+  to { 
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.bounce-in {
+  animation: bounceIn 0.5s ease-out forwards;
+}
+
+@keyframes bounceIn {
+  0% { 
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.7;
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
+}
+
+/* Hover effect utilities */
+.hover-lift {
+  transition: transform 0.3s ease-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 15px 2px rgba(var(--primary), 0.3);
 }

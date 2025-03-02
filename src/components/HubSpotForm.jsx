@@ -1,9 +1,9 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
-// HubSpotForm component with your specific IDs
+// HubSpotForm component with your specific IDs and menu selection field
 const HubSpotForm = () => {
-  React.useEffect(() => {
+  useEffect(() => {
     // Create a script element
     const script = document.createElement('script');
     script.src = '//js.hsforms.net/forms/embed/v2.js';
@@ -20,7 +20,26 @@ const HubSpotForm = () => {
           portalId: "47808663",
           formId: "f9d120e6-b8c3-46d4-9a5e-f1640a4450d8",
           region: "na1",
-          target: "#hubspot-form-container"
+          target: "#hubspot-form-container",
+          // Add custom fields to capture menu selection
+          additionalFieldsMap: [
+            {
+              name: "menu_selection",
+              label: "Menu Selection",
+              fieldType: "hidden",
+              defaultValue: ""
+            }
+          ],
+          onFormReady: function(form) {
+            // Add a hidden field for menu selection if it doesn't exist
+            const existingField = form.querySelector('input[name="menu_selection"]');
+            if (!existingField) {
+              const hiddenField = document.createElement('input');
+              hiddenField.type = 'hidden';
+              hiddenField.name = 'menu_selection';
+              form.appendChild(hiddenField);
+            }
+          }
         });
       }
     });

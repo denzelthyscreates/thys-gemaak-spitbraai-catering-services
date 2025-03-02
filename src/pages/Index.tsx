@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import About from '../components/About';
@@ -9,8 +9,30 @@ import Contact from '../components/Contact';
 import Footer from '../components/Footer';
 
 const Index = () => {
-  // Implement smooth scrolling
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  // Handle scroll animations and scroll progress
   useEffect(() => {
+    const handleScroll = () => {
+      // Calculate scroll progress for the progress bar
+      const totalHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const progress = (window.scrollY / totalHeight) * 100;
+      setScrollProgress(progress);
+      
+      // Handle section animations
+      const sections = document.querySelectorAll('section[id]');
+      
+      sections.forEach(section => {
+        const sectionTop = section.getBoundingClientRect().top;
+        const triggerPoint = window.innerHeight * 0.8;
+        
+        if (sectionTop < triggerPoint) {
+          section.classList.add('animate-enter');
+        }
+      });
+    };
+    
+    // Smooth scroll to element
     const handleScrollToElement = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const href = target.getAttribute('href');
@@ -29,13 +51,18 @@ const Index = () => {
       }
     };
 
-    // Add event listeners to all anchor links
+    // Add event listeners
+    window.addEventListener('scroll', handleScroll);
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', handleScrollToElement as EventListener);
     });
 
+    // Initial call to set up animations for elements already in view
+    handleScroll();
+
     // Cleanup
     return () => {
+      window.removeEventListener('scroll', handleScroll);
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.removeEventListener('click', handleScrollToElement as EventListener);
       });
@@ -44,6 +71,12 @@ const Index = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Scroll Progress Indicator */}
+      <div 
+        className="scroll-indicator" 
+        style={{ width: `${scrollProgress}%` }}
+      />
+      
       <Navbar />
       <main className="flex-grow">
         <Hero />
