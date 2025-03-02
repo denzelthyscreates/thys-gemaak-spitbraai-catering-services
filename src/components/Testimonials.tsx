@@ -52,7 +52,7 @@ const Testimonials = () => {
           <span className="inline-block px-4 py-1.5 mb-6 text-sm font-medium rounded-full bg-primary/10 text-primary">
             Testimonials
           </span>
-          <h2 className="text-8xl md:text-9xl font-serif font-semibold tracking-tight text-foreground mb-6 animate-slide-down">
+          <h2 className="text-4xl md:text-5xl font-serif font-semibold tracking-tight text-foreground mb-6 animate-slide-down">
             What Our Clients Say
           </h2>
           <p className="text-lg text-muted-foreground">
