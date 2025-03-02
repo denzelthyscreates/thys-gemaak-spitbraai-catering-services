@@ -29,7 +29,7 @@ const About = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           {/* Image Column - Moved to align with title */}
           <div className="relative">
-            <span className="inline-block px-4 py-1.5 mb-6 text-lg font-medium rounded-full bg-primary/10 text-primary">
+            <span className="inline-block px-4 py-1.5 mb-6 text-xl font-medium rounded-full bg-primary/10 text-primary">
               Our Story
             </span>
             
