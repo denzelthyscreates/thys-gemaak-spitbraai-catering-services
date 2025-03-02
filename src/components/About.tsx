@@ -26,29 +26,48 @@ const About = () => {
   return (
     <section id="about" className="section bg-secondary/30">
       <div className="container-width">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Image Column */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+          {/* Image Column - Moved to align with title */}
           <div className="relative">
-            <div className="relative z-10 rounded-xl overflow-hidden shadow-prominent">
-              <img 
-                src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788458/IMG-20241110-WA0049_esye9b.jpg" 
-                alt="Thys Gemaak Spitbraai Catering Services Team Preparing Spitbraai" 
-                className="w-full h-auto object-cover aspect-[4/3]"
-              />
-            </div>
-            {/* Decorative element */}
-            <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-primary/10 rounded-xl -z-10"></div>
-            <div className="absolute -top-6 -left-6 w-24 h-24 bg-spice-100 rounded-xl -z-10"></div>
-          </div>
-
-          {/* Content Column */}
-          <div>
             <span className="inline-block px-4 py-1.5 mb-6 text-sm font-medium rounded-full bg-primary/10 text-primary">
               Our Story
             </span>
             
             <h2 className="h2 mb-6">Revolutionizing Spitbraai Catering in South Africa</h2>
             
+            <div className="relative z-10 rounded-xl overflow-hidden shadow-prominent mb-8">
+              <img 
+                src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788458/IMG-20241110-WA0049_esye9b.jpg" 
+                alt="Thys Gemaak Spitbraai Catering Services Team Preparing Spitbraai" 
+                className="w-full h-auto object-cover aspect-[4/3]"
+              />
+            </div>
+            
+            {/* New images in a grid */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="rounded-xl overflow-hidden shadow-prominent">
+                <img 
+                  src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788466/IMG-20241110-WA0022_k5cdid.jpg" 
+                  alt="Thys Gemaak Spitbraai Preparation" 
+                  className="w-full h-auto object-cover aspect-square"
+                />
+              </div>
+              <div className="rounded-xl overflow-hidden shadow-prominent">
+                <img 
+                  src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788463/IMG-20241110-WA0024_fasc43.jpg" 
+                  alt="Thys Gemaak Spitbraai Event" 
+                  className="w-full h-auto object-cover aspect-square"
+                />
+              </div>
+            </div>
+            
+            {/* Decorative elements */}
+            <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-primary/10 rounded-xl -z-10"></div>
+            <div className="absolute -top-6 -left-6 w-24 h-24 bg-spice-100 rounded-xl -z-10"></div>
+          </div>
+
+          {/* Content Column */}
+          <div>
             <div className="space-y-6 text-muted-foreground">
               <p>
                 At Thys Gemaak Spitbraai Catering, we're not just changing the game, we're defining the future of catering. 

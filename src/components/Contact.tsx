@@ -1,3 +1,4 @@
+
 import { MapPin, Phone, Mail } from 'lucide-react';
 import HubSpotForm from './HubSpotForm'; // Import the new component
 
@@ -6,7 +7,7 @@ const Contact = () => {
     <section id="contact" className="section">
       <div className="container-width">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          {/* Contact Information - Keep this part unchanged */}
+          {/* Contact Information */}
           <div>
             <span className="inline-block px-4 py-1.5 mb-6 text-sm font-medium rounded-full bg-primary/10 text-primary">
               Get In Touch
@@ -17,7 +18,7 @@ const Contact = () => {
               catering needs, or contact us directly using the information below.
             </p>
             
-            {/* Contact Details - Keep this unchanged */}
+            {/* Contact Details */}
             <div className="space-y-6 mb-10">
               <div className="flex items-start gap-4">
                 <div className="bg-secondary/50 p-3 rounded-full">
@@ -30,10 +31,30 @@ const Contact = () => {
                 </div>
               </div>
               
-              {/* Other contact details remain unchanged */}
+              <div className="flex items-start gap-4">
+                <div className="bg-secondary/50 p-3 rounded-full">
+                  <Phone className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-1">Phone</h4>
+                  <p className="text-muted-foreground">+27 82 788 4168</p>
+                  <p className="text-muted-foreground">+27 81 768 8884</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-4">
+                <div className="bg-secondary/50 p-3 rounded-full">
+                  <Mail className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-1">Email</h4>
+                  <p className="text-muted-foreground">info@thysgemaak.co.za</p>
+                  <p className="text-muted-foreground">bookings@thysgemaak.co.za</p>
+                </div>
+              </div>
             </div>
             
-            {/* Logo Image - Keep this unchanged */}
+            {/* Logo Image */}
             <div className="rounded-xl overflow-hidden shadow-subtle border border-border">
               <img 
                 src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740792199/unnamed_ffvctc.jpg" 
@@ -43,7 +64,7 @@ const Contact = () => {
             </div>
           </div>
           
-          {/* Replace the Contact Form with HubSpot Form */}
+          {/* HubSpot Form */}
           <div className="bg-white rounded-xl p-8 shadow-prominent border border-border">
             <h3 className="text-xl font-semibold mb-6">Inquiry Form</h3>
             
