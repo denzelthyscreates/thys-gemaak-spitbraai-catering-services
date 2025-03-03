@@ -12,56 +12,8 @@ const Contact = () => {
   // Function to handle menu selection changes from MenuBuilder
   const handleMenuSelectionChange = (selection: any) => {
     setMenuSelection(selection);
-    setMenuDataSent(false);
-    
-    // Update hidden field in HubSpot form if it exists
-    updateHubSpotFormWithMenuData(selection);
+    setMenuDataSent(true); // Mark as sent immediately since we're updating in real-time
   };
-
-  // Function to update HubSpot form with menu data
-  const updateHubSpotFormWithMenuData = (selection: any) => {
-    if (selection && window.hbspt) {
-      const form = document.querySelector('form.hs-form');
-      if (form) {
-        // Try to find the hidden field for menu selection
-        const hiddenFields = form.querySelectorAll('input[type="hidden"]');
-        
-        hiddenFields.forEach((field: any) => {
-          if (field.name === 'menu_selection') {
-            // Store complete object including extras and total price
-            field.value = JSON.stringify({
-              menuPackage: selection.menuPackage,
-              numberOfGuests: selection.numberOfGuests,
-              season: selection.season,
-              starters: selection.starters,
-              sides: selection.sides,
-              desserts: selection.desserts,
-              extras: selection.extras,
-              totalPrice: selection.totalPrice
-            });
-            setMenuDataSent(true);
-            console.log('Menu data added to HubSpot form:', selection);
-          }
-        });
-      }
-    }
-  };
-
-  // Poll for HubSpot form presence (it loads asynchronously)
-  useEffect(() => {
-    if (menuSelection && !menuDataSent) {
-      const checkInterval = setInterval(() => {
-        const form = document.querySelector('form.hs-form');
-        if (form) {
-          updateHubSpotFormWithMenuData(menuSelection);
-          clearInterval(checkInterval);
-        }
-      }, 1000);
-      
-      // Clean up interval
-      return () => clearInterval(checkInterval);
-    }
-  }, [menuSelection, menuDataSent]);
 
   return (
     <section id="contact" className="section scroll-mt-20 transition-all duration-700 transform">
@@ -135,7 +87,7 @@ const Contact = () => {
             {/* HubSpot Form Component */}
             <HubSpotForm menuSelection={menuSelection} />
             
-            {/* Menu Selection Summary (if available) */}
+            {/* Menu Selection Summary (if available) - Updated for real-time display */}
             {menuSelection && (
               <div className="mt-6 p-4 bg-primary/5 rounded-lg animate-scale-in">
                 <h4 className="font-semibold mb-2">Your Menu Selection</h4>

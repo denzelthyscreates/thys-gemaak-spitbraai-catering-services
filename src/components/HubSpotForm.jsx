@@ -1,8 +1,10 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
-// Updated HubSpotForm component with menu selection prop
+// Updated HubSpotForm component with menu selection prop and real-time updates
 const HubSpotForm = ({ menuSelection }) => {
+  const [formInitialized, setFormInitialized] = useState(false);
+
   useEffect(() => {
     // Create a script element
     const script = document.createElement('script');
@@ -21,58 +23,9 @@ const HubSpotForm = ({ menuSelection }) => {
           formId: "f9d120e6-b8c3-46d4-9a5e-f1640a4450d8",
           region: "na1",
           target: "#hubspot-form-container",
-          // Add custom fields to capture menu selection with complete details
-          additionalFieldsMap: [
-            {
-              name: "menu_selection",
-              label: "Menu Selection",
-              fieldType: "hidden",
-              defaultValue: menuSelection ? JSON.stringify({
-                menuPackage: menuSelection.menuPackage,
-                numberOfGuests: menuSelection.numberOfGuests,
-                season: menuSelection.season,
-                starters: menuSelection.starters,
-                sides: menuSelection.sides,
-                desserts: menuSelection.desserts,
-                extras: menuSelection.extras,
-                totalPrice: menuSelection.totalPrice
-              }) : ""
-            }
-          ],
           onFormReady: function(form) {
-            // Add a hidden field for menu selection if it doesn't exist
-            const existingField = form.querySelector('input[name="menu_selection"]');
-            if (!existingField) {
-              const hiddenField = document.createElement('input');
-              hiddenField.type = 'hidden';
-              hiddenField.name = 'menu_selection';
-              if (menuSelection) {
-                // Store complete menu data including all extras and total price
-                hiddenField.value = JSON.stringify({
-                  menuPackage: menuSelection.menuPackage,
-                  numberOfGuests: menuSelection.numberOfGuests,
-                  season: menuSelection.season,
-                  starters: menuSelection.starters,
-                  sides: menuSelection.sides,
-                  desserts: menuSelection.desserts,
-                  extras: menuSelection.extras,
-                  totalPrice: menuSelection.totalPrice
-                });
-              }
-              form.appendChild(hiddenField);
-            } else if (menuSelection) {
-              // Update existing field with complete data
-              existingField.value = JSON.stringify({
-                menuPackage: menuSelection.menuPackage,
-                numberOfGuests: menuSelection.numberOfGuests,
-                season: menuSelection.season,
-                starters: menuSelection.starters,
-                sides: menuSelection.sides,
-                desserts: menuSelection.desserts,
-                extras: menuSelection.extras,
-                totalPrice: menuSelection.totalPrice
-              });
-            }
+            setFormInitialized(true);
+            updateFormWithMenuData(form, menuSelection);
             
             // Add listener for form submission
             form.addEventListener('submit', function() {
@@ -96,7 +49,47 @@ const HubSpotForm = ({ menuSelection }) => {
         formContainer.innerHTML = '';
       }
     };
-  }, [menuSelection]); // Added menuSelection to dependency array
+  }, []); // We remove menuSelection from dependencies and handle it separately
+
+  // Effect to update the form when menuSelection changes
+  useEffect(() => {
+    if (formInitialized && menuSelection) {
+      const form = document.querySelector('form.hs-form');
+      if (form) {
+        updateFormWithMenuData(form, menuSelection);
+      }
+    }
+  }, [menuSelection, formInitialized]);
+
+  // Function to update the form with menu data
+  const updateFormWithMenuData = (form, menuData) => {
+    if (!menuData) return;
+    
+    // Look for existing field
+    let menuField = form.querySelector('input[name="menu_selection"]');
+    
+    // Create field if it doesn't exist
+    if (!menuField) {
+      menuField = document.createElement('input');
+      menuField.type = 'hidden';
+      menuField.name = 'menu_selection';
+      form.appendChild(menuField);
+    }
+    
+    // Update field value with complete data
+    menuField.value = JSON.stringify({
+      menuPackage: menuData.menuPackage,
+      numberOfGuests: menuData.numberOfGuests,
+      season: menuData.season,
+      starters: menuData.starters,
+      sides: menuData.sides,
+      desserts: menuData.desserts,
+      extras: menuData.extras,
+      totalPrice: menuData.totalPrice
+    });
+    
+    console.log('Updated HubSpot form with menu data:', menuData);
+  };
 
   return (
     <div
