@@ -21,13 +21,22 @@ const HubSpotForm = ({ menuSelection }) => {
           formId: "f9d120e6-b8c3-46d4-9a5e-f1640a4450d8",
           region: "na1",
           target: "#hubspot-form-container",
-          // Add custom fields to capture menu selection
+          // Add custom fields to capture menu selection with complete details
           additionalFieldsMap: [
             {
               name: "menu_selection",
               label: "Menu Selection",
               fieldType: "hidden",
-              defaultValue: menuSelection ? JSON.stringify(menuSelection.fullSelection) : ""
+              defaultValue: menuSelection ? JSON.stringify({
+                menuPackage: menuSelection.menuPackage,
+                numberOfGuests: menuSelection.numberOfGuests,
+                season: menuSelection.season,
+                starters: menuSelection.starters,
+                sides: menuSelection.sides,
+                desserts: menuSelection.desserts,
+                extras: menuSelection.extras,
+                totalPrice: menuSelection.totalPrice
+              }) : ""
             }
           ],
           onFormReady: function(form) {
@@ -38,11 +47,31 @@ const HubSpotForm = ({ menuSelection }) => {
               hiddenField.type = 'hidden';
               hiddenField.name = 'menu_selection';
               if (menuSelection) {
-                hiddenField.value = menuSelection.fullSelection;
+                // Store complete menu data including all extras and total price
+                hiddenField.value = JSON.stringify({
+                  menuPackage: menuSelection.menuPackage,
+                  numberOfGuests: menuSelection.numberOfGuests,
+                  season: menuSelection.season,
+                  starters: menuSelection.starters,
+                  sides: menuSelection.sides,
+                  desserts: menuSelection.desserts,
+                  extras: menuSelection.extras,
+                  totalPrice: menuSelection.totalPrice
+                });
               }
               form.appendChild(hiddenField);
             } else if (menuSelection) {
-              existingField.value = menuSelection.fullSelection;
+              // Update existing field with complete data
+              existingField.value = JSON.stringify({
+                menuPackage: menuSelection.menuPackage,
+                numberOfGuests: menuSelection.numberOfGuests,
+                season: menuSelection.season,
+                starters: menuSelection.starters,
+                sides: menuSelection.sides,
+                desserts: menuSelection.desserts,
+                extras: menuSelection.extras,
+                totalPrice: menuSelection.totalPrice
+              });
             }
             
             // Add listener for form submission
