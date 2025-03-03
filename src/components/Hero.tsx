@@ -69,7 +69,10 @@ const Hero = () => {
             <a href="#contact" className="button-primary transform transition-transform hover:scale-105">
               Book Your Experience
             </a>
-            <a href="#services" className="button-outline border-white text-white flex items-center justify-center gap-2 group transform transition-transform hover:scale-105 hover:bg-white/10">
+            <a 
+              href="#services" 
+              className="bg-white/20 backdrop-blur-sm text-white font-medium px-6 py-3 rounded-md flex items-center justify-center gap-2 group transition-all hover:bg-white/30 transform hover:scale-105"
+            >
               Explore Services
               <ArrowRight className="h-4 w-4 transform transition-transform group-hover:translate-x-1" />
             </a>
