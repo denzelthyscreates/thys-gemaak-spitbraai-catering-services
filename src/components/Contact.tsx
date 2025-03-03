@@ -1,18 +1,17 @@
-
 import { MapPin, Phone, Mail } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import HubSpotForm from './HubSpotForm';
 import MenuBuilder from './MenuBuilder';
 
 const Contact = () => {
   const [menuSelection, setMenuSelection] = useState<any>(null);
   const [showMenuBuilder, setShowMenuBuilder] = useState(false);
-  const [menuDataSent, setMenuDataSent] = useState(false);
 
   // Function to handle menu selection changes from MenuBuilder
   const handleMenuSelectionChange = (selection: any) => {
-    setMenuSelection(selection);
-    setMenuDataSent(true); // Mark as sent immediately since we're updating in real-time
+    console.log('Menu selection changed:', selection);
+    // Update with the complete selection data
+    setMenuSelection({ ...selection });
   };
 
   return (
@@ -84,35 +83,8 @@ const Contact = () => {
           <div className="bg-white rounded-xl p-8 shadow-prominent border border-border animate-fade-in">
             <h3 className="text-xl font-semibold mb-6">Inquiry Form</h3>
             
-            {/* HubSpot Form Component */}
+            {/* HubSpot Form Component with the current menu selection */}
             <HubSpotForm menuSelection={menuSelection} />
-            
-            {/* Menu Selection Summary (if available) - Updated for real-time display */}
-            {menuSelection && (
-              <div className="mt-6 p-4 bg-primary/5 rounded-lg animate-scale-in">
-                <h4 className="font-semibold mb-2">Your Menu Selection</h4>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Your menu selection will be included with your inquiry.
-                </p>
-                
-                <div className="text-sm border-t border-border pt-2">
-                  <p><strong>Menu Package:</strong> {menuSelection.menuPackage}</p>
-                  <p><strong>Number of Guests:</strong> {menuSelection.numberOfGuests}</p>
-                  {menuSelection.season && <p><strong>Season:</strong> {menuSelection.season}</p>}
-                  {menuSelection.starters && <p><strong>Starters:</strong> {menuSelection.starters}</p>}
-                  {menuSelection.sides && <p><strong>Sides:</strong> {menuSelection.sides}</p>}
-                  {menuSelection.desserts && <p><strong>Desserts:</strong> {menuSelection.desserts}</p>}
-                  {menuSelection.extras && <p><strong>Extras:</strong> {menuSelection.extras}</p>}
-                  <p className="font-semibold mt-1"><strong>Total Price:</strong> R{menuSelection.totalPrice} pp</p>
-                </div>
-                
-                {menuDataSent ? (
-                  <p className="text-xs text-green-600 mt-2">✓ Menu data will be sent with your inquiry</p>
-                ) : (
-                  <p className="text-xs text-amber-600 mt-2">Menu data will be attached when you submit</p>
-                )}
-              </div>
-            )}
           </div>
           
           {/* Menu Builder - Right Column */}
