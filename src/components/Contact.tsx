@@ -1,5 +1,5 @@
 import { MapPin, Phone, Mail } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import HubSpotForm from './HubSpotForm';
 import MenuBuilder from './MenuBuilder';
 
