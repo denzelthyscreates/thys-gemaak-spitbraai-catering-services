@@ -171,6 +171,10 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
     }
   };
 
+  const handleExtraSaladTypeSelect = (saladId: string) => {
+    setExtraSaladType(saladId);
+  };
+
   const calculateTotalPrice = (): number => {
     if (!selectedMenu) return 0;
     const menuPrice = menuOptions.find(opt => opt.id === selectedMenu)?.price || 0;
