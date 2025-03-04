@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState, useRef } from 'react';
+import { toast } from 'sonner';
 
 const HubSpotForm = ({ menuSelection }) => {
   const [formInitialized, setFormInitialized] = useState(false);
@@ -32,18 +33,37 @@ const HubSpotForm = ({ menuSelection }) => {
               updateFormWithMenuData(form, menuSelection);
               updateVisibleSummary(menuSelection);
             }
-            
-            // Add listener for form submission
-            form.addEventListener('submit', function() {
-              console.log('Form submitted with menu selection:', menuSelection);
-              // We can't directly create the HubSpot automation tasks here as 
-              // those must be set up in the HubSpot workflow/automation system
-            });
           },
           onFormSubmit: function($form) {
-            // Let users know about the automated reminders
-            // This creates better user experience by setting clear expectations
+            // Add a hidden field for menu_workflow_trigger to signal HubSpot to start the workflow
+            const menuWorkflowField = document.createElement('input');
+            menuWorkflowField.type = 'hidden';
+            menuWorkflowField.name = 'menu_workflow_trigger';
+            menuWorkflowField.value = 'true';
+            $form.append(menuWorkflowField);
+            
+            // Add a hidden field for sending reminder emails
+            const reminderField = document.createElement('input');
+            reminderField.type = 'hidden';
+            reminderField.name = 'send_reminders';
+            reminderField.value = 'true';
+            $form.append(reminderField);
+            
+            console.log("Form submitted with menu data and workflow triggers");
+            
+            // Show toast to user that their booking was submitted
+            toast.success("Booking enquiry submitted successfully!", {
+              description: "You'll receive a confirmation email shortly."
+            });
+          },
+          onFormSubmitted: function() {
+            // Log that HubSpot workflow will handle automated reminders
             console.log("Form submitted - HubSpot will handle automated reminders");
+            
+            // Log additional context for the HubSpot automation
+            if (menuSelection) {
+              console.log("Menu data for HubSpot automation:", JSON.stringify(menuSelection));
+            }
           }
         });
       }
@@ -136,21 +156,42 @@ const HubSpotForm = ({ menuSelection }) => {
       return;
     }
     
-    // Look for existing field
-    let menuField = form.querySelector('input[name="menu_selection"]');
+    // These will be used to create HubSpot properties and automation rules
+    const propertiesToUpdate = {
+      'menu_selection': JSON.stringify(menuData),
+      'menu_package': menuData.menuPackage || '',
+      'number_of_guests': menuData.numberOfGuests?.toString() || '0',
+      'menu_season': menuData.season || '',
+      'menu_starters': menuData.starters || '',
+      'menu_sides': menuData.sides || '',
+      'menu_desserts': menuData.desserts || '',
+      'menu_extras': menuData.extras || '',
+      'menu_total_price': menuData.totalPrice?.toString() || '0',
+      'menu_extra_salad_type': menuData.extraSaladType || '',
+      'requires_reminders': 'true',
+      'booking_reminder_due': '2', // 2 days after submission
+      'payment_reminder_due': '3'  // 3 days after submission
+    };
     
-    // Create field if it doesn't exist
-    if (!menuField) {
-      menuField = document.createElement('input');
-      menuField.type = 'hidden';
-      menuField.name = 'menu_selection';
-      form.appendChild(menuField);
-      console.log("Created new hidden field for menu data");
-    }
+    // Update or create hidden fields for each property
+    Object.entries(propertiesToUpdate).forEach(([property, value]) => {
+      // Look for existing field
+      let field = form.querySelector(`input[name="${property}"]`);
+      
+      // Create field if it doesn't exist
+      if (!field) {
+        field = document.createElement('input');
+        field.type = 'hidden';
+        field.name = property;
+        form.appendChild(field);
+        console.log(`Created new hidden field for ${property}`);
+      }
+      
+      // Update field value
+      field.value = value;
+    });
     
-    // Update field value with complete data
-    menuField.value = JSON.stringify(menuData);
-    console.log("Form data updated with menu selection");
+    console.log("Form data updated with complete menu selection");
   };
 
   return (
