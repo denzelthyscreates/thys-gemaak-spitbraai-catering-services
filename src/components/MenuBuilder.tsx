@@ -10,12 +10,12 @@ interface MenuOption {
 }
 
 const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any) => void }) => {
-  // Updated menu data from the uploaded documents
+  // Updated menu data with modified titles for Birthday Menu options
   const menuOptions: MenuOption[] = [
     // Birthday Menu Options (from Birthday Menu.docx)
-    { id: 'menu1', name: 'Menu 1', price: 169, description: 'Lamb Spit Main, Garlic Bread, 2 Salads', category: 'menu' },
-    { id: 'menu2', name: 'Menu 2', price: 185, description: 'Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads', category: 'menu' },
-    { id: 'menu3', name: 'Menu 3', price: 195, description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads, Dessert', category: 'menu' },
+    { id: 'menu1', name: 'Birthday Menu 1', price: 169, description: 'Lamb Spit Main, Garlic Bread, 2 Salads', category: 'menu' },
+    { id: 'menu2', name: 'Birthday Menu 2', price: 185, description: 'Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads', category: 'menu' },
+    { id: 'menu3', name: 'Birthday Menu 3', price: 195, description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads, Dessert', category: 'menu' },
     // Corporate Menu Options
     { id: 'corporate', name: 'Corporate Menu', price: 290, description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Water & Juice, 3 Sides, Dessert', category: 'menu' },
     // Wedding Menu Options
@@ -320,4 +320,150 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
                 >
                   <div className="flex justify-between items-start">
                     <h4 className="font-semibold">Winter Menu</h4>
-                    {selectedSeason === 'winter' && <Check className="h-5 w
+                    {selectedSeason === 'winter' && <Check className="h-5 w-5 text-primary" />}
+                  </div>
+                  <p className="text-muted-foreground text-sm mt-1">
+                    Includes Baby Potatoes, Baby Carrots, Baby Onions
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Select Starters (if applicable) */}
+          {starters.length > 0 && getMaxSelections('starter') > 0 && (
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold mb-4">{step++}. Select Starter (Max: {getMaxSelections('starter')})</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {starters.map((starter) => (
+                  <div
+                    key={starter.id}
+                    onClick={() => toggleOption(starter.id, 'starter')}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
+                      selectedStarters.includes(starter.id)
+                        ? 'border-primary bg-primary/10 shadow-md'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-semibold">{starter.name}</h4>
+                      {selectedStarters.includes(starter.id) && <Check className="h-5 w-5 text-primary" />}
+                    </div>
+                    <p className="text-muted-foreground text-sm mt-1">{starter.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Select Sides (if applicable) */}
+          {sides.length > 0 && getMaxSelections('side') > 0 && (
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold mb-4">{step++}. Select Sides (Max: {getMaxSelections('side')})</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {getAvailableSides().map((side) => (
+                  <div
+                    key={side.id}
+                    onClick={() => toggleOption(side.id, 'side')}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
+                      selectedSides.includes(side.id)
+                        ? 'border-primary bg-primary/10 shadow-md'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-semibold">{side.name}</h4>
+                      {selectedSides.includes(side.id) && <Check className="h-5 w-5 text-primary" />}
+                    </div>
+                    <p className="text-muted-foreground text-sm mt-1">{side.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 5: Select Desserts (if applicable) */}
+          {desserts.length > 0 && getMaxSelections('dessert') > 0 && (
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold mb-4">{step++}. Select Dessert (Max: {getMaxSelections('dessert')})</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {desserts.map((dessert) => (
+                  <div
+                    key={dessert.id}
+                    onClick={() => toggleOption(dessert.id, 'dessert')}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
+                      selectedDesserts.includes(dessert.id)
+                        ? 'border-primary bg-primary/10 shadow-md'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-semibold">{dessert.name}</h4>
+                      {selectedDesserts.includes(dessert.id) && <Check className="h-5 w-5 text-primary" />}
+                    </div>
+                    <p className="text-muted-foreground text-sm mt-1">{dessert.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 6: Select Extras (if applicable) */}
+          {extras.length > 0 && (
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold mb-4">{step++}. Select Extras</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {extras.map((extra) => (
+                  <div
+                    key={extra.id}
+                    onClick={() => toggleOption(extra.id, 'extra')}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
+                      selectedExtras.includes(extra.id)
+                        ? 'border-primary bg-primary/10 shadow-md'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-semibold">{extra.name}</h4>
+                      {selectedExtras.includes(extra.id) && <Check className="h-5 w-5 text-primary" />}
+                    </div>
+                    <p className="text-muted-foreground text-sm mt-1">{extra.description}</p>
+                    {extra.id === 'cheese_table' || extra.id === 'fruit_table' ? (
+                      <p className="text-xs text-muted-foreground mt-1">Price is per group.</p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground mt-1">Price is per person.</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Display Menu Inclusions */}
+          {selectedMenu && (
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold mb-4">Menu Inclusions</h3>
+              <ul className="list-disc pl-5 text-muted-foreground">
+                {getMenuInclusions().map((inclusion, index) => (
+                  <li key={index}>{inclusion}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Display Total Price */}
+          {selectedMenu && (
+            <div className="mb-8">
+              <div className="flex items-center justify-between p-4 bg-secondary/5 rounded-lg">
+                <h3 className="text-xl font-semibold">Total Price Per Person:</h3>
+                <p className="text-2xl font-bold text-primary">R{totalPrice}</p>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+export default MenuBuilder;

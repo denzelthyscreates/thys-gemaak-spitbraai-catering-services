@@ -1,3 +1,4 @@
+
 import { MapPin, Phone, Mail } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import HubSpotForm from './HubSpotForm';
@@ -11,7 +12,7 @@ const Contact = () => {
   const handleMenuSelectionChange = (selection: any) => {
     console.log('Menu selection changed:', selection);
     // Update with the complete selection data
-    setMenuSelection({ ...selection });
+    setMenuSelection(selection);
   };
 
   return (
