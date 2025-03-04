@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Check, ShoppingCart } from 'lucide-react';
 
@@ -333,7 +334,9 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
           {/* Step 3: Select Starters (if applicable) */}
           {starters.length > 0 && getMaxSelections('starter') > 0 && (
             <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-4">{step++}. Select Starter (Max: {getMaxSelections('starter')})</h3>
+              <h3 className="text-xl font-semibold mb-4">
+                {step++}. Select Starter ({selectedStarters.length}/{getMaxSelections('starter')})
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {starters.map((starter) => (
                   <div
@@ -359,7 +362,9 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
           {/* Step 4: Select Sides (if applicable) */}
           {sides.length > 0 && getMaxSelections('side') > 0 && (
             <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-4">{step++}. Select Sides (Max: {getMaxSelections('side')})</h3>
+              <h3 className="text-xl font-semibold mb-4">
+                {step++}. Select Sides ({selectedSides.length}/{getMaxSelections('side')})
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {getAvailableSides().map((side) => (
                   <div
@@ -385,7 +390,9 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
           {/* Step 5: Select Desserts (if applicable) */}
           {desserts.length > 0 && getMaxSelections('dessert') > 0 && (
             <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-4">{step++}. Select Dessert (Max: {getMaxSelections('dessert')})</h3>
+              <h3 className="text-xl font-semibold mb-4">
+                {step++}. Select Dessert ({selectedDesserts.length}/{getMaxSelections('dessert')})
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {desserts.map((dessert) => (
                   <div
@@ -411,7 +418,9 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
           {/* Step 6: Select Extras (if applicable) */}
           {extras.length > 0 && (
             <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-4">{step++}. Select Extras</h3>
+              <h3 className="text-xl font-semibold mb-4">
+                {step++}. Select Extras ({selectedExtras.length})
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {extras.map((extra) => (
                   <div
@@ -428,11 +437,14 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
                       {selectedExtras.includes(extra.id) && <Check className="h-5 w-5 text-primary" />}
                     </div>
                     <p className="text-muted-foreground text-sm mt-1">{extra.description}</p>
-                    {extra.id === 'cheese_table' || extra.id === 'fruit_table' ? (
-                      <p className="text-xs text-muted-foreground mt-1">Price is per group.</p>
-                    ) : (
-                      <p className="text-xs text-muted-foreground mt-1">Price is per person.</p>
-                    )}
+                    <div className="flex justify-between items-center mt-2">
+                      <p className="font-semibold">R{extra.price}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {extra.id === 'cheese_table' || extra.id === 'fruit_table' 
+                          ? 'Price is per group' 
+                          : 'Price is per person'}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
