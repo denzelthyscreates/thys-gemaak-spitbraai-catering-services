@@ -3,10 +3,12 @@ import { MapPin, Phone, Mail } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import HubSpotForm from './HubSpotForm';
 import MenuBuilder from './MenuBuilder';
+import PaymentOptions from './PaymentOptions';
 
 const Contact = () => {
   const [menuSelection, setMenuSelection] = useState<any>(null);
   const [showMenuBuilder, setShowMenuBuilder] = useState(false);
+  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
 
   // Function to handle menu selection changes from MenuBuilder
   const handleMenuSelectionChange = (selection: any) => {
@@ -88,7 +90,7 @@ const Contact = () => {
             <HubSpotForm menuSelection={menuSelection} />
           </div>
           
-          {/* Menu Builder - Right Column */}
+          {/* Menu Builder & Payment Options - Right Column */}
           <div className="space-y-8">
             {/* Menu Builder Toggle */}
             <div className="bg-white rounded-xl p-6 shadow-prominent border border-border animate-fade-in">
@@ -105,6 +107,28 @@ const Contact = () => {
                 </div>
               )}
             </div>
+            
+            {/* Payment Options Toggle - Only show if a menu is selected */}
+            {menuSelection && (
+              <div className="bg-white rounded-xl p-6 shadow-prominent border border-border animate-fade-in">
+                <button 
+                  onClick={() => setShowPaymentOptions(!showPaymentOptions)}
+                  className="w-full button-primary flex items-center justify-center gap-2"
+                >
+                  {showPaymentOptions ? "Hide Payment Options" : "View Payment Options"}
+                </button>
+                
+                {showPaymentOptions && (
+                  <div className="mt-6 animate-scale-in">
+                    <PaymentOptions 
+                      totalPrice={menuSelection.totalPrice || 0} 
+                      numGuests={menuSelection.numberOfGuests || 0}
+                      onClose={() => setShowPaymentOptions(false)}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
