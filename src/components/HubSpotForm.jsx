@@ -36,7 +36,14 @@ const HubSpotForm = ({ menuSelection }) => {
             // Add listener for form submission
             form.addEventListener('submit', function() {
               console.log('Form submitted with menu selection:', menuSelection);
+              // We can't directly create the HubSpot automation tasks here as 
+              // those must be set up in the HubSpot workflow/automation system
             });
+          },
+          onFormSubmit: function($form) {
+            // Let users know about the automated reminders
+            // This creates better user experience by setting clear expectations
+            console.log("Form submitted - HubSpot will handle automated reminders");
           }
         });
       }
@@ -105,7 +112,15 @@ const HubSpotForm = ({ menuSelection }) => {
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block mr-1">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          Menu data will be sent with your inquiry
+          Menu data will be sent with your enquiry
+        </div>
+        <div class="mt-4 p-3 bg-primary/5 rounded border border-primary/20 text-sm">
+          <p><strong>What happens next?</strong></p>
+          <ul class="list-disc pl-5 mt-2 space-y-1">
+            <li>You'll receive a confirmation email immediately</li>
+            <li>We'll send a reminder to confirm your booking within 2 days</li>
+            <li>You'll receive payment details for the booking fee and deposit</li>
+          </ul>
         </div>
       </div>
     `;
@@ -147,7 +162,7 @@ const HubSpotForm = ({ menuSelection }) => {
         <div className="menu-selection-summary mt-4 p-4 bg-primary/5 rounded-lg">
           <h4 className="font-semibold mb-2">Your Menu Selection</h4>
           <p className="text-sm text-muted-foreground mb-3">
-            Your menu selection will be included with your inquiry.
+            Your menu selection will be included with your enquiry.
           </p>
           <div ref={summaryRef}></div>
         </div>

@@ -80,11 +80,11 @@ const Contact = () => {
           </div>
         </div>
         
-        {/* Bottom Row: Inquiry Form + Menu Builder */}
+        {/* Bottom Row: Enquiry Form + Menu Builder */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* HubSpot Form - Left Column */}
           <div className="bg-white rounded-xl p-8 shadow-prominent border border-border animate-fade-in">
-            <h3 className="text-xl font-semibold mb-6">Inquiry Form</h3>
+            <h3 className="text-xl font-semibold mb-6">Booking Enquiry</h3>
             
             {/* HubSpot Form Component with the current menu selection */}
             <HubSpotForm menuSelection={menuSelection} />

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Check, ShoppingCart } from 'lucide-react';
 
@@ -11,7 +10,6 @@ interface MenuOption {
 }
 
 const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any) => void }) => {
-  // Updated menu data with modified titles for Birthday Menu options
   const menuOptions: MenuOption[] = [
     // Birthday Menu Options (from Birthday Menu.docx)
     { id: 'menu1', name: 'Birthday Menu 1', price: 169, description: 'Lamb Spit Main, Garlic Bread, 2 Salads', category: 'menu' },
@@ -49,7 +47,6 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
     { id: 'extra_salad', name: 'Extra Salad', price: 25, description: 'Per person', category: 'extra' },
   ];
 
-  // States for selections and number of guests
   const [selectedMenu, setSelectedMenu] = useState<string | null>(null);
   const [selectedStarters, setSelectedStarters] = useState<string[]>([]);
   const [selectedSides, setSelectedSides] = useState<string[]>([]);
@@ -58,17 +55,15 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
   const [selectedSeason, setSelectedSeason] = useState<'summer' | 'winter' | null>(null);
   const [numGuests, setNumGuests] = useState<number>(50); // Default to 50 guests
   const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [extraSaladType, setExtraSaladType] = useState<string>('');
 
-  // Calculate total price whenever relevant state changes
   useEffect(() => {
     const calculatedPrice = calculateTotalPrice();
     setTotalPrice(calculatedPrice);
     
-    // Update selection summary after price calculation
     updateSelectionSummary(calculatedPrice);
   }, [selectedMenu, selectedStarters, selectedSides, selectedDesserts, selectedExtras, selectedSeason, numGuests]);
 
-  // Update selection summary (called on changes)
   const updateSelectionSummary = (calculatedPrice: number) => {
     if (!selectedMenu) return;
     
@@ -76,7 +71,14 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
     const starterNames = selectedStarters.map(id => menuOptions.find(opt => opt.id === id)?.name || '');
     const sideNames = selectedSides.map(id => menuOptions.find(opt => opt.id === id)?.name || '');
     const dessertNames = selectedDesserts.map(id => menuOptions.find(opt => opt.id === id)?.name || '');
-    const extraNames = selectedExtras.map(id => menuOptions.find(opt => opt.id === id)?.name || '');
+    
+    const extraNames = selectedExtras.map(id => {
+      if (id === 'extra_salad' && extraSaladType) {
+        const saladOption = menuOptions.find(opt => opt.id === extraSaladType);
+        return `Extra Salad: ${saladOption?.name || 'Not specified'}`;
+      }
+      return menuOptions.find(opt => opt.id === id)?.name || '';
+    });
     
     let seasonInfo = '';
     if (selectedMenu === 'wedding1' && selectedSeason) {
@@ -91,6 +93,7 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
       sides: sideNames.join(', '),
       desserts: dessertNames.join(', '),
       extras: extraNames.join(', '),
+      extraSaladType: extraSaladType ? menuOptions.find(opt => opt.id === extraSaladType)?.name : '',
       totalPrice: calculatedPrice,
       fullSelection: `
         Menu Package: ${menuName}
@@ -107,7 +110,6 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
     onSelectionChange(selectionSummary);
   };
 
-  // Handler for menu selection
   const handleMenuSelect = (menuId: string) => {
     setSelectedMenu(menuId);
     setSelectedStarters([]);
@@ -115,21 +117,19 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
     setSelectedDesserts([]);
     setSelectedExtras([]);
     setSelectedSeason(null);
+    setExtraSaladType('');
   };
 
-  // Handler for season selection (used for Wedding Menu 1)
   const handleSeasonSelect = (season: 'summer' | 'winter') => {
     setSelectedSeason(season);
-    setSelectedSides([]); // Reset sides if season changes
+    setSelectedSides([]);
   };
 
-  // Toggle option for starters, sides, desserts, and extras
   const toggleOption = (id: string, category: 'starter' | 'side' | 'dessert' | 'extra') => {
     let updatedSelection: string[] = [];
     
     switch (category) {
       case 'starter':
-        // For menus that require one starter only
         updatedSelection = selectedStarters.includes(id) ? [] : [id];
         setSelectedStarters(updatedSelection);
         break;
@@ -144,7 +144,6 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
           } else if (selectedMenu === 'menu3') {
             maxSides = 3;
           }
-          // For Wedding Menu 1 the sides are fixed by season; no manual selection.
           if (selectedMenu === 'wedding1') return;
           
           if (updatedSelection.length < maxSides) {
@@ -172,7 +171,6 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
     }
   };
 
-  // Calculate total price per person – taking into account the number of guests for group extras.
   const calculateTotalPrice = (): number => {
     if (!selectedMenu) return 0;
     const menuPrice = menuOptions.find(opt => opt.id === selectedMenu)?.price || 0;
@@ -180,11 +178,9 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
     const extrasPrice = selectedExtras.reduce((total, extraId) => {
       const extra = menuOptions.find(opt => opt.id === extraId);
       if (!extra) return total;
-      // For per-person extras (chicken_thigh & extra_salad) add full price.
       if (extra.id === 'chicken_thigh' || extra.id === 'extra_salad') {
         return total + extra.price;
       } else {
-        // For group extras (cheese_table, fruit_table) divide by number of guests.
         return total + (numGuests > 0 ? Math.round(extra.price / numGuests) : extra.price);
       }
     }, 0);
@@ -192,14 +188,12 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
     return menuPrice + extrasPrice;
   };
 
-  // Filter options by category
   const menuPackages = menuOptions.filter(opt => opt.category === 'menu');
   const starters = menuOptions.filter(opt => opt.category === 'starter');
   const sides = menuOptions.filter(opt => opt.category === 'side');
   const desserts = menuOptions.filter(opt => opt.category === 'dessert');
   const extras = menuOptions.filter(opt => opt.category === 'extra');
 
-  // For Wedding Menu 1, determine available sides based on season
   const getAvailableSides = () => {
     if (selectedMenu === 'wedding1' && selectedSeason === 'winter') {
       return sides.filter(side => ['baby_potatoes', 'baby_carrots', 'baby_onions'].includes(side.id));
@@ -209,27 +203,24 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
     return sides;
   };
 
-  // Determine the maximum selections allowed for different categories
   const getMaxSelections = (category: 'starter' | 'side' | 'dessert') => {
     if (!selectedMenu) return 0;
     switch (category) {
       case 'starter':
-        // Menu 3, Corporate, and Wedding Menu 1 require exactly 1 starter.
-        return (selectedMenu === 'menu3' || selectedMenu === 'corporate' || selectedMenu === 'wedding1') ? 1 : 0;
+        if (selectedMenu === 'menu3' || selectedMenu === 'corporate' || selectedMenu === 'wedding1') return 1;
+        return 0;
       case 'side':
         if (selectedMenu === 'corporate' || selectedMenu === 'menu3') return 3;
         if (selectedMenu === 'menu1' || selectedMenu === 'menu2' || selectedMenu === 'wedding2' || selectedMenu === 'standard') return 2;
-        // Wedding Menu 1 sides are fixed by season.
         return selectedMenu === 'wedding1' ? 0 : 0;
       case 'dessert':
-        // Menu 3, Corporate, and Wedding Menu 1 require exactly 1 dessert.
-        return (selectedMenu === 'menu3' || selectedMenu === 'corporate' || selectedMenu === 'wedding1') ? 1 : 0;
+        if (selectedMenu === 'menu3' || selectedMenu === 'corporate' || selectedMenu === 'wedding1') return 1;
+        return 0;
       default:
         return 0;
     }
   };
 
-  // Display what is included in the menu package
   const getMenuInclusions = () => {
     if (!selectedMenu) return [];
     const inclusions: string[] = [];
@@ -247,12 +238,15 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
     return inclusions;
   };
 
-  // Use a local counter for dynamically numbering the steps
+  const getAvailableSalads = () => {
+    return menuOptions.filter(opt => opt.category === 'side' && 
+      ['curry_noodle', 'green_salad', 'potato_salad', 'three_bean'].includes(opt.id));
+  };
+
   let step = 1;
 
   return (
     <div className="animate-fade-in">
-      {/* Step 1: Select Menu Package */}
       <div className="mb-8">
         <h3 className="text-xl font-semibold mb-4">{step++}. Select Your Menu Package</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -279,7 +273,6 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
       
       {selectedMenu && (
         <>
-          {/* Step 2: Enter Number of Guests */}
           <div className="mb-8">
             <h3 className="text-xl font-semibold mb-4">{step++}. Enter Number of Guests</h3>
             <input
@@ -294,7 +287,6 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
             />
           </div>
           
-          {/* If Wedding Menu 1, show Season Selection */}
           {selectedMenu === 'wedding1' && (
             <div className="mb-8">
               <h3 className="text-xl font-semibold mb-4">{step++}. Select Season (Wedding Menu 1)</h3>
@@ -331,7 +323,6 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
             </div>
           )}
 
-          {/* Step 3: Select Starters (if applicable) */}
           {starters.length > 0 && getMaxSelections('starter') > 0 && (
             <div className="mb-8">
               <h3 className="text-xl font-semibold mb-4">
@@ -359,7 +350,6 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
             </div>
           )}
 
-          {/* Step 4: Select Sides (if applicable) */}
           {sides.length > 0 && getMaxSelections('side') > 0 && (
             <div className="mb-8">
               <h3 className="text-xl font-semibold mb-4">
@@ -387,7 +377,6 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
             </div>
           )}
 
-          {/* Step 5: Select Desserts (if applicable) */}
           {desserts.length > 0 && getMaxSelections('dessert') > 0 && (
             <div className="mb-8">
               <h3 className="text-xl font-semibold mb-4">
@@ -415,7 +404,6 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
             </div>
           )}
 
-          {/* Step 6: Select Extras (if applicable) */}
           {extras.length > 0 && (
             <div className="mb-8">
               <h3 className="text-xl font-semibold mb-4">
@@ -448,10 +436,34 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
                   </div>
                 ))}
               </div>
+              
+              {selectedExtras.includes('extra_salad') && (
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold mb-4">Select Salad Type</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {getAvailableSalads().map((salad) => (
+                      <div
+                        key={salad.id}
+                        onClick={() => handleExtraSaladTypeSelect(salad.id)}
+                        className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
+                          extraSaladType === salad.id
+                            ? 'border-primary bg-primary/10 shadow-md'
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-semibold">{salad.name}</h4>
+                          {extraSaladType === salad.id && <Check className="h-5 w-5 text-primary" />}
+                        </div>
+                        <p className="text-muted-foreground text-sm mt-1">{salad.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Display Menu Inclusions */}
           {selectedMenu && (
             <div className="mb-8">
               <h3 className="text-xl font-semibold mb-4">Menu Inclusions</h3>
@@ -463,7 +475,6 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
             </div>
           )}
 
-          {/* Display Total Price */}
           {selectedMenu && (
             <div className="mb-8">
               <div className="flex items-center justify-between p-4 bg-secondary/5 rounded-lg">
