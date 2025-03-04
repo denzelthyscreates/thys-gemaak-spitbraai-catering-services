@@ -1,10 +1,9 @@
+import React, { useEffect, useState, useRef } from 'react';
 
-import React, { useEffect, useState } from 'react';
-
-// Updated HubSpotForm component with better menu selection handling
 const HubSpotForm = ({ menuSelection }) => {
   const [formInitialized, setFormInitialized] = useState(false);
   const [lastUpdateData, setLastUpdateData] = useState(null);
+  const summaryRef = useRef(null);
 
   useEffect(() => {
     // Create a script element
@@ -59,23 +58,51 @@ const HubSpotForm = ({ menuSelection }) => {
   // Effect to update the form when menuSelection changes
   useEffect(() => {
     // Only proceed if we have both initialized form and menu data
-    if (formInitialized && menuSelection) {
-      // Get the current form
-      const form = document.querySelector('form.hs-form');
-      if (form) {
-        // Stringify current menu data to compare with last update
-        const currentData = JSON.stringify(menuSelection);
-        const lastData = lastUpdateData ? JSON.stringify(lastUpdateData) : null;
-        
-        // Only update if data has changed
-        if (currentData !== lastData) {
+    if (menuSelection) {
+      // Update the visible summary immediately regardless of form initialization
+      updateVisibleSummary(menuSelection);
+      
+      if (formInitialized) {
+        // Get the current form
+        const form = document.querySelector('form.hs-form');
+        if (form) {
+          // Always update the hidden field with the latest data
           updateFormWithMenuData(form, menuSelection);
           setLastUpdateData(menuSelection);
-          console.log('HubSpot form updated with new menu data:', menuSelection);
         }
       }
     }
-  }, [menuSelection, formInitialized, lastUpdateData]);
+  }, [menuSelection, formInitialized]);
+
+  // Function to update the visible summary without waiting for HubSpot form
+  const updateVisibleSummary = (menuData) => {
+    if (!menuData || !summaryRef.current) return;
+    
+    // Format the total price
+    const formattedPrice = `R${menuData.totalPrice} pp`;
+    
+    // Create summary HTML
+    const summaryHTML = `
+      <div class="menu-selection-content">
+        <div class="menu-item"><strong>Menu Package:</strong> ${menuData.menuPackage || ''}</div>
+        <div class="menu-item"><strong>Number of Guests:</strong> ${menuData.numberOfGuests || 0}</div>
+        ${menuData.season ? `<div class="menu-item"><strong>Season:</strong> ${menuData.season}</div>` : ''}
+        ${menuData.starters ? `<div class="menu-item"><strong>Starters:</strong> ${menuData.starters}</div>` : ''}
+        ${menuData.sides ? `<div class="menu-item"><strong>Sides:</strong> ${menuData.sides}</div>` : ''}
+        ${menuData.desserts ? `<div class="menu-item"><strong>Desserts:</strong> ${menuData.desserts}</div>` : ''}
+        ${menuData.extras ? `<div class="menu-item"><strong>Extras:</strong> ${menuData.extras}</div>` : ''}
+        <div class="menu-item price"><strong>Total Price:</strong> ${formattedPrice}</div>
+        <div class="mt-2 text-sm text-success">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block mr-1">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          Menu data will be sent with your inquiry
+        </div>
+      </div>
+    `;
+    
+    summaryRef.current.innerHTML = summaryHTML;
+  };
 
   // Function to update the form with menu data
   const updateFormWithMenuData = (form, menuData) => {
@@ -92,45 +119,8 @@ const HubSpotForm = ({ menuSelection }) => {
       form.appendChild(menuField);
     }
     
-    // Create a complete data object with all necessary fields
-    const completeData = {
-      menuPackage: menuData.menuPackage || '',
-      numberOfGuests: menuData.numberOfGuests || 0,
-      season: menuData.season || '',
-      starters: menuData.starters || '',
-      sides: menuData.sides || '',
-      desserts: menuData.desserts || '',
-      extras: menuData.extras || '',
-      totalPrice: menuData.totalPrice || 0
-    };
-    
     // Update field value with complete data
-    menuField.value = JSON.stringify(completeData);
-    
-    // Also update the visible summary in the form if it exists
-    const summaryElement = document.querySelector('.hubspot-form-wrapper .menu-selection-summary');
-    if (summaryElement) {
-      // Format the total price as a number with commas
-      const formattedPrice = `R${completeData.totalPrice} pp`;
-      
-      // Create summary HTML
-      const summaryHTML = `
-        <div class="menu-selection-content">
-          <div class="menu-item"><strong>Menu Package:</strong> ${completeData.menuPackage}</div>
-          <div class="menu-item"><strong>Number of Guests:</strong> ${completeData.numberOfGuests}</div>
-          ${completeData.season ? `<div class="menu-item"><strong>Season:</strong> ${completeData.season}</div>` : ''}
-          ${completeData.starters ? `<div class="menu-item"><strong>Starters:</strong> ${completeData.starters}</div>` : ''}
-          ${completeData.sides ? `<div class="menu-item"><strong>Sides:</strong> ${completeData.sides}</div>` : ''}
-          ${completeData.desserts ? `<div class="menu-item"><strong>Desserts:</strong> ${completeData.desserts}</div>` : ''}
-          ${completeData.extras ? `<div class="menu-item"><strong>Extras:</strong> ${completeData.extras}</div>` : ''}
-          <div class="menu-item price"><strong>Total Price:</strong> ${formattedPrice}</div>
-        </div>
-      `;
-      
-      summaryElement.innerHTML = summaryHTML;
-    }
-    
-    console.log('Form menu data updated:', completeData);
+    menuField.value = JSON.stringify(menuData);
   };
 
   return (
@@ -144,6 +134,7 @@ const HubSpotForm = ({ menuSelection }) => {
           <p className="text-sm text-muted-foreground mb-3">
             Your menu selection will be included with your inquiry.
           </p>
+          <div ref={summaryRef}></div>
         </div>
       )}
     </div>
@@ -151,4 +142,3 @@ const HubSpotForm = ({ menuSelection }) => {
 };
 
 export default HubSpotForm;
-
