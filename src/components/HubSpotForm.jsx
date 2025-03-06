@@ -42,13 +42,33 @@ const HubSpotForm = ({ menuSelection }) => {
             menuWorkflowField.value = 'true';
             $form.append(menuWorkflowField);
             
-            // Add a hidden field for sending reminder emails
+            // Add a hidden field for send_reminders emails
             const reminderField = document.createElement('input');
             reminderField.type = 'hidden';
             reminderField.name = 'send_reminders';
             reminderField.value = 'true';
             $form.append(reminderField);
-            
+
+            // Add a hidden field for requires_reminders
+            const requiresRemindersField = document.createElement('input');
+            requiresRemindersField.type = 'hidden';
+            requiresRemindersField.name = 'requires_reminders'; // Ensure this matches the HubSpot property name
+            requiresRemindersField.value = 'true';
+            $form.append(requiresRemindersField);
+
+            // Add a hidden field for booking_reminder_due
+            const bookingReminderField = document.createElement('input');
+            bookingReminderField.type = 'hidden';
+            bookingReminderField.name = 'booking_reminder_due'; // Ensure this matches the HubSpot property name
+            bookingReminderField.value = '2'; // 2 days
+            $form.append(bookingReminderField);
+
+            // Add a hidden field for payment_reminder_due
+            const paymentReminderField = document.createElement('input');
+            paymentReminderField.type = 'hidden';
+            paymentReminderField.name = 'payment_reminder_due'; // Ensure this matches the HubSpot property name
+            paymentReminderField.value = '3'; // 3 days
+            $form.append(paymentReminderField);
             console.log("Form submitted with menu data and workflow triggers");
             
             // Show toast to user that their booking was submitted
