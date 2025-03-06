@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Check, ShoppingCart } from 'lucide-react';
 
@@ -7,21 +8,32 @@ interface MenuOption {
   price: number;
   description: string;
   category: 'menu' | 'starter' | 'side' | 'dessert' | 'extra';
+  subtitle?: string; // Optional subtitle field
 }
 
 const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any) => void }) => {
   const menuOptions: MenuOption[] = [
-    // Birthday Menu Options (from Birthday Menu.docx)
-    { id: 'menu1', name: 'Birthday Menu 1', price: 169, description: 'Lamb Spit Main, Garlic Bread, 2 Salads', category: 'menu' },
-    { id: 'menu2', name: 'Birthday Menu 2', price: 185, description: 'Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads', category: 'menu' },
-    { id: 'menu3', name: 'Birthday Menu 3', price: 195, description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads, Dessert', category: 'menu' },
-    // Corporate Menu Options
-    { id: 'corporate', name: 'Corporate Menu', price: 290, description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Water & Juice, 3 Sides, Dessert', category: 'menu' },
-    // Wedding Menu Options
-    { id: 'wedding1', name: 'Wedding Menu 1', price: 195, description: '3 Course Meal (Start, Main & Dessert)', category: 'menu' },
-    { id: 'wedding2', name: 'Wedding Menu 2', price: 169, description: 'Lamb Spit, Garlic Bread, and 2 sides', category: 'menu' },
-    // Standard Menu Options
-    { id: 'standard', name: 'Standard Menu', price: 169, description: 'Lamb Spit, Garlic Bread, and 2 sides', category: 'menu' },
+    // Birthday Menu Options with new psychological names
+    { id: 'menu1', name: 'Essential Celebration', price: 169, description: 'Lamb Spit Main, Garlic Bread, 2 Salads', category: 'menu' },
+    { id: 'menu2', name: 'Deluxe Celebration Experience', price: 185, description: 'Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads', category: 'menu' },
+    { id: 'menu3', name: 'Ultimate Birthday Feast', price: 195, description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads, Dessert', category: 'menu' },
+    
+    // Corporate Menu Options with new psychological name
+    { id: 'corporate', name: 'Executive Premium Experience', price: 290, description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Water & Juice, 3 Sides, Dessert', category: 'menu' },
+    
+    // Wedding Menu Options with new psychological names
+    { id: 'wedding1', name: 'Luxury Wedding Experience', price: 195, description: '3 Course Meal (Start, Main & Dessert)', category: 'menu' },
+    { id: 'wedding2', name: 'Classic Wedding Celebration', price: 169, description: 'Lamb Spit, Garlic Bread, and 2 sides', category: 'menu' },
+    
+    // Standard Menu Option with new psychological name
+    { id: 'standard', name: 'Classic Spitbraai Selection', price: 169, description: 'Lamb Spit, Garlic Bread, and 2 sides', category: 'menu' },
+    
+    // Year-End Function Menu Option
+    { id: 'yearend', name: 'Signature Year-End Celebration', price: 160, description: 'Lamb Spit, Garlic Bread, and 2 sides', category: 'menu' },
+    
+    // Matric Farewell Menus with special naming
+    { id: 'matric_standard', name: 'Essential Matric Farewell 2025', price: 169, description: 'Lamb Spit, Garlic Bread, and any 2 sides from our selection', category: 'menu', subtitle: 'Standard Matric Farewell Package' },
+    { id: 'matric_premium', name: 'Premium Matric Farewell 2025', price: 195, description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Sides, Dessert', category: 'menu', subtitle: 'Exclusive Matric Farewell Experience' },
     
     // Starters
     { id: 'cocktail_burger', name: 'Cocktail Burger', price: 0, description: 'Mini burger appetizer', category: 'starter' },
@@ -141,7 +153,7 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
           let maxSides = 2;
           if (selectedMenu === 'corporate') {
             maxSides = 3;
-          } else if (selectedMenu === 'menu3') {
+          } else if (selectedMenu === 'menu3' || selectedMenu === 'matric_premium') {
             maxSides = 3;
           }
           if (selectedMenu === 'wedding1') return;
@@ -203,6 +215,11 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
       return sides.filter(side => ['baby_potatoes', 'baby_carrots', 'baby_onions'].includes(side.id));
     } else if (selectedMenu === 'wedding1' && selectedSeason === 'summer') {
       return sides.filter(side => ['potato_salad', 'curry_noodle', 'green_salad'].includes(side.id));
+    } else if (selectedMenu === 'matric_standard') {
+      // For Matric Standard menu, only show salads, baby potatoes, and baby carrots
+      return sides.filter(side => 
+        ['potato_salad', 'curry_noodle', 'green_salad', 'three_bean', 'baby_potatoes', 'baby_carrots'].includes(side.id)
+      );
     }
     return sides;
   };
@@ -211,14 +228,14 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
     if (!selectedMenu) return 0;
     switch (category) {
       case 'starter':
-        if (selectedMenu === 'menu3' || selectedMenu === 'corporate' || selectedMenu === 'wedding1') return 1;
+        if (selectedMenu === 'menu3' || selectedMenu === 'corporate' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium') return 1;
         return 0;
       case 'side':
-        if (selectedMenu === 'corporate' || selectedMenu === 'menu3') return 3;
-        if (selectedMenu === 'menu1' || selectedMenu === 'menu2' || selectedMenu === 'wedding2' || selectedMenu === 'standard') return 2;
+        if (selectedMenu === 'corporate' || selectedMenu === 'menu3' || selectedMenu === 'matric_premium') return 3;
+        if (selectedMenu === 'menu1' || selectedMenu === 'menu2' || selectedMenu === 'wedding2' || selectedMenu === 'standard' || selectedMenu === 'yearend' || selectedMenu === 'matric_standard') return 2;
         return selectedMenu === 'wedding1' ? 0 : 0;
       case 'dessert':
-        if (selectedMenu === 'menu3' || selectedMenu === 'corporate' || selectedMenu === 'wedding1') return 1;
+        if (selectedMenu === 'menu3' || selectedMenu === 'corporate' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium') return 1;
         return 0;
       default:
         return 0;
@@ -228,6 +245,7 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
   const getMenuInclusions = () => {
     if (!selectedMenu) return [];
     const inclusions: string[] = [];
+    
     if (selectedMenu === 'menu1') {
       inclusions.push('Menu', 'Cutlery & Crockery', 'All Equipment');
     } else if (selectedMenu === 'menu2' || selectedMenu === 'menu3') {
@@ -236,9 +254,14 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
       inclusions.push('Starter, Main & Dessert', 'Cutlery & Crockery', 'All Equipment', 'Friendly Staff', 'Jugs & Glasses', 'Setup & Serving', 'Clearing');
     } else if (selectedMenu === 'wedding1') {
       inclusions.push('Menu', 'Cutlery & Crockery', 'Jugs & Glasses', 'Juice + 1 Refill', 'All Equipment + Setup of Serving Table');
-    } else if (selectedMenu === 'wedding2' || selectedMenu === 'standard') {
+    } else if (selectedMenu === 'wedding2' || selectedMenu === 'standard' || selectedMenu === 'yearend') {
       inclusions.push('Menu', 'Cutlery & Crockery', 'All Equipment');
+    } else if (selectedMenu === 'matric_standard') {
+      inclusions.push('Menu', 'Cutlery & Crockery', 'All Equipment', 'Serving Staff');
+    } else if (selectedMenu === 'matric_premium') {
+      inclusions.push('Complete Menu Experience', 'Cutlery & Crockery', 'All Equipment', 'Professional Serving Staff', 'Jugs & Glasses', 'Setup & Clearing');
     }
+    
     return inclusions;
   };
 
@@ -265,7 +288,12 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
               }`}
             >
               <div className="flex justify-between items-start">
-                <h4 className="font-semibold">{menu.name}</h4>
+                <div>
+                  <h4 className="font-semibold">{menu.name}</h4>
+                  {menu.subtitle && (
+                    <p className="text-xs text-muted-foreground">{menu.subtitle}</p>
+                  )}
+                </div>
                 {selectedMenu === menu.id && <Check className="h-5 w-5 text-primary" />}
               </div>
               <p className="text-muted-foreground text-sm mt-1">{menu.description}</p>
@@ -359,6 +387,11 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
               <h3 className="text-xl font-semibold mb-4">
                 {step++}. Select Sides ({selectedSides.length}/{getMaxSelections('side')})
               </h3>
+              {selectedMenu === 'matric_standard' && (
+                <p className="text-muted-foreground mb-4">
+                  Lamb Spit and Garlic Bread are fixed items. Please select any 2 sides from the options below.
+                </p>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {getAvailableSides().map((side) => (
                   <div
