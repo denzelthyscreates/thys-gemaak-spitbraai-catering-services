@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MenuBuilder from './MenuBuilder';
-import BookingForm from './BookingForm';  // Updated to use our new component
+import BookingForm from './BookingForm';
 import PaymentOptions from './PaymentOptions';
 
 const Contact = () => {
@@ -12,6 +12,10 @@ const Contact = () => {
   const handleMenuSelectionChange = (selection: any) => {
     setMenuSelection(selection);
   };
+
+  // Default values for PaymentOptions when no menu is selected
+  const defaultNumGuests = 50;
+  const defaultTotalPrice = 0;
 
   return (
     <section id="contact" className="section scroll-mt-20">
@@ -46,7 +50,10 @@ const Contact = () => {
           </TabsContent>
           
           <TabsContent value="payment">
-            <PaymentOptions />
+            <PaymentOptions 
+              totalPrice={menuSelection ? menuSelection.totalPrice : defaultTotalPrice} 
+              numGuests={menuSelection ? menuSelection.numberOfGuests : defaultNumGuests} 
+            />
           </TabsContent>
         </Tabs>
         
