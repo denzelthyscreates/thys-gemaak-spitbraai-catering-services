@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Check, ShoppingCart, Calendar, CalendarCheck, PartyPopper, GraduationCap } from 'lucide-react';
+import { Check, Users, Building, Calendar, CalendarCheck, PartyPopper, GraduationCap } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 
@@ -10,7 +9,7 @@ interface MenuOption {
   price: number;
   description: string;
   category: 'menu' | 'starter' | 'side' | 'dessert' | 'extra';
-  eventType?: 'birthday' | 'corporate' | 'wedding' | 'standard' | 'yearend' | 'matric'; // Make eventType optional
+  eventType?: 'birthday' | 'business' | 'wedding' | 'standard' | 'yearend' | 'matric';
   subtitle?: string;
   availabilityInfo?: string;
   icon?: JSX.Element;
@@ -48,32 +47,32 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
       icon: <PartyPopper className="h-5 w-5 text-pink-500" />
     },
     
-    // Corporate Menu Options with new psychological name
+    // Business Menu Options (renamed from Corporate)
     { 
-      id: 'corporate', 
+      id: 'business', 
       name: 'Executive Premium Experience', 
       price: 290, 
       description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Water & Juice, 3 Sides, Dessert', 
       category: 'menu',
-      eventType: 'corporate',
-      icon: <Calendar className="h-5 w-5 text-blue-500" />
+      eventType: 'business',
+      icon: <Building className="h-5 w-5 text-blue-500" />
     },
     
-    // Wedding Menu Options with new psychological names
-    { 
-      id: 'wedding1', 
-      name: 'Luxury Wedding Experience', 
-      price: 195, 
-      description: '3 Course Meal (Start, Main & Dessert)', 
-      category: 'menu',
-      eventType: 'wedding',
-      icon: <CalendarCheck className="h-5 w-5 text-purple-500" />
-    },
+    // Wedding Menu Options with new order (Classic first, then Luxury)
     { 
       id: 'wedding2', 
       name: 'Classic Wedding Celebration', 
       price: 169, 
       description: 'Lamb Spit, Garlic Bread, and 2 sides', 
+      category: 'menu',
+      eventType: 'wedding',
+      icon: <CalendarCheck className="h-5 w-5 text-purple-500" />
+    },
+    { 
+      id: 'wedding1', 
+      name: 'Luxury Wedding Experience', 
+      price: 195, 
+      description: '3 Course Meal (Start, Main & Dessert)', 
       category: 'menu',
       eventType: 'wedding',
       icon: <CalendarCheck className="h-5 w-5 text-purple-500" />
@@ -98,7 +97,7 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
       description: 'Lamb Spit, Garlic Bread, and 2 sides', 
       category: 'menu',
       eventType: 'yearend',
-      availabilityInfo: 'Available only for year-end corporate events (November-December)',
+      availabilityInfo: 'Available only for year-end business events (November-December)',
       icon: <Calendar className="h-5 w-5 text-orange-500" />
     },
     
@@ -156,13 +155,16 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
   const [selectedDesserts, setSelectedDesserts] = useState<string[]>([]);
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [selectedSeason, setSelectedSeason] = useState<'summer' | 'winter' | null>(null);
-  const [numGuests, setNumGuests] = useState<number>(50); // Default to 50 guests
+  const [numGuests, setNumGuests] = useState<number>(50);
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [extraSaladType, setExtraSaladType] = useState<string>('');
+  const [discountApplied, setDiscountApplied] = useState<boolean>(false);
 
   useEffect(() => {
     const calculatedPrice = calculateTotalPrice();
     setTotalPrice(calculatedPrice);
+    
+    setDiscountApplied(numGuests >= 100);
     
     updateSelectionSummary(calculatedPrice);
   }, [selectedMenu, selectedStarters, selectedSides, selectedDesserts, selectedExtras, selectedSeason, numGuests]);
@@ -188,6 +190,8 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
       seasonInfo = `Season: ${selectedSeason.charAt(0).toUpperCase() + selectedSeason.slice(1)}`;
     }
     
+    const discountInfo = discountApplied ? '10% Volume Discount Applied!' : '';
+    
     const selectionSummary = {
       menuPackage: menuName,
       numberOfGuests: numGuests,
@@ -198,6 +202,7 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
       extras: extraNames.join(', '),
       extraSaladType: extraSaladType ? menuOptions.find(opt => opt.id === extraSaladType)?.name : '',
       totalPrice: calculatedPrice,
+      discountApplied: discountApplied,
       fullSelection: `
         Menu Package: ${menuName}
         Number of Guests: ${numGuests}
@@ -206,6 +211,7 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
         ${sideNames.length > 0 ? `Sides: ${sideNames.join(', ')}` : ''}
         ${dessertNames.length > 0 ? `Desserts: ${dessertNames.join(', ')}` : ''}
         ${extraNames.length > 0 ? `Extras: ${extraNames.join(', ')}` : ''}
+        ${discountInfo ? `${discountInfo}\n` : ''}
         Total Price: R${calculatedPrice} pp
       `
     };
@@ -292,7 +298,13 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
       }
     }, 0);
     
-    return menuPrice + extrasPrice;
+    let finalPrice = menuPrice + extrasPrice;
+    
+    if (numGuests >= 100) {
+      finalPrice = Math.round(finalPrice * 0.9);
+    }
+    
+    return finalPrice;
   };
 
   const menuPackages = menuOptions.filter(opt => opt.category === 'menu');
@@ -307,7 +319,6 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
     } else if (selectedMenu === 'wedding1' && selectedSeason === 'summer') {
       return sides.filter(side => ['potato_salad', 'curry_noodle', 'green_salad'].includes(side.id));
     } else if (selectedMenu === 'matric_standard') {
-      // For Matric Standard menu, only show salads, baby potatoes, and baby carrots
       return sides.filter(side => 
         ['potato_salad', 'curry_noodle', 'green_salad', 'three_bean', 'baby_potatoes', 'baby_carrots'].includes(side.id)
       );
@@ -369,9 +380,9 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
         bgColor: "bg-pink-50",
         borderColor: "border-pink-200"
       },
-      corporate: {
-        title: "Corporate Event Packages",
-        menus: menuPackages.filter(menu => menu.eventType === 'corporate'),
+      business: {
+        title: "Business Event Packages",
+        menus: menuPackages.filter(menu => menu.eventType === 'business'),
         bgColor: "bg-blue-50",
         borderColor: "border-blue-200"
       },
@@ -401,7 +412,6 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
       }
     };
 
-    // Filter out event types with no menus
     return Object.entries(eventGroups)
       .filter(([_, group]) => group.menus.length > 0)
       .map(([type, group]) => group);
@@ -482,16 +492,29 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
           <>
             <div className="mb-8">
               <h3 className="text-xl font-semibold mb-4">{step++}. Enter Number of Guests</h3>
-              <input
-                type="number"
-                min="1"
-                value={numGuests}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value) || 1;
-                  setNumGuests(val);
-                }}
-                className="px-3 py-2 border rounded-md"
-              />
+              <div>
+                <input
+                  type="number"
+                  min="1"
+                  value={numGuests}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value) || 1;
+                    setNumGuests(val);
+                  }}
+                  className="px-3 py-2 border rounded-md"
+                />
+                {numGuests >= 100 && (
+                  <div className="mt-2 text-success flex items-center gap-1">
+                    <Check className="h-4 w-4" />
+                    <span>10% volume discount applied for 100+ guests!</span>
+                  </div>
+                )}
+                {numGuests < 100 && numGuests >= 90 && (
+                  <div className="mt-2 text-muted-foreground text-sm">
+                    Add {100 - numGuests} more guests to qualify for a 10% volume discount!
+                  </div>
+                )}
+              </div>
             </div>
             
             {selectedMenu === 'wedding1' && (
@@ -690,7 +713,12 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
             {selectedMenu && (
               <div className="mb-8">
                 <div className="flex items-center justify-between p-4 bg-secondary/5 rounded-lg">
-                  <h3 className="text-xl font-semibold">Total Price Per Person:</h3>
+                  <div>
+                    <h3 className="text-xl font-semibold">Total Price Per Person:</h3>
+                    {discountApplied && (
+                      <p className="text-sm text-success">10% volume discount applied</p>
+                    )}
+                  </div>
                   <p className="text-2xl font-bold text-primary">R{totalPrice}</p>
                 </div>
               </div>

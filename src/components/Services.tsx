@@ -18,20 +18,20 @@ const Services = () => {
     {
       id: 2,
       icon: <Building className="h-10 w-10 text-earth-700" />,
-      title: 'Corporate Functions',
-      description: 'Impress clients and reward employees with our professional corporate catering. From office parties to client presentations, we deliver exceptional food with seamless execution.',
+      title: 'Business Functions',
+      description: 'Impress clients and reward employees with our professional business catering. From office parties to client presentations, we deliver exceptional food with seamless execution.',
       features: [
         'Branded presentation options',
         'Dietary accommodation',
         'Flexible scheduling',
-        'Corporate package discounts',
+        'Volume discounts for 100+ guests',
       ],
     },
     {
       id: 3,
       icon: <Cake className="h-10 w-10 text-earth-700" />,
       title: 'Large Celebrations',
-      description: 'Our scalable approach allows us to cater events of any size without compromising quality. Wedding receptions, festivals, and community gatherings are all within our expertise.',
+      description: 'Our scalable approach allows us to cater events of any size without compromising quality. Wedding receptions, year-end functions, graduation parties, festivals, and community gatherings are all within our expertise.',
       features: [
         'High-volume capacity',
         'Multiple serving stations',
