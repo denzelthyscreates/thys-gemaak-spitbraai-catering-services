@@ -1,6 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
-import { Check, ShoppingCart } from 'lucide-react';
+import { Check, ShoppingCart, Calendar, CalendarCheck, PartyPopper, GraduationCap } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useToast } from "@/hooks/use-toast";
 
 interface MenuOption {
   id: string;
@@ -8,32 +9,121 @@ interface MenuOption {
   price: number;
   description: string;
   category: 'menu' | 'starter' | 'side' | 'dessert' | 'extra';
-  subtitle?: string; // Optional subtitle field
+  eventType: 'birthday' | 'corporate' | 'wedding' | 'standard' | 'yearend' | 'matric';
+  subtitle?: string;
+  availabilityInfo?: string;
+  icon?: JSX.Element;
 }
 
 const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any) => void }) => {
+  const { toast } = useToast();
   const menuOptions: MenuOption[] = [
     // Birthday Menu Options with new psychological names
-    { id: 'menu1', name: 'Essential Celebration', price: 169, description: 'Lamb Spit Main, Garlic Bread, 2 Salads', category: 'menu' },
-    { id: 'menu2', name: 'Deluxe Celebration Experience', price: 185, description: 'Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads', category: 'menu' },
-    { id: 'menu3', name: 'Ultimate Birthday Feast', price: 195, description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads, Dessert', category: 'menu' },
+    { 
+      id: 'menu1', 
+      name: 'Essential Celebration', 
+      price: 169, 
+      description: 'Lamb Spit Main, Garlic Bread, 2 Salads', 
+      category: 'menu',
+      eventType: 'birthday',
+      icon: <PartyPopper className="h-5 w-5 text-pink-500" />
+    },
+    { 
+      id: 'menu2', 
+      name: 'Deluxe Celebration Experience', 
+      price: 185, 
+      description: 'Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads', 
+      category: 'menu',
+      eventType: 'birthday',
+      icon: <PartyPopper className="h-5 w-5 text-pink-500" />
+    },
+    { 
+      id: 'menu3', 
+      name: 'Ultimate Birthday Feast', 
+      price: 195, 
+      description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads, Dessert', 
+      category: 'menu',
+      eventType: 'birthday',
+      icon: <PartyPopper className="h-5 w-5 text-pink-500" />
+    },
     
     // Corporate Menu Options with new psychological name
-    { id: 'corporate', name: 'Executive Premium Experience', price: 290, description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Water & Juice, 3 Sides, Dessert', category: 'menu' },
+    { 
+      id: 'corporate', 
+      name: 'Executive Premium Experience', 
+      price: 290, 
+      description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Water & Juice, 3 Sides, Dessert', 
+      category: 'menu',
+      eventType: 'corporate',
+      icon: <Calendar className="h-5 w-5 text-blue-500" />
+    },
     
     // Wedding Menu Options with new psychological names
-    { id: 'wedding1', name: 'Luxury Wedding Experience', price: 195, description: '3 Course Meal (Start, Main & Dessert)', category: 'menu' },
-    { id: 'wedding2', name: 'Classic Wedding Celebration', price: 169, description: 'Lamb Spit, Garlic Bread, and 2 sides', category: 'menu' },
+    { 
+      id: 'wedding1', 
+      name: 'Luxury Wedding Experience', 
+      price: 195, 
+      description: '3 Course Meal (Start, Main & Dessert)', 
+      category: 'menu',
+      eventType: 'wedding',
+      icon: <CalendarCheck className="h-5 w-5 text-purple-500" />
+    },
+    { 
+      id: 'wedding2', 
+      name: 'Classic Wedding Celebration', 
+      price: 169, 
+      description: 'Lamb Spit, Garlic Bread, and 2 sides', 
+      category: 'menu',
+      eventType: 'wedding',
+      icon: <CalendarCheck className="h-5 w-5 text-purple-500" />
+    },
     
     // Standard Menu Option with new psychological name
-    { id: 'standard', name: 'Classic Spitbraai Selection', price: 169, description: 'Lamb Spit, Garlic Bread, and 2 sides', category: 'menu' },
+    { 
+      id: 'standard', 
+      name: 'Classic Spitbraai Selection', 
+      price: 169, 
+      description: 'Lamb Spit, Garlic Bread, and 2 sides', 
+      category: 'menu',
+      eventType: 'standard',
+      icon: <Calendar className="h-5 w-5 text-gray-500" />
+    },
     
     // Year-End Function Menu Option
-    { id: 'yearend', name: 'Signature Year-End Celebration', price: 160, description: 'Lamb Spit, Garlic Bread, and 2 sides', category: 'menu' },
+    { 
+      id: 'yearend', 
+      name: 'Signature Year-End Celebration', 
+      price: 160, 
+      description: 'Lamb Spit, Garlic Bread, and 2 sides', 
+      category: 'menu',
+      eventType: 'yearend',
+      availabilityInfo: 'Available only for year-end corporate events (November-December)',
+      icon: <Calendar className="h-5 w-5 text-orange-500" />
+    },
     
     // Matric Farewell Menus with special naming
-    { id: 'matric_standard', name: 'Essential Matric Farewell 2025', price: 169, description: 'Lamb Spit, Garlic Bread, and any 2 sides from our selection', category: 'menu', subtitle: 'Standard Matric Farewell Package' },
-    { id: 'matric_premium', name: 'Premium Matric Farewell 2025', price: 195, description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Sides, Dessert', category: 'menu', subtitle: 'Exclusive Matric Farewell Experience' },
+    { 
+      id: 'matric_standard', 
+      name: 'Essential Matric Farewell 2025', 
+      price: 169, 
+      description: 'Lamb Spit, Garlic Bread, and any 2 sides from our selection', 
+      category: 'menu', 
+      subtitle: 'Standard Matric Farewell Package',
+      eventType: 'matric',
+      availabilityInfo: 'Available exclusively for school Matric Farewell events',
+      icon: <GraduationCap className="h-5 w-5 text-green-500" />
+    },
+    { 
+      id: 'matric_premium', 
+      name: 'Premium Matric Farewell 2025', 
+      price: 195, 
+      description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Sides, Dessert', 
+      category: 'menu', 
+      subtitle: 'Exclusive Matric Farewell Experience',
+      eventType: 'matric',
+      availabilityInfo: 'Available exclusively for school Matric Farewell events',
+      icon: <GraduationCap className="h-5 w-5 text-green-500" />
+    },
     
     // Starters
     { id: 'cocktail_burger', name: 'Cocktail Burger', price: 0, description: 'Mini burger appetizer', category: 'starter' },
@@ -270,259 +360,344 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
       ['curry_noodle', 'green_salad', 'potato_salad', 'three_bean'].includes(opt.id));
   };
 
+  const getMenusByEventType = () => {
+    const eventGroups = {
+      birthday: {
+        title: "Birthday Packages",
+        menus: menuPackages.filter(menu => menu.eventType === 'birthday'),
+        bgColor: "bg-pink-50",
+        borderColor: "border-pink-200"
+      },
+      corporate: {
+        title: "Corporate Event Packages",
+        menus: menuPackages.filter(menu => menu.eventType === 'corporate'),
+        bgColor: "bg-blue-50",
+        borderColor: "border-blue-200"
+      },
+      wedding: {
+        title: "Wedding Packages",
+        menus: menuPackages.filter(menu => menu.eventType === 'wedding'),
+        bgColor: "bg-purple-50",
+        borderColor: "border-purple-200"
+      },
+      yearend: {
+        title: "Year-End Celebration Packages",
+        menus: menuPackages.filter(menu => menu.eventType === 'yearend'),
+        bgColor: "bg-orange-50",
+        borderColor: "border-orange-200"
+      },
+      matric: {
+        title: "Matric Farewell 2025 Packages",
+        menus: menuPackages.filter(menu => menu.eventType === 'matric'),
+        bgColor: "bg-green-50",
+        borderColor: "border-green-200"
+      },
+      standard: {
+        title: "Standard Packages",
+        menus: menuPackages.filter(menu => menu.eventType === 'standard'),
+        bgColor: "bg-gray-50",
+        borderColor: "border-gray-200"
+      }
+    };
+
+    // Filter out event types with no menus
+    return Object.entries(eventGroups)
+      .filter(([_, group]) => group.menus.length > 0)
+      .map(([type, group]) => group);
+  };
+
+  const showMenuAvailabilityToast = (menuOption: MenuOption) => {
+    if (menuOption.availabilityInfo) {
+      toast({
+        title: `${menuOption.name} Availability`,
+        description: menuOption.availabilityInfo,
+        duration: 5000
+      });
+    }
+  };
+
   let step = 1;
 
   return (
-    <div className="animate-fade-in">
-      <div className="mb-8">
-        <h3 className="text-xl font-semibold mb-4">{step++}. Select Your Menu Package</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {menuPackages.map((menu) => (
-            <div 
-              key={menu.id}
-              onClick={() => handleMenuSelect(menu.id)}
-              className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
-                selectedMenu === menu.id 
-                  ? 'border-primary bg-primary/10 shadow-md' 
-                  : 'border-border hover:border-primary/50'
-              }`}
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="font-semibold">{menu.name}</h4>
-                  {menu.subtitle && (
-                    <p className="text-xs text-muted-foreground">{menu.subtitle}</p>
-                  )}
-                </div>
-                {selectedMenu === menu.id && <Check className="h-5 w-5 text-primary" />}
-              </div>
-              <p className="text-muted-foreground text-sm mt-1">{menu.description}</p>
-              <p className="font-semibold mt-2">R{menu.price} pp</p>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      {selectedMenu && (
-        <>
-          <div className="mb-8">
-            <h3 className="text-xl font-semibold mb-4">{step++}. Enter Number of Guests</h3>
-            <input
-              type="number"
-              min="1"
-              value={numGuests}
-              onChange={(e) => {
-                const val = parseInt(e.target.value) || 1;
-                setNumGuests(val);
-              }}
-              className="px-3 py-2 border rounded-md"
-            />
-          </div>
+    <TooltipProvider>
+      <div className="animate-fade-in">
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold mb-4">{step++}. Select Your Menu Package</h3>
           
-          {selectedMenu === 'wedding1' && (
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-4">{step++}. Select Season (Wedding Menu 1)</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div 
-                  onClick={() => handleSeasonSelect('summer')}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
-                    selectedSeason === 'summer' ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  <div className="flex justify-between items-start">
-                    <h4 className="font-semibold">Summer Menu</h4>
-                    {selectedSeason === 'summer' && <Check className="h-5 w-5 text-primary" />}
-                  </div>
-                  <p className="text-muted-foreground text-sm mt-1">
-                    Includes Potato Salad, Curry Noodle Salad, Green Salad
-                  </p>
-                </div>
-                <div 
-                  onClick={() => handleSeasonSelect('winter')}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
-                    selectedSeason === 'winter' ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  <div className="flex justify-between items-start">
-                    <h4 className="font-semibold">Winter Menu</h4>
-                    {selectedSeason === 'winter' && <Check className="h-5 w-5 text-primary" />}
-                  </div>
-                  <p className="text-muted-foreground text-sm mt-1">
-                    Includes Baby Potatoes, Baby Carrots, Baby Onions
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {starters.length > 0 && getMaxSelections('starter') > 0 && (
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-4">
-                {step++}. Select Starter ({selectedStarters.length}/{getMaxSelections('starter')})
-              </h3>
+          {getMenusByEventType().map((group, groupIndex) => (
+            <div key={groupIndex} className="mb-6">
+              <h4 className={`text-lg font-medium mb-3 pb-1 border-b ${group.borderColor}`}>
+                {group.title}
+              </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {starters.map((starter) => (
-                  <div
-                    key={starter.id}
-                    onClick={() => toggleOption(starter.id, 'starter')}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
-                      selectedStarters.includes(starter.id)
-                        ? 'border-primary bg-primary/10 shadow-md'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <h4 className="font-semibold">{starter.name}</h4>
-                      {selectedStarters.includes(starter.id) && <Check className="h-5 w-5 text-primary" />}
-                    </div>
-                    <p className="text-muted-foreground text-sm mt-1">{starter.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {sides.length > 0 && getMaxSelections('side') > 0 && (
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-4">
-                {step++}. Select Sides ({selectedSides.length}/{getMaxSelections('side')})
-              </h3>
-              {selectedMenu === 'matric_standard' && (
-                <p className="text-muted-foreground mb-4">
-                  Lamb Spit and Garlic Bread are fixed items. Please select any 2 sides from the options below.
-                </p>
-              )}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {getAvailableSides().map((side) => (
-                  <div
-                    key={side.id}
-                    onClick={() => toggleOption(side.id, 'side')}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
-                      selectedSides.includes(side.id)
-                        ? 'border-primary bg-primary/10 shadow-md'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <h4 className="font-semibold">{side.name}</h4>
-                      {selectedSides.includes(side.id) && <Check className="h-5 w-5 text-primary" />}
-                    </div>
-                    <p className="text-muted-foreground text-sm mt-1">{side.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {desserts.length > 0 && getMaxSelections('dessert') > 0 && (
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-4">
-                {step++}. Select Dessert ({selectedDesserts.length}/{getMaxSelections('dessert')})
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {desserts.map((dessert) => (
-                  <div
-                    key={dessert.id}
-                    onClick={() => toggleOption(dessert.id, 'dessert')}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
-                      selectedDesserts.includes(dessert.id)
-                        ? 'border-primary bg-primary/10 shadow-md'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <h4 className="font-semibold">{dessert.name}</h4>
-                      {selectedDesserts.includes(dessert.id) && <Check className="h-5 w-5 text-primary" />}
-                    </div>
-                    <p className="text-muted-foreground text-sm mt-1">{dessert.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {extras.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-4">
-                {step++}. Select Extras ({selectedExtras.length})
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {extras.map((extra) => (
-                  <div
-                    key={extra.id}
-                    onClick={() => toggleOption(extra.id, 'extra')}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
-                      selectedExtras.includes(extra.id)
-                        ? 'border-primary bg-primary/10 shadow-md'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <h4 className="font-semibold">{extra.name}</h4>
-                      {selectedExtras.includes(extra.id) && <Check className="h-5 w-5 text-primary" />}
-                    </div>
-                    <p className="text-muted-foreground text-sm mt-1">{extra.description}</p>
-                    <div className="flex justify-between items-center mt-2">
-                      <p className="font-semibold">R{extra.price}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {extra.id === 'cheese_table' || extra.id === 'fruit_table' 
-                          ? 'Price is per group' 
-                          : 'Price is per person'}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              {selectedExtras.includes('extra_salad') && (
-                <div className="mt-6">
-                  <h4 className="text-lg font-semibold mb-4">Select Salad Type</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {getAvailableSalads().map((salad) => (
-                      <div
-                        key={salad.id}
-                        onClick={() => handleExtraSaladTypeSelect(salad.id)}
+                {group.menus.map((menu) => (
+                  <Tooltip key={menu.id}>
+                    <TooltipTrigger asChild>
+                      <div 
+                        onClick={() => {
+                          handleMenuSelect(menu.id);
+                          showMenuAvailabilityToast(menu);
+                        }}
                         className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
-                          extraSaladType === salad.id
-                            ? 'border-primary bg-primary/10 shadow-md'
-                            : 'border-border hover:border-primary/50'
+                          selectedMenu === menu.id 
+                            ? `border-primary bg-primary/10 shadow-md` 
+                            : `border-border hover:border-primary/50 ${group.bgColor}`
                         }`}
                       >
                         <div className="flex justify-between items-start">
-                          <h4 className="font-semibold">{salad.name}</h4>
-                          {extraSaladType === salad.id && <Check className="h-5 w-5 text-primary" />}
+                          <div className="flex items-center gap-2">
+                            {menu.icon}
+                            <div>
+                              <h4 className="font-semibold">{menu.name}</h4>
+                              {menu.subtitle && (
+                                <p className="text-xs text-muted-foreground">{menu.subtitle}</p>
+                              )}
+                            </div>
+                          </div>
+                          {selectedMenu === menu.id && <Check className="h-5 w-5 text-primary" />}
                         </div>
-                        <p className="text-muted-foreground text-sm mt-1">{salad.description}</p>
+                        <p className="text-muted-foreground text-sm mt-1">{menu.description}</p>
+                        <p className="font-semibold mt-2">R{menu.price} pp</p>
+                        {menu.availabilityInfo && (
+                          <div className="mt-1 text-xs text-muted-foreground italic">
+                            {menu.availabilityInfo}
+                          </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {selectedMenu && (
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-4">Menu Inclusions</h3>
-              <ul className="list-disc pl-5 text-muted-foreground">
-                {getMenuInclusions().map((inclusion, index) => (
-                  <li key={index}>{inclusion}</li>
+                    </TooltipTrigger>
+                    {menu.availabilityInfo && (
+                      <TooltipContent>
+                        <p>{menu.availabilityInfo}</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
                 ))}
-              </ul>
-            </div>
-          )}
-
-          {selectedMenu && (
-            <div className="mb-8">
-              <div className="flex items-center justify-between p-4 bg-secondary/5 rounded-lg">
-                <h3 className="text-xl font-semibold">Total Price Per Person:</h3>
-                <p className="text-2xl font-bold text-primary">R{totalPrice}</p>
               </div>
             </div>
-          )}
-        </>
-      )}
-    </div>
+          ))}
+        </div>
+        
+        {selectedMenu && (
+          <>
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold mb-4">{step++}. Enter Number of Guests</h3>
+              <input
+                type="number"
+                min="1"
+                value={numGuests}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value) || 1;
+                  setNumGuests(val);
+                }}
+                className="px-3 py-2 border rounded-md"
+              />
+            </div>
+            
+            {selectedMenu === 'wedding1' && (
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-4">{step++}. Select Season (Wedding Menu 1)</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div 
+                    onClick={() => handleSeasonSelect('summer')}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
+                      selectedSeason === 'summer' ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-semibold">Summer Menu</h4>
+                      {selectedSeason === 'summer' && <Check className="h-5 w-5 text-primary" />}
+                    </div>
+                    <p className="text-muted-foreground text-sm mt-1">
+                      Includes Potato Salad, Curry Noodle Salad, Green Salad
+                    </p>
+                  </div>
+                  <div 
+                    onClick={() => handleSeasonSelect('winter')}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
+                      selectedSeason === 'winter' ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-semibold">Winter Menu</h4>
+                      {selectedSeason === 'winter' && <Check className="h-5 w-5 text-primary" />}
+                    </div>
+                    <p className="text-muted-foreground text-sm mt-1">
+                      Includes Baby Potatoes, Baby Carrots, Baby Onions
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {starters.length > 0 && getMaxSelections('starter') > 0 && (
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-4">
+                  {step++}. Select Starter ({selectedStarters.length}/{getMaxSelections('starter')})
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {starters.map((starter) => (
+                    <div
+                      key={starter.id}
+                      onClick={() => toggleOption(starter.id, 'starter')}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
+                        selectedStarters.includes(starter.id)
+                          ? 'border-primary bg-primary/10 shadow-md'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <h4 className="font-semibold">{starter.name}</h4>
+                        {selectedStarters.includes(starter.id) && <Check className="h-5 w-5 text-primary" />}
+                      </div>
+                      <p className="text-muted-foreground text-sm mt-1">{starter.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {sides.length > 0 && getMaxSelections('side') > 0 && (
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-4">
+                  {step++}. Select Sides ({selectedSides.length}/{getMaxSelections('side')})
+                </h3>
+                {selectedMenu === 'matric_standard' && (
+                  <p className="text-muted-foreground mb-4">
+                    Lamb Spit and Garlic Bread are fixed items. Please select any 2 sides from the options below.
+                  </p>
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {getAvailableSides().map((side) => (
+                    <div
+                      key={side.id}
+                      onClick={() => toggleOption(side.id, 'side')}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
+                        selectedSides.includes(side.id)
+                          ? 'border-primary bg-primary/10 shadow-md'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <h4 className="font-semibold">{side.name}</h4>
+                        {selectedSides.includes(side.id) && <Check className="h-5 w-5 text-primary" />}
+                      </div>
+                      <p className="text-muted-foreground text-sm mt-1">{side.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {desserts.length > 0 && getMaxSelections('dessert') > 0 && (
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-4">
+                  {step++}. Select Dessert ({selectedDesserts.length}/{getMaxSelections('dessert')})
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {desserts.map((dessert) => (
+                    <div
+                      key={dessert.id}
+                      onClick={() => toggleOption(dessert.id, 'dessert')}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
+                        selectedDesserts.includes(dessert.id)
+                          ? 'border-primary bg-primary/10 shadow-md'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <h4 className="font-semibold">{dessert.name}</h4>
+                        {selectedDesserts.includes(dessert.id) && <Check className="h-5 w-5 text-primary" />}
+                      </div>
+                      <p className="text-muted-foreground text-sm mt-1">{dessert.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {extras.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-4">
+                  {step++}. Select Extras ({selectedExtras.length})
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {extras.map((extra) => (
+                    <div
+                      key={extra.id}
+                      onClick={() => toggleOption(extra.id, 'extra')}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
+                        selectedExtras.includes(extra.id)
+                          ? 'border-primary bg-primary/10 shadow-md'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <h4 className="font-semibold">{extra.name}</h4>
+                        {selectedExtras.includes(extra.id) && <Check className="h-5 w-5 text-primary" />}
+                      </div>
+                      <p className="text-muted-foreground text-sm mt-1">{extra.description}</p>
+                      <div className="flex justify-between items-center mt-2">
+                        <p className="font-semibold">R{extra.price}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {extra.id === 'cheese_table' || extra.id === 'fruit_table' 
+                            ? 'Price is per group' 
+                            : 'Price is per person'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {selectedExtras.includes('extra_salad') && (
+                  <div className="mt-6">
+                    <h4 className="text-lg font-semibold mb-4">Select Salad Type</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {getAvailableSalads().map((salad) => (
+                        <div
+                          key={salad.id}
+                          onClick={() => handleExtraSaladTypeSelect(salad.id)}
+                          className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
+                            extraSaladType === salad.id
+                              ? 'border-primary bg-primary/10 shadow-md'
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start">
+                            <h4 className="font-semibold">{salad.name}</h4>
+                            {extraSaladType === salad.id && <Check className="h-5 w-5 text-primary" />}
+                          </div>
+                          <p className="text-muted-foreground text-sm mt-1">{salad.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {selectedMenu && (
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-4">Menu Inclusions</h3>
+                <ul className="list-disc pl-5 text-muted-foreground">
+                  {getMenuInclusions().map((inclusion, index) => (
+                    <li key={index}>{inclusion}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {selectedMenu && (
+              <div className="mb-8">
+                <div className="flex items-center justify-between p-4 bg-secondary/5 rounded-lg">
+                  <h3 className="text-xl font-semibold">Total Price Per Person:</h3>
+                  <p className="text-2xl font-bold text-primary">R{totalPrice}</p>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </TooltipProvider>
   );
 };
 
