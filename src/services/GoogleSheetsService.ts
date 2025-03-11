@@ -3,10 +3,11 @@
  * This is a service that simulates integration with Make + Google Sheets
  * 
  * In a real implementation:
- * 1. The BookingForm would submit to a Make webhook
- * 2. Make would process the data and add it to Google Sheets
- * 3. Make would trigger Gmail to send confirmation emails
- * 4. Make would schedule follow-up reminders
+ * 1. The HubSpot form would submit to HubSpot for contact management
+ * 2. Make would receive the form data via a webhook
+ * 3. Make would process the data and add it to Google Sheets
+ * 4. Make would trigger Gmail to send confirmation emails
+ * 5. Make would schedule follow-up reminders
  */
 
 interface BookingData {
