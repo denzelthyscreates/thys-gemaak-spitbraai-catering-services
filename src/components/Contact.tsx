@@ -86,15 +86,15 @@ const Contact = () => {
           <div className="p-6 rounded-xl bg-card shadow-subtle">
             <h3 className="text-xl font-semibold mb-3">Service Areas</h3>
             <p className="text-muted-foreground mb-4">
-              We provide catering services throughout these areas and surrounding regions.
+              We provide catering services throughout the Western Cape and surrounding regions.
             </p>
             <ul className="space-y-2">
-              <li>Johannesburg</li>
-              <li>Pretoria</li>
-              <li>East Rand</li>
-              <li>West Rand</li>
-              <li>Vaal Triangle</li>
-              <li>Hartbeespoort</li>
+              <li>Cape Town</li>
+              <li>Stellenbosch</li>
+              <li>Paarl</li>
+              <li>Franschhoek</li>
+              <li>Somerset West</li>
+              <li>Hermanus</li>
             </ul>
             <p className="mt-4 text-sm text-muted-foreground">
               For locations outside these areas, please contact us for availability.
