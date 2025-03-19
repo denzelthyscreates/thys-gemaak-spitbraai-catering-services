@@ -17,7 +17,7 @@ const TermsOfService = () => {
             <h2 className="text-2xl font-semibold mt-8 mb-4">1. Booking with Thys Gemaak Spitbraai Catering</h2>
             <p>
               a) All bookings must be confirmed in writing by the Client via WhatsApp: +27 60 461 3766 or
-              email: wade@thysgemaak.com.
+              email: info@thysgemaak.com.
             </p>
             <p>
               b) A non-refundable booking fee of R500 is required to secure Thys Gemaak Spitbraai Catering
@@ -159,7 +159,7 @@ const TermsOfService = () => {
               If you have any questions about these Terms and Conditions, please contact us at:
             </p>
             <p className="mt-4">
-              <strong>Email:</strong> wade@thysgemaak.com<br />
+              <strong>Email:</strong> info@thysgemaak.com<br />
               <strong>Phone:</strong> +27 60 461 3766<br />
               <strong>Address:</strong> 75 School Street, Kylemore, Stellenbosch, 7600
             </p>

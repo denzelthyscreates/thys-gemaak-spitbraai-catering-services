@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -68,16 +69,15 @@ const Contact = () => {
             <div className="space-y-3">
               <div>
                 <div className="font-medium">Phone</div>
-                <a href="tel:+27123456789" className="text-primary hover:underline">+27 12 345 6789</a>
+                <a href="tel:+27604613766" className="text-primary hover:underline">+27 60 461 3766</a>
               </div>
               <div>
                 <div className="font-medium">Email</div>
-                <a href="mailto:info@premiumspitbraai.co.za" className="text-primary hover:underline">info@premiumspitbraai.co.za</a>
+                <a href="mailto:info@thysgemaak.com" className="text-primary hover:underline">info@thysgemaak.com</a>
               </div>
               <div>
                 <div className="font-medium">Office Hours</div>
                 <p>Monday - Friday: 9:00 - 17:00</p>
-                <p>Saturday: 10:00 - 15:00</p>
               </div>
             </div>
           </div>

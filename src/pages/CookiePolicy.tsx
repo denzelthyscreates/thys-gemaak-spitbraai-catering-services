@@ -67,7 +67,7 @@ const CookiePolicy = () => {
               If you have any questions about our use of cookies or other technologies, please contact us at:
             </p>
             <p className="mt-4">
-              <strong>Email:</strong> wade@thysgemaak.com<br />
+              <strong>Email:</strong> info@thysgemaak.com<br />
               <strong>Phone:</strong> +27 60 461 3766<br />
               <strong>Address:</strong> 75 School Street, Kylemore, Stellenbosch, 7600
             </p>
