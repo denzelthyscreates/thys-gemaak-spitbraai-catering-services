@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -86,18 +85,10 @@ const Contact = () => {
           <div className="p-6 rounded-xl bg-card shadow-subtle">
             <h3 className="text-xl font-semibold mb-3">Service Areas</h3>
             <p className="text-muted-foreground mb-4">
-              We provide catering services throughout the Western Cape and surrounding regions.
+              We provide Spitbraai catering for any event, size and location within the borders of the Western Cape.
             </p>
-            <ul className="space-y-2">
-              <li>Cape Town</li>
-              <li>Stellenbosch</li>
-              <li>Paarl</li>
-              <li>Franschhoek</li>
-              <li>Somerset West</li>
-              <li>Hermanus</li>
-            </ul>
             <p className="mt-4 text-sm text-muted-foreground">
-              For locations outside these areas, please contact us for availability.
+              Contact us to discuss your specific location requirements.
             </p>
           </div>
           
