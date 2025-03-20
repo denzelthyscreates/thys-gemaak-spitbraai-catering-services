@@ -81,7 +81,7 @@ const About = () => {
                 and effective digital solutions.
               </p>
               <p>
-                At Thys Gemaak, we are breaking down barriers and delivering spitbraai catering that combines authentic 
+                At Thys Gemaak, we are breaking down barriers and delivering spitbraai catering that combines classic 
                 open-fire cooking with efficiency and precision. Our vision is to become the premier 
                 spitbraai catering company in South Africa, serving millions of customers, and setting the standard for modern 
                 catering experiences globally.
