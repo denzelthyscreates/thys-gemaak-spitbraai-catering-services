@@ -98,7 +98,7 @@ const About = () => {
               <div className="p-4 bg-white/50 rounded-lg border border-primary/20">
                 <h4 className="font-semibold text-foreground mb-2">Mission Statement:</h4>
                 <p className="text-muted-foreground">
-                  To redefine spitbraai catering by leveraging cutting-edge technology and a scalable operational model to deliver 
+                  To redefine spitbraai catering by using a scalable operational model to deliver 
                   affordable, premium-quality experiences while uplifting local communities through job creation and socioeconomic empowerment.
                 </p>
               </div>
