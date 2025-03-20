@@ -22,8 +22,7 @@ const Footer = () => {
               </span>
             </div>
             <p className="text-blue-100">
-              Combining tradition with innovation to deliver exceptional spitbraai catering experiences 
-              across South Africa.
+              Providing quality spitbraai catering services throughout the Western Cape.
             </p>
             <div className="flex gap-4">
               <a 

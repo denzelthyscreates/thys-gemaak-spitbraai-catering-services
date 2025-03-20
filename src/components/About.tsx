@@ -33,7 +33,7 @@ const About = () => {
               Our Story
             </span>
             
-<h2 className="text-4xl md:text-5xl font-serif font-semibold tracking-tight text-foreground mb-3">Revolutionizing Spitbraai Catering in South Africa</h2>
+<h2 className="text-4xl md:text-5xl font-serif font-semibold tracking-tight text-foreground mb-3">Improving Spitbraai Catering in South Africa</h2>
             
             <div className="relative z-10 rounded-xl overflow-hidden shadow-prominent mb-8">
               <img 
@@ -71,19 +71,19 @@ const About = () => {
             <div className="space-y-6 text-muted-foreground">
               <p>
                 At Thys Gemaak Spitbraai Catering, we're not just changing the game, we're defining the future of catering. 
-                Spitbraai is more than a meal; it's an experience, a cultural symbol of togetherness, and a celebration. 
+                Spitbraai is more than a meal; it's an experience, a symbol of togetherness, and a celebration. 
                 But until now, it's been reserved for special occasions due to high costs and limited accessibility. That ends today!
               </p>
               <p>
                 With over 10 years of hands-on experience, we officially launched in January 2024, ready to disrupt the market 
                 by making premium spitbraai catering affordable, accessible, and scalable. As tech companies transformed their 
-                respective industries, we are revolutionizing the spitbraai industry through modern innovation, lean operational models, 
-                and cutting-edge digital integration.
+                respective industries, we are enhancing the spitbraai industry through modern approaches, lean operational models, 
+                and effective digital solutions.
               </p>
               <p>
-                At Thys Gemaak, we are breaking down traditional barriers and delivering spitbraai catering that combines the rich 
-                tradition of open-fire cooking with the efficiency and precision of technology. Our vision is to become the premier 
-                spitbraai catering company in South Africa, serving millions of customers, and setting the standard for future-forward 
+                At Thys Gemaak, we are breaking down barriers and delivering spitbraai catering that combines authentic 
+                open-fire cooking with efficiency and precision. Our vision is to become the premier 
+                spitbraai catering company in South Africa, serving millions of customers, and setting the standard for modern 
                 catering experiences globally.
               </p>
               

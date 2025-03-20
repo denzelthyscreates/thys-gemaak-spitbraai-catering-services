@@ -53,7 +53,7 @@ const Hero = () => {
       <div className="container-width relative z-10">
         <div className="mx-auto max-w-8xl text-center">
           <span className="inline-block px-4 py-1.5 mb-6 text-xl font-medium rounded-full bg-primary/20 text-white animate-fade-in">
-            Revolutionizing Traditional Spitbraai
+            Enhanced Spitbraai Experience
           </span>
           
           <h1 className="text-4xl md:text-5xl font-serif font-semibold tracking-tight text-white mb-6 animate-slide-down">
@@ -61,7 +61,7 @@ const Hero = () => {
           </h1>
           
           <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto animate-slide-down delay-100">
-            Combining timeless tradition with modern innovation to deliver exceptional 
+            Providing expertly prepared spitbraai with effective methods to deliver exceptional 
             catering experiences for private, corporate, and large-scale events.
           </p>
           
