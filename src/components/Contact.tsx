@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MenuBuilder from './MenuBuilder';
@@ -8,9 +8,37 @@ import PaymentOptions from './PaymentOptions';
 
 const Contact = () => {
   const [menuSelection, setMenuSelection] = useState(null);
+  const [activeTab, setActiveTab] = useState("menu");
+  
+  // Load saved menu selection and active tab from localStorage on component mount
+  useEffect(() => {
+    const savedMenuSelection = localStorage.getItem('menuSelection');
+    const savedActiveTab = localStorage.getItem('activeTab');
+    
+    if (savedMenuSelection) {
+      setMenuSelection(JSON.parse(savedMenuSelection));
+    }
+    
+    if (savedActiveTab) {
+      setActiveTab(savedActiveTab);
+    }
+  }, []);
+  
+  // Save menu selection and active tab to localStorage when they change
+  useEffect(() => {
+    if (menuSelection) {
+      localStorage.setItem('menuSelection', JSON.stringify(menuSelection));
+    }
+    
+    localStorage.setItem('activeTab', activeTab);
+  }, [menuSelection, activeTab]);
   
   const handleMenuSelectionChange = (selection: any) => {
     setMenuSelection(selection);
+  };
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
   };
 
   // Default values for PaymentOptions when no menu is selected
@@ -34,7 +62,7 @@ const Contact = () => {
           </p>
         </div>
         
-        <Tabs defaultValue="menu" className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="menu">Build Your Menu</TabsTrigger>
             <TabsTrigger value="book">Booking Enquiry</TabsTrigger>
@@ -42,7 +70,10 @@ const Contact = () => {
           </TabsList>
           
           <TabsContent value="menu" className="px-1">
-            <MenuBuilder onSelectionChange={handleMenuSelectionChange} />
+            <MenuBuilder 
+              onSelectionChange={handleMenuSelectionChange} 
+              initialSelection={menuSelection}
+            />
           </TabsContent>
           
           <TabsContent value="book">

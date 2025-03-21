@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Users, Building, Calendar, CalendarCheck, PartyPopper, GraduationCap } from 'lucide-react';
+import { Check, Users, Building, Calendar, CalendarCheck, PartyPopper, GraduationCap, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface MenuOption {
   id: string;
@@ -15,7 +17,12 @@ interface MenuOption {
   icon?: JSX.Element;
 }
 
-const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any) => void }) => {
+interface MenuBuilderProps {
+  onSelectionChange: (selection: any) => void;
+  initialSelection?: any;
+}
+
+const MenuBuilder = ({ onSelectionChange, initialSelection }: MenuBuilderProps) => {
   const { toast } = useToast();
   const menuOptions: MenuOption[] = [
     // Birthday Menu Options with new psychological names
@@ -159,6 +166,72 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [extraSaladType, setExtraSaladType] = useState<string>('');
   const [discountApplied, setDiscountApplied] = useState<boolean>(false);
+  
+  const [menuSectionOpen, setMenuSectionOpen] = useState<boolean>(true);
+  const [detailsSectionOpen, setDetailsSectionOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (initialSelection) {
+      const menuOption = menuOptions.find(opt => opt.name === initialSelection.menuPackage);
+      if (menuOption) {
+        setSelectedMenu(menuOption.id);
+      }
+      
+      setNumGuests(initialSelection.numberOfGuests || 50);
+      
+      if (initialSelection.season) {
+        setSelectedSeason(initialSelection.season.toLowerCase() as 'summer' | 'winter');
+      }
+      
+      if (initialSelection.starters) {
+        const starterNames = initialSelection.starters.split(', ');
+        const starterIds = starterNames.map(name => {
+          const option = menuOptions.find(opt => opt.name === name && opt.category === 'starter');
+          return option ? option.id : null;
+        }).filter(Boolean);
+        setSelectedStarters(starterIds);
+      }
+      
+      if (initialSelection.sides) {
+        const sideNames = initialSelection.sides.split(', ');
+        const sideIds = sideNames.map(name => {
+          const option = menuOptions.find(opt => opt.name === name && opt.category === 'side');
+          return option ? option.id : null;
+        }).filter(Boolean);
+        setSelectedSides(sideIds);
+      }
+      
+      if (initialSelection.desserts) {
+        const dessertNames = initialSelection.desserts.split(', ');
+        const dessertIds = dessertNames.map(name => {
+          const option = menuOptions.find(opt => opt.name === name && opt.category === 'dessert');
+          return option ? option.id : null;
+        }).filter(Boolean);
+        setSelectedDesserts(dessertIds);
+      }
+      
+      if (initialSelection.extras) {
+        const extraNames = initialSelection.extras.split(', ');
+        const extraIds = extraNames.map(name => {
+          if (name.startsWith("Extra Salad: ")) {
+            const saladName = name.replace("Extra Salad: ", "");
+            const saladOption = menuOptions.find(opt => opt.name === saladName && opt.category === 'side');
+            if (saladOption) {
+              setExtraSaladType(saladOption.id);
+            }
+            return 'extra_salad';
+          }
+          
+          const option = menuOptions.find(opt => opt.name === name && opt.category === 'extra');
+          return option ? option.id : null;
+        }).filter(Boolean);
+        setSelectedExtras(extraIds);
+      }
+      
+      setDetailsSectionOpen(true);
+      setMenuSectionOpen(false);
+    }
+  }, [initialSelection]);
 
   useEffect(() => {
     const calculatedPrice = calculateTotalPrice();
@@ -168,6 +241,13 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
     
     updateSelectionSummary(calculatedPrice);
   }, [selectedMenu, selectedStarters, selectedSides, selectedDesserts, selectedExtras, selectedSeason, numGuests]);
+
+  useEffect(() => {
+    if (selectedMenu) {
+      setDetailsSectionOpen(true);
+      setMenuSectionOpen(false);
+    }
+  }, [selectedMenu]);
 
   const updateSelectionSummary = (calculatedPrice: number) => {
     if (!selectedMenu) return;
@@ -227,6 +307,29 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
     setSelectedExtras([]);
     setSelectedSeason(null);
     setExtraSaladType('');
+  };
+
+  const handleReset = () => {
+    setSelectedMenu(null);
+    setSelectedStarters([]);
+    setSelectedSides([]);
+    setSelectedDesserts([]);
+    setSelectedExtras([]);
+    setSelectedSeason(null);
+    setNumGuests(50);
+    setExtraSaladType('');
+    setMenuSectionOpen(true);
+    setDetailsSectionOpen(false);
+    
+    localStorage.removeItem('menuSelection');
+    
+    toast({
+      title: "Menu Builder Reset",
+      description: "All selections have been cleared.",
+      duration: 3000
+    });
+    
+    onSelectionChange(null);
   };
 
   const handleSeasonSelect = (season: 'summer' | 'winter') => {
@@ -432,302 +535,17 @@ const MenuBuilder = ({ onSelectionChange }: { onSelectionChange: (selection: any
   return (
     <TooltipProvider>
       <div className="animate-fade-in">
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4">{step++}. Select Your Menu Package</h3>
-          
-          {getMenusByEventType().map((group, groupIndex) => (
-            <div key={groupIndex} className="mb-6">
-              <h4 className={`text-lg font-medium mb-3 pb-1 border-b ${group.borderColor}`}>
-                {group.title}
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {group.menus.map((menu) => (
-                  <Tooltip key={menu.id}>
-                    <TooltipTrigger asChild>
-                      <div 
-                        onClick={() => {
-                          handleMenuSelect(menu.id);
-                          showMenuAvailabilityToast(menu);
-                        }}
-                        className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
-                          selectedMenu === menu.id 
-                            ? `border-primary bg-primary/10 shadow-md` 
-                            : `border-border hover:border-primary/50 ${group.bgColor}`
-                        }`}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div className="flex items-center gap-2">
-                            {menu.icon}
-                            <div>
-                              <h4 className="font-semibold">{menu.name}</h4>
-                              {menu.subtitle && (
-                                <p className="text-xs text-muted-foreground">{menu.subtitle}</p>
-                              )}
-                            </div>
-                          </div>
-                          {selectedMenu === menu.id && <Check className="h-5 w-5 text-primary" />}
-                        </div>
-                        <p className="text-muted-foreground text-sm mt-1">{menu.description}</p>
-                        <p className="font-semibold mt-2">R{menu.price} pp</p>
-                        {menu.availabilityInfo && (
-                          <div className="mt-1 text-xs text-muted-foreground italic">
-                            {menu.availabilityInfo}
-                          </div>
-                        )}
-                      </div>
-                    </TooltipTrigger>
-                    {menu.availabilityInfo && (
-                      <TooltipContent>
-                        <p>{menu.availabilityInfo}</p>
-                      </TooltipContent>
-                    )}
-                  </Tooltip>
-                ))}
-              </div>
-            </div>
-          ))}
+        <div className="mb-4 flex justify-end">
+          <Button 
+            variant="outline" 
+            onClick={handleReset}
+            className="flex items-center gap-2"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Reset Menu Selections
+          </Button>
         </div>
         
-        {selectedMenu && (
-          <>
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-4">{step++}. Enter Number of Guests</h3>
-              <div>
-                <input
-                  type="number"
-                  min="1"
-                  value={numGuests}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value) || 1;
-                    setNumGuests(val);
-                  }}
-                  className="px-3 py-2 border rounded-md"
-                />
-                {numGuests >= 100 && (
-                  <div className="mt-2 text-success flex items-center gap-1">
-                    <Check className="h-4 w-4" />
-                    <span>10% volume discount applied for 100+ guests!</span>
-                  </div>
-                )}
-                {numGuests < 100 && numGuests >= 90 && (
-                  <div className="mt-2 text-muted-foreground text-sm">
-                    Add {100 - numGuests} more guests to qualify for a 10% volume discount!
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {selectedMenu === 'wedding1' && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4">{step++}. Select Season (Wedding Menu 1)</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div 
-                    onClick={() => handleSeasonSelect('summer')}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
-                      selectedSeason === 'summer' ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <h4 className="font-semibold">Summer Menu</h4>
-                      {selectedSeason === 'summer' && <Check className="h-5 w-5 text-primary" />}
-                    </div>
-                    <p className="text-muted-foreground text-sm mt-1">
-                      Includes Potato Salad, Curry Noodle Salad, Green Salad
-                    </p>
-                  </div>
-                  <div 
-                    onClick={() => handleSeasonSelect('winter')}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
-                      selectedSeason === 'winter' ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <h4 className="font-semibold">Winter Menu</h4>
-                      {selectedSeason === 'winter' && <Check className="h-5 w-5 text-primary" />}
-                    </div>
-                    <p className="text-muted-foreground text-sm mt-1">
-                      Includes Baby Potatoes, Baby Carrots, Baby Onions
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {starters.length > 0 && getMaxSelections('starter') > 0 && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4">
-                  {step++}. Select Starter ({selectedStarters.length}/{getMaxSelections('starter')})
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {starters.map((starter) => (
-                    <div
-                      key={starter.id}
-                      onClick={() => toggleOption(starter.id, 'starter')}
-                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
-                        selectedStarters.includes(starter.id)
-                          ? 'border-primary bg-primary/10 shadow-md'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <h4 className="font-semibold">{starter.name}</h4>
-                        {selectedStarters.includes(starter.id) && <Check className="h-5 w-5 text-primary" />}
-                      </div>
-                      <p className="text-muted-foreground text-sm mt-1">{starter.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {sides.length > 0 && getMaxSelections('side') > 0 && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4">
-                  {step++}. Select Sides ({selectedSides.length}/{getMaxSelections('side')})
-                </h3>
-                {selectedMenu === 'matric_standard' && (
-                  <p className="text-muted-foreground mb-4">
-                    Lamb Spit and Garlic Bread are fixed items. Please select any 2 sides from the options below.
-                  </p>
-                )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {getAvailableSides().map((side) => (
-                    <div
-                      key={side.id}
-                      onClick={() => toggleOption(side.id, 'side')}
-                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
-                        selectedSides.includes(side.id)
-                          ? 'border-primary bg-primary/10 shadow-md'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <h4 className="font-semibold">{side.name}</h4>
-                        {selectedSides.includes(side.id) && <Check className="h-5 w-5 text-primary" />}
-                      </div>
-                      <p className="text-muted-foreground text-sm mt-1">{side.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {desserts.length > 0 && getMaxSelections('dessert') > 0 && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4">
-                  {step++}. Select Dessert ({selectedDesserts.length}/{getMaxSelections('dessert')})
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {desserts.map((dessert) => (
-                    <div
-                      key={dessert.id}
-                      onClick={() => toggleOption(dessert.id, 'dessert')}
-                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
-                        selectedDesserts.includes(dessert.id)
-                          ? 'border-primary bg-primary/10 shadow-md'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <h4 className="font-semibold">{dessert.name}</h4>
-                        {selectedDesserts.includes(dessert.id) && <Check className="h-5 w-5 text-primary" />}
-                      </div>
-                      <p className="text-muted-foreground text-sm mt-1">{dessert.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {extras.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4">
-                  {step++}. Select Extras ({selectedExtras.length})
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {extras.map((extra) => (
-                    <div
-                      key={extra.id}
-                      onClick={() => toggleOption(extra.id, 'extra')}
-                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
-                        selectedExtras.includes(extra.id)
-                          ? 'border-primary bg-primary/10 shadow-md'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <h4 className="font-semibold">{extra.name}</h4>
-                        {selectedExtras.includes(extra.id) && <Check className="h-5 w-5 text-primary" />}
-                      </div>
-                      <p className="text-muted-foreground text-sm mt-1">{extra.description}</p>
-                      <div className="flex justify-between items-center mt-2">
-                        <p className="font-semibold">R{extra.price}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {extra.id === 'cheese_table' || extra.id === 'fruit_table' 
-                            ? 'Price is per group' 
-                            : 'Price is per person'}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                {selectedExtras.includes('extra_salad') && (
-                  <div className="mt-6">
-                    <h4 className="text-lg font-semibold mb-4">Select Salad Type</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {getAvailableSalads().map((salad) => (
-                        <div
-                          key={salad.id}
-                          onClick={() => handleExtraSaladTypeSelect(salad.id)}
-                          className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md ${
-                            extraSaladType === salad.id
-                              ? 'border-primary bg-primary/10 shadow-md'
-                              : 'border-border hover:border-primary/50'
-                          }`}
-                        >
-                          <div className="flex justify-between items-start">
-                            <h4 className="font-semibold">{salad.name}</h4>
-                            {extraSaladType === salad.id && <Check className="h-5 w-5 text-primary" />}
-                          </div>
-                          <p className="text-muted-foreground text-sm mt-1">{salad.description}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {selectedMenu && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4">Menu Inclusions</h3>
-                <ul className="list-disc pl-5 text-muted-foreground">
-                  {getMenuInclusions().map((inclusion, index) => (
-                    <li key={index}>{inclusion}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            {selectedMenu && (
-              <div className="mb-8">
-                <div className="flex items-center justify-between p-4 bg-secondary/5 rounded-lg">
-                  <div>
-                    <h3 className="text-xl font-semibold">Total Price Per Person:</h3>
-                    {discountApplied && (
-                      <p className="text-sm text-success">10% volume discount applied</p>
-                    )}
-                  </div>
-                  <p className="text-2xl font-bold text-primary">R{totalPrice}</p>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    </TooltipProvider>
-  );
-};
+        <
 
-export default MenuBuilder;
+
