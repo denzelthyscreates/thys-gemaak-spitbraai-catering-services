@@ -1,13 +1,9 @@
 
 /**
- * This is a service that simulates integration with Make + Google Sheets
- * 
- * In a real implementation:
- * 1. The HubSpot form would submit to HubSpot for contact management
- * 2. Make would receive the form data via a webhook
- * 3. Make would process the data and add it to Google Sheets
- * 4. Make would trigger Gmail to send confirmation emails
- * 5. Make would schedule follow-up reminders
+ * This service handles integration with Make (formerly Integromat) to:
+ * 1. Submit booking data to Google Sheets via Make
+ * 2. Trigger email confirmations via Gmail
+ * 3. Schedule follow-up reminders
  */
 
 interface BookingData {
@@ -30,26 +26,50 @@ interface BookingData {
   submittedAt: string;
 }
 
+// Make webhook URL for the integration
+const MAKE_WEBHOOK_URL = "https://hook.eu2.make.com/tgojx8cfkf5sf65n1ctj4noz1du6pvpw";
+
+/**
+ * Submits booking data to Make webhook, which then:
+ * 1. Adds the data to Google Sheets
+ * 2. Sends confirmation email via Gmail
+ * 3. Schedules reminder emails
+ */
 export const submitBookingToMake = async (data: BookingData): Promise<boolean> => {
   try {
-    console.log('In a real implementation, this would submit to a Make webhook URL');
-    console.log('Make would then:');
-    console.log('1. Add the booking to a Google Sheet');
-    console.log('2. Send a confirmation email via Gmail');
-    console.log('3. Schedule reminder emails in Make for follow-up');
+    console.log('Submitting booking data to Make webhook:', MAKE_WEBHOOK_URL);
     
-    // In a real implementation, this would be an actual API call:
-    // const response = await fetch('https://hook.eu1.make.com/your-webhook-id', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify(data),
-    // });
-    // return response.ok;
+    // Add metadata for Make scenario to use
+    const makePayload = {
+      ...data,
+      source: 'website_booking_form',
+      requires_confirmation: true,
+      requires_reminders: true,
+      booking_reminder_due: 2, // 2 days for booking confirmation reminder
+      payment_reminder_due: 7, // 7 days for payment reminder
+      submission_timestamp: new Date().toISOString()
+    };
     
-    // Instead, we'll simulate a successful response
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Make the actual API call to the Make webhook
+    const response = await fetch(MAKE_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(makePayload),
+    });
+    
+    // Check if the request was successful
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error from Make webhook:', errorText);
+      return false;
+    }
+    
+    // Log the successful response
+    const responseData = await response.json().catch(() => null);
+    console.log('Make webhook response:', responseData || 'Success (no response body)');
+    
     return true;
   } catch (error) {
     console.error('Error submitting booking to Make:', error);

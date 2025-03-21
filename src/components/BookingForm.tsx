@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -101,19 +102,21 @@ const BookingForm = ({ menuSelection }: { menuSelection: any }) => {
         submittedAt: new Date().toISOString(),
       };
       
-      // In a real implementation, this would send the data to a Make scenario via a webhook
-      // For now, we'll simulate a successful submission
-      console.log("Form data being sent:", formData);
+      console.log("Form data being sent to Make:", formData);
       
-      // Simulate Google Sheet and Gmail automation via Make (in real implementation)
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Submit the data to Make webhook
+      const success = await submitBookingToMake(formData);
       
-      // Show success message
-      toast.success("Booking enquiry submitted successfully!", {
-        description: "You'll receive a confirmation email shortly."
-      });
-      
-      setSubmissionComplete(true);
+      if (success) {
+        // Show success message
+        toast.success("Booking enquiry submitted successfully!", {
+          description: "You'll receive a confirmation email shortly."
+        });
+        
+        setSubmissionComplete(true);
+      } else {
+        throw new Error("Failed to submit booking");
+      }
       
     } catch (error) {
       console.error("Error submitting form:", error);
