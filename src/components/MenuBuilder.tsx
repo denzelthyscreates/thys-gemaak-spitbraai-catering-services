@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Check, Users, Building, Calendar, CalendarCheck, PartyPopper, GraduationCap, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -546,6 +547,398 @@ const MenuBuilder = ({ onSelectionChange, initialSelection }: MenuBuilderProps) 
           </Button>
         </div>
         
-        <
+        <Collapsible open={menuSectionOpen} onOpenChange={setMenuSectionOpen} className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-semibold">
+              Step {step++}: Choose Your Menu Package
+            </h3>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="w-9 p-0">
+                {menuSectionOpen ? 
+                  <ChevronUp className="h-4 w-4" /> : 
+                  <ChevronDown className="h-4 w-4" />
+                }
+              </Button>
+            </CollapsibleTrigger>
+          </div>
+          
+          <CollapsibleContent>
+            {getMenusByEventType().map((group, index) => (
+              <div key={index} className={`mb-8 p-4 rounded-lg ${group.bgColor} ${group.borderColor} border`}>
+                <h4 className="text-lg font-medium mb-4">{group.title}</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {group.menus.map((menuOption) => (
+                    <div
+                      key={menuOption.id}
+                      className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                        selectedMenu === menuOption.id
+                          ? 'bg-primary/10 border-primary'
+                          : 'bg-card hover:bg-muted/50 border-muted'
+                      }`}
+                      onClick={() => {
+                        handleMenuSelect(menuOption.id);
+                        showMenuAvailabilityToast(menuOption);
+                      }}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-2">
+                          {menuOption.icon}
+                          <div>
+                            <h5 className="font-medium">{menuOption.name}</h5>
+                            {menuOption.subtitle && <p className="text-sm text-muted-foreground">{menuOption.subtitle}</p>}
+                          </div>
+                        </div>
+                        <span className="text-lg font-semibold">R{menuOption.price}</span>
+                      </div>
+                      <p className="mt-2 text-sm text-muted-foreground">{menuOption.description}</p>
+                      {selectedMenu === menuOption.id && (
+                        <div className="mt-2 flex items-center text-sm text-primary">
+                          <Check className="mr-1 h-4 w-4" /> Selected
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </CollapsibleContent>
+        </Collapsible>
+        
+        {selectedMenu && (
+          <Collapsible open={detailsSectionOpen} onOpenChange={setDetailsSectionOpen} className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold">
+                Step {step++}: Configure Your Menu
+              </h3>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="w-9 p-0">
+                  {detailsSectionOpen ? 
+                    <ChevronUp className="h-4 w-4" /> : 
+                    <ChevronDown className="h-4 w-4" />
+                  }
+                </Button>
+              </CollapsibleTrigger>
+            </div>
+            
+            <CollapsibleContent>
+              <div className="mb-6 space-y-4">
+                <div className="p-4 rounded-lg bg-card border">
+                  <h4 className="text-lg font-medium mb-4">Number of Guests</h4>
+                  <div className="flex items-center gap-6">
+                    <div className="flex items-center">
+                      <Users className="mr-2 h-5 w-5 text-primary" />
+                      <span>Guests:</span>
+                    </div>
+                    <input
+                      type="number"
+                      min="10"
+                      value={numGuests}
+                      onChange={(e) => setNumGuests(Number(e.target.value))}
+                      className="w-20 p-2 border rounded"
+                    />
+                    {numGuests >= 100 && (
+                      <span className="text-sm font-medium text-green-600">10% Volume Discount Applied!</span>
+                    )}
+                  </div>
+                </div>
+                
+                {selectedMenu === 'wedding1' && (
+                  <div className="p-4 rounded-lg bg-card border">
+                    <h4 className="text-lg font-medium mb-4">Season Selection</h4>
+                    <div className="flex flex-wrap gap-4">
+                      <Button
+                        variant={selectedSeason === 'summer' ? 'default' : 'outline'}
+                        onClick={() => handleSeasonSelect('summer')}
+                      >
+                        Summer Menu
+                      </Button>
+                      <Button
+                        variant={selectedSeason === 'winter' ? 'default' : 'outline'}
+                        onClick={() => handleSeasonSelect('winter')}
+                      >
+                        Winter Menu
+                      </Button>
+                    </div>
+                    
+                    {selectedSeason && (
+                      <div className="mt-4">
+                        <h5 className="font-medium mb-2">
+                          {selectedSeason === 'summer' ? 'Summer' : 'Winter'} Menu Includes:
+                        </h5>
+                        <ul className="list-disc list-inside space-y-1 text-sm">
+                          {selectedSeason === 'summer' ? (
+                            <>
+                              <li>Lamb Spit</li>
+                              <li>Garlic Bread</li>
+                              <li>Potato Salad</li>
+                              <li>Curry Noodle Salad</li>
+                              <li>Green Salad</li>
+                            </>
+                          ) : (
+                            <>
+                              <li>Lamb Spit</li>
+                              <li>Garlic Bread</li>
+                              <li>Baby Potatoes</li>
+                              <li>Baby Carrots</li>
+                              <li>Baby Onions</li>
+                            </>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {getMaxSelections('starter') > 0 && (
+                  <div className="p-4 rounded-lg bg-card border">
+                    <h4 className="text-lg font-medium mb-4">Choose Starter</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {starters.map((starter) => (
+                        <div
+                          key={starter.id}
+                          className={`p-3 rounded border cursor-pointer ${
+                            selectedStarters.includes(starter.id)
+                              ? 'bg-primary/10 border-primary'
+                              : 'hover:bg-muted/50'
+                          }`}
+                          onClick={() => toggleOption(starter.id, 'starter')}
+                        >
+                          <div className="flex justify-between items-start">
+                            <span>{starter.name}</span>
+                            {selectedStarters.includes(starter.id) && (
+                              <Check className="h-4 w-4 text-primary" />
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">{starter.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {getMaxSelections('side') > 0 && selectedMenu !== 'wedding1' && (
+                  <div className="p-4 rounded-lg bg-card border">
+                    <h4 className="text-lg font-medium mb-4">
+                      Choose Sides 
+                      <span className="text-sm font-normal ml-2 text-muted-foreground">
+                        (Select up to {getMaxSelections('side')})
+                      </span>
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {getAvailableSides().map((side) => (
+                        <div
+                          key={side.id}
+                          className={`p-3 rounded border cursor-pointer ${
+                            selectedSides.includes(side.id)
+                              ? 'bg-primary/10 border-primary'
+                              : 'hover:bg-muted/50'
+                          }`}
+                          onClick={() => toggleOption(side.id, 'side')}
+                        >
+                          <div className="flex justify-between items-start">
+                            <span>{side.name}</span>
+                            {selectedSides.includes(side.id) && (
+                              <Check className="h-4 w-4 text-primary" />
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">{side.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {getMaxSelections('dessert') > 0 && (
+                  <div className="p-4 rounded-lg bg-card border">
+                    <h4 className="text-lg font-medium mb-4">Choose Dessert</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {desserts.map((dessert) => (
+                        <div
+                          key={dessert.id}
+                          className={`p-3 rounded border cursor-pointer ${
+                            selectedDesserts.includes(dessert.id)
+                              ? 'bg-primary/10 border-primary'
+                              : 'hover:bg-muted/50'
+                          }`}
+                          onClick={() => toggleOption(dessert.id, 'dessert')}
+                        >
+                          <div className="flex justify-between items-start">
+                            <span>{dessert.name}</span>
+                            {selectedDesserts.includes(dessert.id) && (
+                              <Check className="h-4 w-4 text-primary" />
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">{dessert.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="p-4 rounded-lg bg-card border">
+                  <h4 className="text-lg font-medium mb-4">Optional Extras</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {extras.map((extra) => (
+                      <React.Fragment key={extra.id}>
+                        <div
+                          className={`p-3 rounded border cursor-pointer ${
+                            selectedExtras.includes(extra.id)
+                              ? 'bg-primary/10 border-primary'
+                              : 'hover:bg-muted/50'
+                          }`}
+                          onClick={() => toggleOption(extra.id, 'extra')}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <span>{extra.name}</span>
+                              {extra.id === 'cheese_table' || extra.id === 'fruit_table' ? (
+                                <span className="block text-sm text-muted-foreground">
+                                  R{extra.price} (R{Math.round(extra.price / numGuests)} pp)
+                                </span>
+                              ) : (
+                                <span className="block text-sm text-muted-foreground">
+                                  R{extra.price} pp
+                                </span>
+                              )}
+                            </div>
+                            {selectedExtras.includes(extra.id) && (
+                              <Check className="h-4 w-4 text-primary" />
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">{extra.description}</p>
+                          
+                          {extra.id === 'extra_salad' && selectedExtras.includes('extra_salad') && (
+                            <div className="mt-2 p-2 bg-muted rounded">
+                              <span className="text-sm font-medium block mb-1">Select Salad Type:</span>
+                              <div className="grid grid-cols-2 gap-2">
+                                {getAvailableSalads().map((salad) => (
+                                  <div
+                                    key={salad.id}
+                                    className={`p-2 text-sm rounded cursor-pointer ${
+                                      extraSaladType === salad.id
+                                        ? 'bg-primary/20 border-primary'
+                                        : 'bg-card hover:bg-primary/5'
+                                    }`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleExtraSaladTypeSelect(salad.id);
+                                    }}
+                                  >
+                                    {salad.name}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mb-6 p-4 rounded-lg bg-card border">
+                <h4 className="text-lg font-medium mb-4">Package Inclusions</h4>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {getMenuInclusions().map((inclusion, index) => (
+                    <li key={index} className="flex items-center">
+                      <Check className="h-4 w-4 text-green-600 mr-2" />
+                      <span>{inclusion}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="mb-4 p-4 rounded-lg bg-primary/10 border border-primary">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-lg font-semibold">Total Price:</h4>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold">R{totalPrice} pp</div>
+                    <div className="text-sm text-muted-foreground">
+                      R{totalPrice * numGuests} total for {numGuests} guests
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+        
+        {selectedMenu && (
+          <div className="rounded-lg border p-4 bg-muted/50">
+            <h3 className="text-lg font-medium mb-3">Your Menu Selection Summary</h3>
+            <div className="space-y-2">
+              <div className="grid grid-cols-3 gap-2">
+                <span className="font-medium">Package:</span>
+                <span className="col-span-2">{menuOptions.find(opt => opt.id === selectedMenu)?.name}</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <span className="font-medium">Guests:</span>
+                <span className="col-span-2">{numGuests}</span>
+              </div>
+              {selectedMenu === 'wedding1' && selectedSeason && (
+                <div className="grid grid-cols-3 gap-2">
+                  <span className="font-medium">Season:</span>
+                  <span className="col-span-2">{selectedSeason.charAt(0).toUpperCase() + selectedSeason.slice(1)}</span>
+                </div>
+              )}
+              {selectedStarters.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  <span className="font-medium">Starter:</span>
+                  <span className="col-span-2">
+                    {selectedStarters.map(id => menuOptions.find(opt => opt.id === id)?.name).join(', ')}
+                  </span>
+                </div>
+              )}
+              {selectedSides.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  <span className="font-medium">Sides:</span>
+                  <span className="col-span-2">
+                    {selectedSides.map(id => menuOptions.find(opt => opt.id === id)?.name).join(', ')}
+                  </span>
+                </div>
+              )}
+              {selectedDesserts.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  <span className="font-medium">Dessert:</span>
+                  <span className="col-span-2">
+                    {selectedDesserts.map(id => menuOptions.find(opt => opt.id === id)?.name).join(', ')}
+                  </span>
+                </div>
+              )}
+              {selectedExtras.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  <span className="font-medium">Extras:</span>
+                  <span className="col-span-2">
+                    {selectedExtras.map(id => {
+                      if (id === 'extra_salad' && extraSaladType) {
+                        const saladName = menuOptions.find(opt => opt.id === extraSaladType)?.name;
+                        return `Extra Salad: ${saladName || 'Not specified'}`;
+                      }
+                      return menuOptions.find(opt => opt.id === id)?.name;
+                    }).join(', ')}
+                  </span>
+                </div>
+              )}
+              <div className="grid grid-cols-3 gap-2 pt-2 border-t">
+                <span className="font-medium">Price per person:</span>
+                <span className="col-span-2 font-semibold">R{totalPrice}</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <span className="font-medium">Total price:</span>
+                <span className="col-span-2 font-semibold">R{totalPrice * numGuests}</span>
+              </div>
+              {discountApplied && (
+                <div className="text-sm text-green-600 font-medium mt-1">
+                  10% Volume Discount Applied!
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </TooltipProvider>
+  );
+};
 
-
+export default MenuBuilder;
