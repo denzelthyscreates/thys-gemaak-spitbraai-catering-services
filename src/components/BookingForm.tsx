@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -19,7 +18,7 @@ import { Calendar, Mail, Phone, User, MapPin, CalendarClock, Check } from 'lucid
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { submitBookingToMake } from '@/services/GoogleSheetsService';
+import { submitBookingToMake, BookingData } from '@/services/GoogleSheetsService';
 
 // Define the form schema with Zod
 const bookingFormSchema = z.object({
@@ -86,10 +85,15 @@ const BookingForm = ({ menuSelection }: { menuSelection: any }) => {
     setIsSubmitting(true);
     
     try {
-      // Combine the form data with the menu selection
-      const formData = {
-        ...data,
-        eventDate: data.eventDate ? format(data.eventDate, 'yyyy-MM-dd') : '',
+      // Create a proper BookingData object that matches the interface
+      const bookingData: BookingData = {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        eventDate: data.eventDate ? format(data.eventDate, 'yyyy-MM-dd') : undefined,
+        eventType: data.eventType,
+        eventLocation: data.eventLocation,
+        additionalNotes: data.additionalNotes,
         menuPackage: menuSelection.menuPackage,
         numberOfGuests: menuSelection.numberOfGuests,
         season: menuSelection.season,
@@ -102,10 +106,10 @@ const BookingForm = ({ menuSelection }: { menuSelection: any }) => {
         submittedAt: new Date().toISOString(),
       };
       
-      console.log("Form data being sent to Make:", formData);
+      console.log("Form data being sent to Make:", bookingData);
       
       // Submit the data to Make webhook
-      const success = await submitBookingToMake(formData);
+      const success = await submitBookingToMake(bookingData);
       
       if (success) {
         // Show success message

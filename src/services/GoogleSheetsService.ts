@@ -6,7 +6,7 @@
  * 3. Schedule follow-up reminders
  */
 
-interface BookingData {
+export interface BookingData {
   name: string;
   email: string;
   phone: string;
