@@ -20,7 +20,6 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { submitBookingToMake, BookingData } from '@/services/GoogleSheetsService';
 
-// Define the form schema with Zod
 const bookingFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
   email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -38,7 +37,6 @@ const BookingForm = ({ menuSelection }: { menuSelection: any }) => {
   const [submissionComplete, setSubmissionComplete] = useState(false);
   const summaryRef = useRef<HTMLDivElement>(null);
 
-  // Initialize form with default values
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
     defaultValues: {
@@ -51,14 +49,11 @@ const BookingForm = ({ menuSelection }: { menuSelection: any }) => {
     },
   });
 
-  // Update the visible summary when menu selection changes
   useEffect(() => {
     if (!menuSelection || !summaryRef.current) return;
     
-    // Format the total price
     const formattedPrice = `R${menuSelection.totalPrice} pp`;
     
-    // Create summary HTML
     const summaryHTML = `
       <div class="menu-selection-content">
         <div class="menu-item"><strong>Menu Package:</strong> ${menuSelection.menuPackage || 'Not selected'}</div>
@@ -83,9 +78,9 @@ const BookingForm = ({ menuSelection }: { menuSelection: any }) => {
     }
     
     setIsSubmitting(true);
+    console.log("Starting form submission process...");
     
     try {
-      // Create a proper BookingData object that matches the interface
       const bookingData: BookingData = {
         name: data.name,
         email: data.email,
@@ -96,23 +91,22 @@ const BookingForm = ({ menuSelection }: { menuSelection: any }) => {
         additionalNotes: data.additionalNotes,
         menuPackage: menuSelection.menuPackage,
         numberOfGuests: menuSelection.numberOfGuests,
-        season: menuSelection.season,
-        starters: menuSelection.starters,
-        sides: menuSelection.sides,
-        desserts: menuSelection.desserts,
-        extras: menuSelection.extras,
+        season: menuSelection.season || "",
+        starters: menuSelection.starters || "",
+        sides: menuSelection.sides || "",
+        desserts: menuSelection.desserts || "",
+        extras: menuSelection.extras || "",
         totalPrice: menuSelection.totalPrice,
-        discountApplied: menuSelection.discountApplied,
+        discountApplied: menuSelection.discountApplied || false,
         submittedAt: new Date().toISOString(),
       };
       
       console.log("Form data being sent to Make:", bookingData);
       
-      // Submit the data to Make webhook
       const success = await submitBookingToMake(bookingData);
       
       if (success) {
-        // Show success message
+        console.log("Booking submission successful, showing success message");
         toast.success("Booking enquiry submitted successfully!", {
           description: "You'll receive a confirmation email shortly."
         });
@@ -173,7 +167,6 @@ const BookingForm = ({ menuSelection }: { menuSelection: any }) => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Contact Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Contact Information</h3>
               
@@ -229,7 +222,6 @@ const BookingForm = ({ menuSelection }: { menuSelection: any }) => {
               />
             </div>
             
-            {/* Event Details */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Event Details</h3>
               
@@ -331,7 +323,6 @@ const BookingForm = ({ menuSelection }: { menuSelection: any }) => {
             )}
           />
           
-          {/* Menu selection summary */}
           {menuSelection && (
             <div className="menu-selection-summary p-4 bg-primary/5 rounded-lg border border-primary/20">
               <h4 className="font-semibold mb-2">Your Menu Selection</h4>
