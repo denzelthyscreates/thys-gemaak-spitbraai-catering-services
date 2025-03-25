@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Check } from 'lucide-react';
+import { Check, Building, Calendar, CalendarCheck, GraduationCap, PartyPopper } from 'lucide-react';
 import { MenuOption } from '@/types/menu';
 import { useMenu } from '@/contexts/MenuContext';
 import { useToast } from '@/hooks/use-toast';

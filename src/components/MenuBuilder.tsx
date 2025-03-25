@@ -1,8 +1,9 @@
+
 import React, { useEffect, useState } from 'react';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Building, Calendar, CalendarCheck, GraduationCap, PartyPopper } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { MenuProvider } from '@/contexts/MenuContext';
+import { MenuProvider, useMenu } from '@/contexts/MenuContext';
 import { MenuPackages } from './menu/MenuPackages';
 import { MenuConfiguration } from './menu/MenuConfiguration';
 import { MenuSummary } from './menu/MenuSummary';
@@ -13,6 +14,7 @@ const MenuBuilder = ({ onSelectionChange, initialSelection }: MenuBuilderProps) 
   const { toast } = useToast();
   const [menuSectionOpen, setMenuSectionOpen] = useState(true);
   const [detailsSectionOpen, setDetailsSectionOpen] = useState(false);
+  const { selectedMenu } = useMenu();
   
   const menuOptions: MenuOption[] = [
     // Birthday Menu Options with new psychological names
