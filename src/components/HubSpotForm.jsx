@@ -2,10 +2,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { toast } from 'sonner';
 
-const HubSpotForm = ({ menuSelection }) => {
+const HubSpotForm = ({ menuSelection, savedFormData, onFormDataChange }) => {
   const [formInitialized, setFormInitialized] = useState(false);
   const [lastUpdateData, setLastUpdateData] = useState(null);
   const summaryRef = useRef(null);
+  const formRef = useRef(null);
 
   useEffect(() => {
     // Create a script element
@@ -27,12 +28,21 @@ const HubSpotForm = ({ menuSelection }) => {
           target: "#hubspot-form-container",
           onFormReady: function(form) {
             setFormInitialized(true);
+            formRef.current = form;
             
             // If we already have menu data (possible on re-render), apply it
             if (menuSelection) {
               updateFormWithMenuData(form, menuSelection);
               updateVisibleSummary(menuSelection);
             }
+
+            // If we have saved form data, apply it to the form
+            if (savedFormData) {
+              applyFormData(form, savedFormData);
+            }
+
+            // Add listeners to track form field changes
+            setupFormChangeTracking(form);
           },
           onFormSubmit: function($form) {
             // Add a hidden field for menu_workflow_trigger to signal HubSpot to start the workflow
@@ -75,6 +85,12 @@ const HubSpotForm = ({ menuSelection }) => {
             toast.success("Booking enquiry submitted successfully!", {
               description: "You'll receive a confirmation email shortly."
             });
+
+            // Clear saved form data when form is submitted
+            if (onFormDataChange) {
+              onFormDataChange(null);
+              localStorage.removeItem('bookingFormData');
+            }
           },
           onFormSubmitted: function() {
             // Log that HubSpot workflow will handle automated reminders
@@ -126,6 +142,79 @@ const HubSpotForm = ({ menuSelection }) => {
       }
     }
   }, [menuSelection, formInitialized]);
+
+  // Effect to apply saved form data when it changes
+  useEffect(() => {
+    if (savedFormData && formInitialized) {
+      const form = document.querySelector('form.hs-form');
+      if (form) {
+        applyFormData(form, savedFormData);
+      }
+    }
+  }, [savedFormData, formInitialized]);
+
+  // Setup form change tracking to save form data
+  const setupFormChangeTracking = (form) => {
+    if (!form || !onFormDataChange) return;
+
+    // Add input change event listeners
+    form.querySelectorAll('input, select, textarea').forEach(field => {
+      field.addEventListener('change', () => {
+        const currentFormData = collectFormData(form);
+        
+        // Only update if there are actual changes
+        if (JSON.stringify(currentFormData) !== JSON.stringify(savedFormData)) {
+          onFormDataChange(currentFormData);
+        }
+      });
+      
+      // For text inputs, also track input events for more responsive updates
+      if (field.tagName === 'INPUT' && field.type === 'text' || field.tagName === 'TEXTAREA') {
+        field.addEventListener('input', () => {
+          const currentFormData = collectFormData(form);
+          onFormDataChange(currentFormData);
+        });
+      }
+    });
+  };
+
+  // Collect current form data
+  const collectFormData = (form) => {
+    if (!form) return {};
+    
+    const formData = {};
+    form.querySelectorAll('input, select, textarea').forEach(field => {
+      // Skip hidden fields and submit buttons
+      if (field.type === 'hidden' || field.type === 'submit') return;
+      
+      const name = field.name;
+      const value = field.value;
+      
+      if (name && value) {
+        formData[name] = value;
+      }
+    });
+    
+    return formData;
+  };
+
+  // Apply saved form data to the form
+  const applyFormData = (form, data) => {
+    if (!form || !data) return;
+    
+    console.log("Applying saved form data to HubSpot form:", data);
+    
+    Object.entries(data).forEach(([fieldName, fieldValue]) => {
+      const field = form.querySelector(`[name="${fieldName}"]`);
+      if (field && fieldValue) {
+        field.value = fieldValue;
+        
+        // Trigger change event to ensure HubSpot's validation recognizes the change
+        const event = new Event('change', { bubbles: true });
+        field.dispatchEvent(event);
+      }
+    });
+  };
 
   // Function to update the visible summary without waiting for HubSpot form
   const updateVisibleSummary = (menuData) => {

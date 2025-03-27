@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MenuBuilder from './MenuBuilder';
-import BookingForm from './BookingForm';
+import HubSpotForm from './HubSpotForm';
 import PaymentOptions from './PaymentOptions';
 
 const Contact = () => {
@@ -84,8 +84,8 @@ const Contact = () => {
           </TabsContent>
           
           <TabsContent value="book">
-            <BookingForm 
-              menuSelection={menuSelection} 
+            <HubSpotForm 
+              menuSelection={menuSelection}
               savedFormData={bookingFormData}
               onFormDataChange={handleBookingFormDataChange}
             />
