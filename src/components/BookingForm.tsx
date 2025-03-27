@@ -32,22 +32,61 @@ const bookingFormSchema = z.object({
 
 type BookingFormValues = z.infer<typeof bookingFormSchema>;
 
-const BookingForm = ({ menuSelection }: { menuSelection: any }) => {
+interface BookingFormProps {
+  menuSelection: any;
+  savedFormData?: BookingFormValues | null;
+  onFormDataChange?: (data: BookingFormValues) => void;
+}
+
+const BookingForm: React.FC<BookingFormProps> = ({ 
+  menuSelection, 
+  savedFormData, 
+  onFormDataChange 
+}) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionComplete, setSubmissionComplete] = useState(false);
   const summaryRef = useRef<HTMLDivElement>(null);
 
+  const defaultValues: BookingFormValues = {
+    name: '',
+    email: '',
+    phone: '',
+    eventType: '',
+    eventLocation: '',
+    additionalNotes: '',
+    ...savedFormData
+  };
+
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
-    defaultValues: {
-      name: '',
-      email: '',
-      phone: '',
-      eventType: '',
-      eventLocation: '',
-      additionalNotes: '',
-    },
+    defaultValues,
   });
+
+  useEffect(() => {
+    if (savedFormData) {
+      Object.entries(savedFormData).forEach(([field, value]) => {
+        if (field !== 'eventDate') {
+          form.setValue(field as keyof BookingFormValues, value);
+        }
+      });
+      
+      if (savedFormData.eventDate) {
+        form.setValue('eventDate', new Date(savedFormData.eventDate));
+      }
+    }
+  }, [savedFormData, form]);
+
+  useEffect(() => {
+    const subscription = form.watch((values) => {
+      if (onFormDataChange && Object.keys(form.formState.dirtyFields).length > 0) {
+        onFormDataChange(values as BookingFormValues);
+      }
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [form, onFormDataChange]);
 
   useEffect(() => {
     if (!menuSelection || !summaryRef.current) return;
@@ -112,6 +151,11 @@ const BookingForm = ({ menuSelection }: { menuSelection: any }) => {
         });
         
         setSubmissionComplete(true);
+        
+        localStorage.removeItem('bookingFormData');
+        if (onFormDataChange) {
+          onFormDataChange(null);
+        }
       } else {
         throw new Error("Failed to submit booking");
       }

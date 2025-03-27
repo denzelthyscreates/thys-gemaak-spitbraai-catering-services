@@ -3,17 +3,19 @@ import React, { useState, useEffect } from 'react';
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MenuBuilder from './MenuBuilder';
-import HubSpotForm from './HubSpotForm';
+import BookingForm from './BookingForm';
 import PaymentOptions from './PaymentOptions';
 
 const Contact = () => {
   const [menuSelection, setMenuSelection] = useState(null);
   const [activeTab, setActiveTab] = useState("menu");
+  const [bookingFormData, setBookingFormData] = useState(null);
   
   // Load saved active tab from localStorage on component mount
   useEffect(() => {
     const savedActiveTab = localStorage.getItem('activeTab');
     const savedMenuSelection = localStorage.getItem('menuSelection');
+    const savedBookingFormData = localStorage.getItem('bookingFormData');
     
     if (savedActiveTab) {
       setActiveTab(savedActiveTab);
@@ -21,6 +23,10 @@ const Contact = () => {
     
     if (savedMenuSelection) {
       setMenuSelection(JSON.parse(savedMenuSelection));
+    }
+    
+    if (savedBookingFormData) {
+      setBookingFormData(JSON.parse(savedBookingFormData));
     }
   }, []);
   
@@ -35,6 +41,11 @@ const Contact = () => {
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
+  };
+
+  const handleBookingFormDataChange = (data: any) => {
+    setBookingFormData(data);
+    localStorage.setItem('bookingFormData', JSON.stringify(data));
   };
 
   // Default values for PaymentOptions when no menu is selected
@@ -73,7 +84,11 @@ const Contact = () => {
           </TabsContent>
           
           <TabsContent value="book">
-            <HubSpotForm menuSelection={menuSelection} />
+            <BookingForm 
+              menuSelection={menuSelection} 
+              savedFormData={bookingFormData}
+              onFormDataChange={handleBookingFormDataChange}
+            />
           </TabsContent>
           
           <TabsContent value="payment">
