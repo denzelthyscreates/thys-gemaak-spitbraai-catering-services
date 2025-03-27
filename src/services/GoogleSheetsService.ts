@@ -1,10 +1,11 @@
-
 /**
  * This service handles integration with Make (formerly Integromat) to:
  * 1. Submit booking data to Google Sheets via Make
  * 2. Trigger email confirmations via Gmail
  * 3. Schedule follow-up reminders
  */
+
+import { supabase } from '@/lib/supabase';
 
 export interface BookingData {
   name: string;
@@ -24,20 +25,18 @@ export interface BookingData {
   totalPrice: number;
   discountApplied: boolean;
   submittedAt: string;
+  user_id?: string;
 }
 
 // Make webhook URL for the integration
 const MAKE_WEBHOOK_URL = "https://hook.eu2.make.com/tgojx8cfkf5sf65n1ctj4noz1du6pvpw";
 
 /**
- * Submits booking data to Make webhook, which then:
- * 1. Adds the data to Google Sheets
- * 2. Sends confirmation email via Gmail
- * 3. Schedules reminder emails
+ * Submits booking data to both Supabase and Make webhook
  */
 export const submitBookingToMake = async (data: BookingData): Promise<boolean> => {
   try {
-    console.log('Submitting booking data to Make webhook:', MAKE_WEBHOOK_URL);
+    console.log('Submitting booking data to Make webhook and Supabase');
     
     // Add metadata for Make scenario to use
     const makePayload = {
@@ -50,9 +49,24 @@ export const submitBookingToMake = async (data: BookingData): Promise<boolean> =
       submission_timestamp: new Date().toISOString()
     };
     
-    console.log('Full payload being sent to Make:', JSON.stringify(makePayload));
+    // Get current user if authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      makePayload.user_id = user.id;
+    }
     
-    // Make the actual API call to the Make webhook with mode: 'no-cors' to handle CORS issues
+    console.log('Full payload being sent:', JSON.stringify(makePayload));
+    
+    // Save to Supabase database
+    const { error: supabaseError } = await supabase
+      .from('bookings')
+      .insert(makePayload);
+    
+    if (supabaseError) {
+      console.error('Error saving to Supabase:', supabaseError);
+    }
+    
+    // Also send to Make webhook as a backup/legacy integration
     const response = await fetch(MAKE_WEBHOOK_URL, {
       method: 'POST',
       headers: {
@@ -62,14 +76,42 @@ export const submitBookingToMake = async (data: BookingData): Promise<boolean> =
       body: JSON.stringify(makePayload),
     });
     
-    // When using no-cors, we won't get a proper response status
-    // Instead, we'll log and return success
-    console.log('Make webhook request sent successfully');
+    console.log('Booking submission complete');
     
     return true;
   } catch (error) {
-    console.error('Error submitting booking to Make:', error);
+    console.error('Error submitting booking:', error);
     return false;
+  }
+};
+
+/**
+ * Get bookings for the current user
+ */
+export const getUserBookings = async () => {
+  try {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+    
+    // Get bookings for this user
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('submittedAt', { ascending: false });
+    
+    if (error) {
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching user bookings:', error);
+    throw error;
   }
 };
 
@@ -112,5 +154,6 @@ export const MakeAutomationInfo = {
 
 export default {
   submitBookingToMake,
+  getUserBookings,
   MakeAutomationInfo
 };
