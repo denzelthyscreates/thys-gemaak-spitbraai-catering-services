@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { RotateCcw, Building, Calendar, CalendarCheck, GraduationCap, PartyPopper } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MenuProvider, useMenu } from '@/contexts/MenuContext';
@@ -12,8 +13,56 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions }: {
   onSelectionChange: (selection: any) => void,
   menuOptions: MenuOption[]
 }) => {
+  const { 
+    selectedMenu, 
+    selectedStarters, 
+    selectedSides, 
+    selectedDesserts, 
+    selectedExtras,
+    selectedSeason,
+    numGuests,
+    totalPrice,
+    extraSaladType,
+    handleReset 
+  } = useMenu();
   const { toast } = useToast();
-  const { selectedMenu, handleReset } = useMenu();
+  
+  useEffect(() => {
+    if (selectedMenu) {
+      // Find the menu package name
+      const menuPackage = menuOptions.find(opt => opt.id === selectedMenu)?.name || '';
+      
+      // Get names of selected options
+      const starterNames = selectedStarters.map(id => 
+        menuOptions.find(opt => opt.id === id)?.name || '').join(', ');
+      
+      const sideNames = selectedSides.map(id => 
+        menuOptions.find(opt => opt.id === id)?.name || '').join(', ');
+      
+      const dessertNames = selectedDesserts.map(id => 
+        menuOptions.find(opt => opt.id === id)?.name || '').join(', ');
+      
+      const extraNames = selectedExtras.map(id => 
+        menuOptions.find(opt => opt.id === id)?.name || '').join(', ');
+      
+      // Create a complete selection object
+      const completeSelection = {
+        menuPackage,
+        numberOfGuests: numGuests,
+        season: selectedSeason,
+        starters: starterNames,
+        sides: sideNames,
+        desserts: dessertNames,
+        extras: extraNames,
+        extraSaladType,
+        totalPrice
+      };
+      
+      onSelectionChange(completeSelection);
+    } else {
+      onSelectionChange(null);
+    }
+  }, [selectedMenu, selectedStarters, selectedSides, selectedDesserts, selectedExtras, selectedSeason, numGuests, extraSaladType, totalPrice]);
   
   const resetMenu = () => {
     handleReset();
@@ -42,7 +91,10 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions }: {
       <MenuPackages menuOptions={menuOptions} />
 
       {selectedMenu && (
-        <MenuConfiguration menuOptions={menuOptions} />
+        <>
+          <h3 className="text-xl font-semibold mt-8 mb-4">Step 2: Configure Your Menu</h3>
+          <MenuConfiguration menuOptions={menuOptions} />
+        </>
       )}
 
       <MenuSummary menuOptions={menuOptions} />
@@ -51,6 +103,14 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions }: {
 };
 
 const MenuBuilder = ({ onSelectionChange, initialSelection }: MenuBuilderProps) => {
+  // Use initialSelection to set initial state if provided
+  useEffect(() => {
+    if (initialSelection) {
+      // The actual setting of state will happen in the MenuProvider
+      console.log("Using initial selection in MenuBuilder:", initialSelection);
+    }
+  }, [initialSelection]);
+
   const menuOptions: MenuOption[] = [
     { 
       id: 'menu1', 

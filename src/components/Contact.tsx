@@ -10,28 +10,24 @@ const Contact = () => {
   const [menuSelection, setMenuSelection] = useState(null);
   const [activeTab, setActiveTab] = useState("menu");
   
-  // Load saved menu selection and active tab from localStorage on component mount
+  // Load saved active tab from localStorage on component mount
   useEffect(() => {
-    const savedMenuSelection = localStorage.getItem('menuSelection');
     const savedActiveTab = localStorage.getItem('activeTab');
-    
-    if (savedMenuSelection) {
-      setMenuSelection(JSON.parse(savedMenuSelection));
-    }
+    const savedMenuSelection = localStorage.getItem('menuSelection');
     
     if (savedActiveTab) {
       setActiveTab(savedActiveTab);
     }
+    
+    if (savedMenuSelection) {
+      setMenuSelection(JSON.parse(savedMenuSelection));
+    }
   }, []);
   
-  // Save menu selection and active tab to localStorage when they change
+  // Save active tab to localStorage when it changes
   useEffect(() => {
-    if (menuSelection) {
-      localStorage.setItem('menuSelection', JSON.stringify(menuSelection));
-    }
-    
     localStorage.setItem('activeTab', activeTab);
-  }, [menuSelection, activeTab]);
+  }, [activeTab]);
   
   const handleMenuSelectionChange = (selection: any) => {
     setMenuSelection(selection);

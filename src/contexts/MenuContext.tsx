@@ -28,22 +28,86 @@ interface MenuContextType {
 export const MenuContext = createContext<MenuContextType | undefined>(undefined);
 
 export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [selectedMenu, setSelectedMenu] = useState<string | null>(null);
-  const [selectedStarters, setSelectedStarters] = useState<string[]>([]);
-  const [selectedSides, setSelectedSides] = useState<string[]>([]);
-  const [selectedDesserts, setSelectedDesserts] = useState<string[]>([]);
-  const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
-  const [selectedSeason, setSelectedSeason] = useState<'summer' | 'winter' | null>(null);
-  const [numGuests, setNumGuests] = useState<number>(50);
+  const [selectedMenu, setSelectedMenu] = useState<string | null>(() => {
+    const saved = localStorage.getItem('selectedMenu');
+    return saved ? JSON.parse(saved) : null;
+  });
+  
+  const [selectedStarters, setSelectedStarters] = useState<string[]>(() => {
+    const saved = localStorage.getItem('selectedStarters');
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  const [selectedSides, setSelectedSides] = useState<string[]>(() => {
+    const saved = localStorage.getItem('selectedSides');
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  const [selectedDesserts, setSelectedDesserts] = useState<string[]>(() => {
+    const saved = localStorage.getItem('selectedDesserts');
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  const [selectedExtras, setSelectedExtras] = useState<string[]>(() => {
+    const saved = localStorage.getItem('selectedExtras');
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  const [selectedSeason, setSelectedSeason] = useState<'summer' | 'winter' | null>(() => {
+    const saved = localStorage.getItem('selectedSeason');
+    return saved ? JSON.parse(saved) : null;
+  });
+  
+  const [numGuests, setNumGuests] = useState<number>(() => {
+    const saved = localStorage.getItem('numGuests');
+    return saved ? JSON.parse(saved) : 50;
+  });
+  
   const [totalPrice, setTotalPrice] = useState<number>(0);
-  const [extraSaladType, setExtraSaladType] = useState<string>('');
+  
+  const [extraSaladType, setExtraSaladType] = useState<string>(() => {
+    const saved = localStorage.getItem('extraSaladType');
+    return saved ? JSON.parse(saved) : '';
+  });
+  
   const [discountApplied, setDiscountApplied] = useState<boolean>(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    localStorage.setItem('selectedMenu', JSON.stringify(selectedMenu));
+  }, [selectedMenu]);
+  
+  useEffect(() => {
+    localStorage.setItem('selectedStarters', JSON.stringify(selectedStarters));
+  }, [selectedStarters]);
+  
+  useEffect(() => {
+    localStorage.setItem('selectedSides', JSON.stringify(selectedSides));
+  }, [selectedSides]);
+  
+  useEffect(() => {
+    localStorage.setItem('selectedDesserts', JSON.stringify(selectedDesserts));
+  }, [selectedDesserts]);
+  
+  useEffect(() => {
+    localStorage.setItem('selectedExtras', JSON.stringify(selectedExtras));
+  }, [selectedExtras]);
+  
+  useEffect(() => {
+    localStorage.setItem('selectedSeason', JSON.stringify(selectedSeason));
+  }, [selectedSeason]);
+  
+  useEffect(() => {
+    localStorage.setItem('numGuests', JSON.stringify(numGuests));
+  }, [numGuests]);
+  
+  useEffect(() => {
+    localStorage.setItem('extraSaladType', JSON.stringify(extraSaladType));
+  }, [extraSaladType]);
 
   const calculateTotalPrice = (): number => {
     if (!selectedMenu) return 0;
     const menuOptions = [
-        // Birthday Menu Options with new psychological names
         { 
           id: 'menu1', 
           name: 'Essential Celebration', 
@@ -69,7 +133,6 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
           eventType: 'birthday',
         },
         
-        // Business Menu Options (renamed from Corporate)
         { 
           id: 'business', 
           name: 'Executive Premium Experience', 
@@ -79,7 +142,6 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
           eventType: 'business',
         },
         
-        // Wedding Menu Options with new order (Classic first, then Luxury)
         { 
           id: 'wedding2', 
           name: 'Classic Wedding Celebration', 
@@ -97,7 +159,6 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
           eventType: 'wedding',
         },
         
-        // Standard Menu Option with new psychological name
         { 
           id: 'standard', 
           name: 'Classic Spitbraai Selection', 
@@ -107,7 +168,6 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
           eventType: 'standard',
         },
         
-        // Year-End Function Menu Option
         { 
           id: 'yearend', 
           name: 'Signature Year-End Celebration', 
@@ -118,7 +178,6 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
           availabilityInfo: 'Available only for year-end business events (November-December)',
         },
         
-        // Matric Farewell Menus with special naming
         { 
           id: 'matric_standard', 
           name: 'Essential Matric Farewell 2025', 
@@ -140,11 +199,9 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
           availabilityInfo: 'Available exclusively for school Matric Farewell events',
         },
         
-        // Starters
         { id: 'cocktail_burger', name: 'Cocktail Burger', price: 0, description: 'Mini burger appetizer', category: 'starter', eventType: 'standard' },
         { id: 'curry_rooti', name: 'Curry Rooti', price: 0, description: 'Curry-filled flatbread', category: 'starter', eventType: 'standard' },
         
-        // Sides
         { id: 'curry_noodle', name: 'Curry Noodle Salad', price: 0, description: 'Spiced noodle salad', category: 'side', eventType: 'standard' },
         { id: 'green_salad', name: 'Green Salad', price: 0, description: 'Fresh green salad', category: 'side', eventType: 'standard' },
         { id: 'potato_salad', name: 'Potato Salad', price: 0, description: 'Creamy potato salad', category: 'side', eventType: 'standard' },
@@ -153,11 +210,9 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
         { id: 'baby_carrots', name: 'Baby Carrots', price: 0, description: 'Glazed baby carrots', category: 'side', eventType: 'standard' },
         { id: 'baby_onions', name: 'Baby Onions', price: 0, description: 'Caramelized baby onions', category: 'side', eventType: 'standard' },
         
-        // Desserts
         { id: 'malva_custard', name: 'Malva Custard', price: 0, description: 'Traditional South African dessert', category: 'dessert', eventType: 'standard' },
         { id: 'ice_cream', name: 'Ice Cream & Chocolate Sauce', price: 0, description: 'Classic ice cream with chocolate', category: 'dessert', eventType: 'standard' },
         
-        // Extras – note: pricing for some is per group (cheese_table, fruit_table) and others are per person (chicken_thigh, extra_salad)
         { id: 'cheese_table', name: 'Cheese Table', price: 1900, description: 'Assorted cheese platter', category: 'extra', eventType: 'standard' },
         { id: 'fruit_table', name: 'Fruit Table', price: 900, description: 'Fresh fruit display', category: 'extra', eventType: 'standard' },
         { id: 'chicken_thigh', name: 'Chicken Thigh', price: 25, description: 'Per person', category: 'extra', eventType: 'standard' },
@@ -194,6 +249,14 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setNumGuests(50);
     setExtraSaladType('');
     
+    localStorage.removeItem('selectedMenu');
+    localStorage.removeItem('selectedStarters');
+    localStorage.removeItem('selectedSides');
+    localStorage.removeItem('selectedDesserts');
+    localStorage.removeItem('selectedExtras');
+    localStorage.removeItem('selectedSeason');
+    localStorage.removeItem('numGuests');
+    localStorage.removeItem('extraSaladType');
     localStorage.removeItem('menuSelection');
     
     toast({
@@ -207,7 +270,151 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const calculatedPrice = calculateTotalPrice();
     setTotalPrice(calculatedPrice);
     setDiscountApplied(numGuests >= 100);
-  }, [selectedMenu, selectedStarters, selectedSides, selectedDesserts, selectedExtras, selectedSeason, numGuests]);
+    
+    if (selectedMenu) {
+      const menuOptions = [
+        { 
+          id: 'menu1', 
+          name: 'Essential Celebration', 
+          price: 169, 
+          description: 'Lamb Spit Main, Garlic Bread, 2 Salads', 
+          category: 'menu',
+          eventType: 'birthday',
+        },
+        { 
+          id: 'menu2', 
+          name: 'Deluxe Celebration Experience', 
+          price: 185, 
+          description: 'Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads', 
+          category: 'menu',
+          eventType: 'birthday',
+        },
+        { 
+          id: 'menu3', 
+          name: 'Ultimate Birthday Feast', 
+          price: 195, 
+          description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads, Dessert', 
+          category: 'menu',
+          eventType: 'birthday',
+        },
+        
+        { 
+          id: 'business', 
+          name: 'Executive Premium Experience', 
+          price: 290, 
+          description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Water & Juice, 3 Sides, Dessert', 
+          category: 'menu',
+          eventType: 'business',
+        },
+        
+        { 
+          id: 'wedding2', 
+          name: 'Classic Wedding Celebration', 
+          price: 169, 
+          description: 'Lamb Spit, Garlic Bread, and 2 sides', 
+          category: 'menu',
+          eventType: 'wedding',
+        },
+        { 
+          id: 'wedding1', 
+          name: 'Luxury Wedding Experience', 
+          price: 195, 
+          description: '3 Course Meal (Start, Main & Dessert)', 
+          category: 'menu',
+          eventType: 'wedding',
+        },
+        
+        { 
+          id: 'standard', 
+          name: 'Classic Spitbraai Selection', 
+          price: 169, 
+          description: 'Lamb Spit, Garlic Bread, and 2 sides', 
+          category: 'menu',
+          eventType: 'standard',
+        },
+        
+        { 
+          id: 'yearend', 
+          name: 'Signature Year-End Celebration', 
+          price: 160, 
+          description: 'Lamb Spit, Garlic Bread, and 2 sides', 
+          category: 'menu',
+          eventType: 'yearend',
+          availabilityInfo: 'Available only for year-end business events (November-December)',
+        },
+        
+        { 
+          id: 'matric_standard', 
+          name: 'Essential Matric Farewell 2025', 
+          price: 169, 
+          description: 'Lamb Spit, Garlic Bread, and any 2 sides from our selection', 
+          category: 'menu', 
+          subtitle: 'Standard Matric Farewell Package',
+          eventType: 'matric',
+          availabilityInfo: 'Available exclusively for school Matric Farewell events',
+        },
+        { 
+          id: 'matric_premium', 
+          name: 'Premium Matric Farewell 2025', 
+          price: 195, 
+          description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Sides, Dessert', 
+          category: 'menu', 
+          subtitle: 'Exclusive Matric Farewell Experience',
+          eventType: 'matric',
+          availabilityInfo: 'Available exclusively for school Matric Farewell events',
+        },
+        
+        { id: 'cocktail_burger', name: 'Cocktail Burger', price: 0, description: 'Mini burger appetizer', category: 'starter', eventType: 'standard' },
+        { id: 'curry_rooti', name: 'Curry Rooti', price: 0, description: 'Curry-filled flatbread', category: 'starter', eventType: 'standard' },
+        
+        { id: 'curry_noodle', name: 'Curry Noodle Salad', price: 0, description: 'Spiced noodle salad', category: 'side', eventType: 'standard' },
+        { id: 'green_salad', name: 'Green Salad', price: 0, description: 'Fresh green salad', category: 'side', eventType: 'standard' },
+        { id: 'potato_salad', name: 'Potato Salad', price: 0, description: 'Creamy potato salad', category: 'side', eventType: 'standard' },
+        { id: 'three_bean', name: 'Three Bean Salad', price: 0, description: 'Mixed bean salad', category: 'side', eventType: 'standard' },
+        { id: 'baby_potatoes', name: 'Baby Potatoes', price: 0, description: 'Roasted baby potatoes', category: 'side', eventType: 'standard' },
+        { id: 'baby_carrots', name: 'Baby Carrots', price: 0, description: 'Glazed baby carrots', category: 'side', eventType: 'standard' },
+        { id: 'baby_onions', name: 'Baby Onions', price: 0, description: 'Caramelized baby onions', category: 'side', eventType: 'standard' },
+        
+        { id: 'malva_custard', name: 'Malva Custard', price: 0, description: 'Traditional South African dessert', category: 'dessert', eventType: 'standard' },
+        { id: 'ice_cream', name: 'Ice Cream & Chocolate Sauce', price: 0, description: 'Classic ice cream with chocolate', category: 'dessert', eventType: 'standard' },
+        
+        { id: 'cheese_table', name: 'Cheese Table', price: 1900, description: 'Assorted cheese platter', category: 'extra', eventType: 'standard' },
+        { id: 'fruit_table', name: 'Fruit Table', price: 900, description: 'Fresh fruit display', category: 'extra', eventType: 'standard' },
+        { id: 'chicken_thigh', name: 'Chicken Thigh', price: 25, description: 'Per person', category: 'extra', eventType: 'standard' },
+        { id: 'extra_salad', name: 'Extra Salad', price: 25, description: 'Per person', category: 'extra', eventType: 'standard' },
+      ];
+      
+      const menuPackage = menuOptions.find(opt => opt.id === selectedMenu)?.name || '';
+      
+      const starterNames = selectedStarters.map(id => 
+        menuOptions.find(opt => opt.id === id)?.name || '').join(', ');
+      
+      const sideNames = selectedSides.map(id => 
+        menuOptions.find(opt => opt.id === id)?.name || '').join(', ');
+      
+      const dessertNames = selectedDesserts.map(id => 
+        menuOptions.find(opt => opt.id === id)?.name || '').join(', ');
+      
+      const extraNames = selectedExtras.map(id => 
+        menuOptions.find(opt => opt.id === id)?.name || '').join(', ');
+      
+      const completeSelection = {
+        menuPackage,
+        numberOfGuests: numGuests,
+        season: selectedSeason,
+        starters: starterNames,
+        sides: sideNames,
+        desserts: dessertNames,
+        extras: extraNames,
+        extraSaladType,
+        totalPrice
+      };
+      
+      localStorage.setItem('menuSelection', JSON.stringify(completeSelection));
+    } else {
+      localStorage.removeItem('menuSelection');
+    }
+  }, [selectedMenu, selectedStarters, selectedSides, selectedDesserts, selectedExtras, selectedSeason, numGuests, extraSaladType]);
 
   return (
     <MenuContext.Provider value={{
