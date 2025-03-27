@@ -43,7 +43,7 @@ export const MenuConfiguration = ({ menuOptions }: MenuConfigurationProps) => {
           updatedSelection = updatedSelection.filter(item => item !== id);
         } else {
           let maxSides = 2;
-          if (selectedMenu === 'corporate') {
+          if (selectedMenu === 'business') {
             maxSides = 3;
           } else if (selectedMenu === 'menu3' || selectedMenu === 'matric_premium') {
             maxSides = 3;
@@ -79,14 +79,14 @@ export const MenuConfiguration = ({ menuOptions }: MenuConfigurationProps) => {
     if (!selectedMenu) return 0;
     switch (category) {
       case 'starter':
-        if (selectedMenu === 'menu3' || selectedMenu === 'corporate' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium') return 1;
+        if (selectedMenu === 'menu3' || selectedMenu === 'business' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium') return 1;
         return 0;
       case 'side':
-        if (selectedMenu === 'corporate' || selectedMenu === 'menu3' || selectedMenu === 'matric_premium') return 3;
+        if (selectedMenu === 'business' || selectedMenu === 'menu3' || selectedMenu === 'matric_premium') return 3;
         if (selectedMenu === 'menu1' || selectedMenu === 'menu2' || selectedMenu === 'wedding2' || selectedMenu === 'standard' || selectedMenu === 'yearend' || selectedMenu === 'matric_standard') return 2;
         return selectedMenu === 'wedding1' ? 0 : 0;
       case 'dessert':
-        if (selectedMenu === 'menu3' || selectedMenu === 'corporate' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium') return 1;
+        if (selectedMenu === 'menu3' || selectedMenu === 'business' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium') return 1;
         return 0;
       default:
         return 0;
