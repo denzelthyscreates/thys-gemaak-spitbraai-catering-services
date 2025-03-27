@@ -17,37 +17,37 @@ export const MenuPackages = ({ menuOptions }: MenuPackagesProps) => {
     const eventGroups = {
       birthday: {
         title: "Birthday Packages",
-        menus: menuOptions.filter(menu => menu.eventType === 'birthday'),
+        menus: menuOptions.filter(menu => menu.eventType === 'birthday' && menu.category === 'menu'),
         bgColor: "bg-pink-50",
         borderColor: "border-pink-200"
       },
       business: {
         title: "Business Event Packages",
-        menus: menuOptions.filter(menu => menu.eventType === 'business'),
+        menus: menuOptions.filter(menu => menu.eventType === 'business' && menu.category === 'menu'),
         bgColor: "bg-blue-50",
         borderColor: "border-blue-200"
       },
       wedding: {
         title: "Wedding Packages",
-        menus: menuOptions.filter(menu => menu.eventType === 'wedding'),
+        menus: menuOptions.filter(menu => menu.eventType === 'wedding' && menu.category === 'menu'),
         bgColor: "bg-purple-50",
         borderColor: "border-purple-200"
       },
       yearend: {
         title: "Year-End Celebration Packages",
-        menus: menuOptions.filter(menu => menu.eventType === 'yearend'),
+        menus: menuOptions.filter(menu => menu.eventType === 'yearend' && menu.category === 'menu'),
         bgColor: "bg-orange-50",
         borderColor: "border-orange-200"
       },
       matric: {
         title: "Matric Farewell 2025 Packages",
-        menus: menuOptions.filter(menu => menu.eventType === 'matric'),
+        menus: menuOptions.filter(menu => menu.eventType === 'matric' && menu.category === 'menu'),
         bgColor: "bg-green-50",
         borderColor: "border-green-200"
       },
       standard: {
         title: "Standard Packages",
-        menus: menuOptions.filter(menu => menu.eventType === 'standard'),
+        menus: menuOptions.filter(menu => menu.eventType === 'standard' && menu.category === 'menu'),
         bgColor: "bg-gray-50",
         borderColor: "border-gray-200"
       }
@@ -55,7 +55,7 @@ export const MenuPackages = ({ menuOptions }: MenuPackagesProps) => {
 
     return Object.entries(eventGroups)
       .filter(([_, group]) => group.menus.length > 0)
-      .map(([_, group]) => group);
+      .map(([key, group]) => group);
   };
 
   const handleMenuSelect = (menuOption: MenuOption) => {

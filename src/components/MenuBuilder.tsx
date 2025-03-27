@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { RotateCcw, Building, Calendar, CalendarCheck, GraduationCap, PartyPopper } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { MenuProvider } from '@/contexts/MenuContext';
+import { MenuProvider, useMenu } from '@/contexts/MenuContext';
 import { MenuPackages } from './menu/MenuPackages';
 import { MenuConfiguration } from './menu/MenuConfiguration';
 import { MenuSummary } from './menu/MenuSummary';
@@ -14,8 +14,8 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions }: {
   menuOptions: MenuOption[]
 }) => {
   const { toast } = useToast();
+  const { handleReset } = useMenu();
   const [menuSectionOpen, setMenuSectionOpen] = useState(true);
-  const [detailsSectionOpen, setDetailsSectionOpen] = useState(false);
   
   return (
     <div className="animate-fade-in">
@@ -23,12 +23,7 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions }: {
         <Button 
           variant="outline" 
           onClick={() => {
-            localStorage.removeItem('menuSelection');
-            toast({
-              title: "Menu Builder Reset",
-              description: "All selections have been cleared.",
-              duration: 3000
-            });
+            handleReset();
             onSelectionChange(null);
           }}
           className="flex items-center gap-2"

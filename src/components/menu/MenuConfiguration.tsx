@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Check, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -28,7 +29,7 @@ export const MenuConfiguration = ({ menuOptions }: MenuConfigurationProps) => {
     setExtraSaladType
   } = useMenu();
 
-  const [detailsSectionOpen, setDetailsSectionOpen] = React.useState(false);
+  const [detailsSectionOpen, setDetailsSectionOpen] = useState(false);
 
   if (!selectedMenu) return null;
 
@@ -238,13 +239,13 @@ export const MenuConfiguration = ({ menuOptions }: MenuConfigurationProps) => {
 
           <div className="p-4 rounded-lg bg-card border">
             <h4 className="text-lg font-medium mb-4">Optional Extras</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {menuOptions
                 .filter((option) => option.category === 'extra')
                 .map((extra) => (
                   <div
                     key={extra.id}
-                    className={`p-3 rounded border cursor-pointer ${
+                    className={`p-4 rounded-lg border cursor-pointer ${
                       selectedExtras.includes(extra.id)
                         ? 'bg-primary/10 border-primary'
                         : 'hover:bg-muted/50'
@@ -252,12 +253,17 @@ export const MenuConfiguration = ({ menuOptions }: MenuConfigurationProps) => {
                     onClick={() => toggleOption(extra.id, 'extra')}
                   >
                     <div className="flex justify-between items-start">
-                      <span>{extra.name}</span>
+                      <span className="font-medium">{extra.name}</span>
                       {selectedExtras.includes(extra.id) && (
                         <Check className="h-4 w-4 text-primary" />
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">{extra.description}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{extra.description}</p>
+                    <p className="text-sm font-medium mt-2">
+                      {extra.id === 'cheese_table' || extra.id === 'fruit_table' 
+                        ? `R${extra.price} (table)` 
+                        : `R${extra.price} per person`}
+                    </p>
                   </div>
                 ))}
             </div>
