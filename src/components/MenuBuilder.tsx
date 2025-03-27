@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { RotateCcw, Building, Calendar, CalendarCheck, GraduationCap, PartyPopper } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { MenuProvider, useMenu } from '@/contexts/MenuContext';
 import { MenuPackages } from './menu/MenuPackages';
 import { MenuConfiguration } from './menu/MenuConfiguration';
@@ -14,18 +13,24 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions }: {
   menuOptions: MenuOption[]
 }) => {
   const { toast } = useToast();
-  const { handleReset } = useMenu();
-  const [menuSectionOpen, setMenuSectionOpen] = useState(true);
+  const { selectedMenu, handleReset } = useMenu();
+  
+  const resetMenu = () => {
+    handleReset();
+    onSelectionChange(null);
+    toast({
+      title: "Menu Reset",
+      description: "Your menu selections have been cleared.",
+      duration: 3000
+    });
+  };
   
   return (
     <div className="animate-fade-in">
-      <div className="mb-4 flex justify-end">
+      <div className="mb-6 flex justify-end">
         <Button 
           variant="outline" 
-          onClick={() => {
-            handleReset();
-            onSelectionChange(null);
-          }}
+          onClick={resetMenu}
           className="flex items-center gap-2"
         >
           <RotateCcw className="h-4 w-4" />
@@ -33,22 +38,12 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions }: {
         </Button>
       </div>
 
-      <Collapsible open={menuSectionOpen} onOpenChange={setMenuSectionOpen} className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-semibold">Step 1: Choose Your Menu Package</h3>
-          <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="w-9 p-0">
-              {menuSectionOpen ? '−' : '+'}
-            </Button>
-          </CollapsibleTrigger>
-        </div>
-        
-        <CollapsibleContent>
-          <MenuPackages menuOptions={menuOptions} />
-        </CollapsibleContent>
-      </Collapsible>
+      <h3 className="text-xl font-semibold mb-4">Step 1: Choose Your Menu Package</h3>
+      <MenuPackages menuOptions={menuOptions} />
 
-      <MenuConfiguration menuOptions={menuOptions} />
+      {selectedMenu && (
+        <MenuConfiguration menuOptions={menuOptions} />
+      )}
 
       <MenuSummary menuOptions={menuOptions} />
     </div>
