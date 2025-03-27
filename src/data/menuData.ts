@@ -3,6 +3,13 @@ import { MenuOption } from '@/types/menu';
 import { PartyPopper, Building, CalendarCheck, Calendar, GraduationCap } from 'lucide-react';
 import React from 'react';
 
+// Create icon generator functions to avoid using JSX directly in the object
+const createPartyPopperIcon = () => React.createElement(PartyPopper, { className: "h-5 w-5 text-pink-500" });
+const createBuildingIcon = () => React.createElement(Building, { className: "h-5 w-5 text-blue-500" });
+const createCalendarCheckIcon = () => React.createElement(CalendarCheck, { className: "h-5 w-5 text-purple-500" });
+const createCalendarIcon = (color: string) => React.createElement(Calendar, { className: `h-5 w-5 ${color}` });
+const createGraduationCapIcon = () => React.createElement(GraduationCap, { className: "h-5 w-5 text-green-500" });
+
 // Define all menu options in a single place to avoid duplication
 export const menuOptions: MenuOption[] = [
   { 
@@ -12,7 +19,7 @@ export const menuOptions: MenuOption[] = [
     description: 'Lamb Spit Main, Garlic Bread, 2 Salads', 
     category: 'menu',
     eventType: 'birthday',
-    icon: <PartyPopper className="h-5 w-5 text-pink-500" />
+    icon: createPartyPopperIcon()
   },
   { 
     id: 'menu2', 
@@ -21,7 +28,7 @@ export const menuOptions: MenuOption[] = [
     description: 'Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads', 
     category: 'menu',
     eventType: 'birthday',
-    icon: <PartyPopper className="h-5 w-5 text-pink-500" />
+    icon: createPartyPopperIcon()
   },
   { 
     id: 'menu3', 
@@ -30,7 +37,7 @@ export const menuOptions: MenuOption[] = [
     description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads, Dessert', 
     category: 'menu',
     eventType: 'birthday',
-    icon: <PartyPopper className="h-5 w-5 text-pink-500" />
+    icon: createPartyPopperIcon()
   },
   
   { 
@@ -40,7 +47,7 @@ export const menuOptions: MenuOption[] = [
     description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Water & Juice, 3 Sides, Dessert', 
     category: 'menu',
     eventType: 'business',
-    icon: <Building className="h-5 w-5 text-blue-500" />
+    icon: createBuildingIcon()
   },
   
   { 
@@ -50,7 +57,7 @@ export const menuOptions: MenuOption[] = [
     description: 'Lamb Spit, Garlic Bread, and 2 sides', 
     category: 'menu',
     eventType: 'wedding',
-    icon: <CalendarCheck className="h-5 w-5 text-purple-500" />
+    icon: createCalendarCheckIcon()
   },
   { 
     id: 'wedding1', 
@@ -59,7 +66,7 @@ export const menuOptions: MenuOption[] = [
     description: '3 Course Meal (Start, Main & Dessert)', 
     category: 'menu',
     eventType: 'wedding',
-    icon: <CalendarCheck className="h-5 w-5 text-purple-500" />
+    icon: createCalendarCheckIcon()
   },
   
   { 
@@ -69,7 +76,7 @@ export const menuOptions: MenuOption[] = [
     description: 'Lamb Spit, Garlic Bread, and 2 sides', 
     category: 'menu',
     eventType: 'standard',
-    icon: <Calendar className="h-5 w-5 text-gray-500" />
+    icon: createCalendarIcon("text-gray-500")
   },
   
   { 
@@ -80,7 +87,7 @@ export const menuOptions: MenuOption[] = [
     category: 'menu',
     eventType: 'yearend',
     availabilityInfo: 'Available only for year-end business events (November-December)',
-    icon: <Calendar className="h-5 w-5 text-orange-500" />
+    icon: createCalendarIcon("text-orange-500")
   },
   
   { 
@@ -92,7 +99,7 @@ export const menuOptions: MenuOption[] = [
     subtitle: 'Standard Matric Farewell Package',
     eventType: 'matric',
     availabilityInfo: 'Available exclusively for school Matric Farewell events',
-    icon: <GraduationCap className="h-5 w-5 text-green-500" />
+    icon: createGraduationCapIcon()
   },
   { 
     id: 'matric_premium', 
@@ -103,7 +110,7 @@ export const menuOptions: MenuOption[] = [
     subtitle: 'Exclusive Matric Farewell Experience',
     eventType: 'matric',
     availabilityInfo: 'Available exclusively for school Matric Farewell events',
-    icon: <GraduationCap className="h-5 w-5 text-green-500" />
+    icon: createGraduationCapIcon()
   },
   
   { id: 'cocktail_burger', name: 'Cocktail Burger', price: 0, description: 'Mini burger appetizer', category: 'starter', eventType: 'standard' },
@@ -125,4 +132,3 @@ export const menuOptions: MenuOption[] = [
   { id: 'chicken_thigh', name: 'Chicken Thigh', price: 25, description: 'Per person', category: 'extra', eventType: 'standard' },
   { id: 'extra_salad', name: 'Extra Salad', price: 25, description: 'Per person', category: 'extra', eventType: 'standard' },
 ];
-
