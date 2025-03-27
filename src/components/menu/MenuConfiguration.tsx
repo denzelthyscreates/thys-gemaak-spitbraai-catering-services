@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Check, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -96,10 +95,6 @@ export const MenuConfiguration = ({ menuOptions }: MenuConfigurationProps) => {
 
   return (
     <div className="mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-semibold">Step 2: Configure Your Menu</h3>
-      </div>
-      
       <div className="space-y-4">
         <div className="p-4 rounded-lg bg-card border">
           <h4 className="text-lg font-medium mb-4">Number of Guests</h4>
