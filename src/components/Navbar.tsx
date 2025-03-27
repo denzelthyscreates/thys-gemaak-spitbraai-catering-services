@@ -1,13 +1,15 @@
 
 import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -112,7 +114,21 @@ const Navbar = () => {
                 )}
               </li>
             ))}
+            
+            {/* Account Link */}
+            <li>
+              <Link
+                to="/auth"
+                className={`flex items-center gap-1 text-base font-medium transition-colors duration-200 hover:text-primary ${
+                  isScrolled ? 'text-foreground' : 'text-foreground'
+                }`}
+              >
+                <User size={18} />
+                {user ? 'Account' : 'Sign In'}
+              </Link>
+            </li>
           </ul>
+          
           <Link 
             to="/"
             className="button-primary"
@@ -165,7 +181,20 @@ const Navbar = () => {
                 )}
               </li>
             ))}
-            <li className="w-full mt-4 slide-in-bottom delay-500">
+            
+            {/* Account Link - Mobile */}
+            <li className="w-full slide-in-bottom delay-500">
+              <Link
+                to="/auth"
+                className="flex items-center justify-center gap-2 py-3 text-center text-lg font-medium text-foreground hover:text-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <User size={20} />
+                {user ? 'Account' : 'Sign In'}
+              </Link>
+            </li>
+            
+            <li className="w-full mt-4 slide-in-bottom delay-600">
               <Link
                 to="/"
                 className="block w-full text-center button-primary"
