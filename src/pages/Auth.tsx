@@ -27,9 +27,13 @@ const Auth = () => {
           <Alert variant="destructive" className="mb-6">
             <AlertTriangle className="h-4 w-4 mr-2" />
             <AlertTitle>Supabase Configuration Missing</AlertTitle>
-            <AlertDescription>
-              The application cannot connect to Supabase. Please make sure the environment variables 
-              VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set correctly.
+            <AlertDescription className="space-y-2">
+              <p>
+                The application cannot connect to Supabase. Authentication features are disabled.
+              </p>
+              <p className="font-medium">
+                To enable authentication, connect your project to Supabase through the Lovable interface.
+              </p>
             </AlertDescription>
           </Alert>
         )}

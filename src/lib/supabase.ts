@@ -6,19 +6,31 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Check if environment variables are available
-if (!supabaseUrl || !supabaseAnonKey) {
+const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey);
+
+if (!isSupabaseConfigured) {
   console.error('Missing Supabase environment variables. Authentication will not work!');
 }
 
-// Create the Supabase client with fallback to empty strings to prevent runtime errors
-// This allows the app to at least load, though authentication features won't work
+// Create the Supabase client with proper fallbacks
+// Using dummy values when real ones aren't available allows the app to at least load
 export const supabase = createClient(
-  supabaseUrl || 'https://placeholder-url.supabase.co', 
-  supabaseAnonKey || 'placeholder-key'
+  supabaseUrl || 'https://placeholder-supabase-url.supabase.co', 
+  supabaseAnonKey || 'placeholder-anon-key-for-fallback-purposes'
 );
+
+// Export configuration status for UI components to use
+export const isSupabaseReady = isSupabaseConfigured;
 
 // Auth helpers
 export const signUp = async (email: string, password: string, redirectTo?: string) => {
+  if (!isSupabaseConfigured) {
+    return { 
+      data: null, 
+      error: new Error('Supabase is not configured. Please set the required environment variables.') 
+    };
+  }
+  
   const options = redirectTo ? { emailRedirectTo: redirectTo } : undefined;
   const { data, error } = await supabase.auth.signUp({ 
     email, 
@@ -29,16 +41,31 @@ export const signUp = async (email: string, password: string, redirectTo?: strin
 };
 
 export const signIn = async (email: string, password: string) => {
+  if (!isSupabaseConfigured) {
+    return { 
+      data: null, 
+      error: new Error('Supabase is not configured. Please set the required environment variables.') 
+    };
+  }
+  
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   return { data, error };
 };
 
 export const signOut = async () => {
+  if (!isSupabaseConfigured) {
+    return { error: new Error('Supabase is not configured. Please set the required environment variables.') };
+  }
+  
   const { error } = await supabase.auth.signOut();
   return { error };
 };
 
 export const getCurrentUser = async () => {
+  if (!isSupabaseConfigured) {
+    return { user: null, error: new Error('Supabase is not configured. Please set the required environment variables.') };
+  }
+  
   const { data, error } = await supabase.auth.getUser();
   return { user: data.user, error };
 };
