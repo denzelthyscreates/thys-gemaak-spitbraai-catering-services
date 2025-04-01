@@ -2,15 +2,20 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Get environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Check if environment variables are available
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Missing Supabase environment variables. Authentication will not work!');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Create the Supabase client with fallback to empty strings to prevent runtime errors
+// This allows the app to at least load, though authentication features won't work
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder-url.supabase.co', 
+  supabaseAnonKey || 'placeholder-key'
+);
 
 // Auth helpers
 export const signUp = async (email: string, password: string, redirectTo?: string) => {

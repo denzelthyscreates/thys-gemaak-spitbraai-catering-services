@@ -3,9 +3,11 @@ import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthForm from '@/components/auth/AuthForm';
 import UserProfile from '@/components/auth/UserProfile';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { ExclamationTriangleIcon } from 'lucide-react';
 
 const Auth = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, supabaseReady } = useAuth();
 
   return (
     <div className="container-width py-16">
@@ -21,6 +23,17 @@ const Auth = () => {
       </div>
 
       <div className="max-w-md mx-auto">
+        {!supabaseReady && (
+          <Alert variant="destructive" className="mb-6">
+            <ExclamationTriangleIcon className="h-4 w-4 mr-2" />
+            <AlertTitle>Supabase Configuration Missing</AlertTitle>
+            <AlertDescription>
+              The application cannot connect to Supabase. Please make sure the environment variables 
+              VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set correctly.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {loading ? (
           <div className="text-center p-8">
             <p>Loading...</p>

@@ -11,7 +11,7 @@ const AuthForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, supabaseReady } = useAuth();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,6 +59,7 @@ const AuthForm = () => {
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)} 
                   required 
+                  disabled={!supabaseReady}
                 />
               </div>
               <div className="space-y-2">
@@ -69,11 +70,16 @@ const AuthForm = () => {
                   value={password} 
                   onChange={(e) => setPassword(e.target.value)} 
                   required 
+                  disabled={!supabaseReady}
                 />
               </div>
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={loading || !supabaseReady}
+              >
                 {loading ? "Signing in..." : "Sign In"}
               </Button>
             </CardFooter>
@@ -98,6 +104,7 @@ const AuthForm = () => {
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)} 
                   required 
+                  disabled={!supabaseReady}
                 />
               </div>
               <div className="space-y-2">
@@ -108,6 +115,7 @@ const AuthForm = () => {
                   value={password} 
                   onChange={(e) => setPassword(e.target.value)} 
                   required 
+                  disabled={!supabaseReady}
                 />
                 <p className="text-xs text-muted-foreground">
                   Password must be at least 6 characters
@@ -115,7 +123,11 @@ const AuthForm = () => {
               </div>
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={loading || !supabaseReady}
+              >
                 {loading ? "Creating account..." : "Create Account"}
               </Button>
             </CardFooter>
