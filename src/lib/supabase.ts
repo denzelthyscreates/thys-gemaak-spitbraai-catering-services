@@ -33,24 +33,67 @@ export const getCurrentUser = async () => {
   return { user: data.user, error };
 };
 
-// Database helpers for the booking system
+// Database helpers for the booking system with RLS support
 export const createBooking = async (bookingData: any) => {
+  // Get the current user to ensure we have authentication
+  const { user } = await getCurrentUser();
+  
+  if (!user) {
+    return { data: null, error: new Error('User must be authenticated to create a booking') };
+  }
+  
+  // Add the user_id to the booking data for RLS
+  const bookingWithUserId = {
+    ...bookingData,
+    user_id: user.id
+  };
+  
   const { data, error } = await supabase
     .from('bookings')
-    .insert(bookingData)
+    .insert(bookingWithUserId)
     .select()
     .single();
   
   return { data, error };
 };
 
-export const getBookings = async (userId: string) => {
+export const getBookings = async () => {
+  // RLS will automatically filter to only show the current user's bookings
+  // No need to explicitly filter by user_id as RLS policy will handle this
   const { data, error } = await supabase
     .from('bookings')
     .select('*')
-    .eq('user_id', userId)
     .order('created_at', { ascending: false });
   
   return { data, error };
 };
 
+export const getBookingById = async (id: string) => {
+  const { data, error } = await supabase
+    .from('bookings')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  return { data, error };
+};
+
+export const updateBooking = async (id: string, bookingData: any) => {
+  const { data, error } = await supabase
+    .from('bookings')
+    .update(bookingData)
+    .eq('id', id)
+    .select()
+    .single();
+  
+  return { data, error };
+};
+
+export const deleteBooking = async (id: string) => {
+  const { error } = await supabase
+    .from('bookings')
+    .delete()
+    .eq('id', id);
+  
+  return { error };
+};
