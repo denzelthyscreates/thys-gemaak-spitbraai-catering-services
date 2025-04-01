@@ -89,9 +89,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleSignUp = async (email: string, password: string) => {
     try {
       setLoading(true);
+      // Get the current hostname to set as the redirect URL
+      const baseUrl = window.location.origin;
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${baseUrl}/auth`
+        }
       });
 
       if (error) throw error;

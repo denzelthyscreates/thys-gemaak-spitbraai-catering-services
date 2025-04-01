@@ -13,8 +13,13 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Auth helpers
-export const signUp = async (email: string, password: string) => {
-  const { data, error } = await supabase.auth.signUp({ email, password });
+export const signUp = async (email: string, password: string, redirectTo?: string) => {
+  const options = redirectTo ? { emailRedirectTo: redirectTo } : undefined;
+  const { data, error } = await supabase.auth.signUp({ 
+    email, 
+    password,
+    options
+  });
   return { data, error };
 };
 
