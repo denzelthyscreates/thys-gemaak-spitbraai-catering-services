@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import AuthForm from '@/components/auth/AuthForm';
 import UserProfile from '@/components/auth/UserProfile';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ExclamationTriangleIcon } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 
 const Auth = () => {
   const { user, loading, supabaseReady } = useAuth();
@@ -25,7 +25,7 @@ const Auth = () => {
       <div className="max-w-md mx-auto">
         {!supabaseReady && (
           <Alert variant="destructive" className="mb-6">
-            <ExclamationTriangleIcon className="h-4 w-4 mr-2" />
+            <AlertTriangle className="h-4 w-4 mr-2" />
             <AlertTitle>Supabase Configuration Missing</AlertTitle>
             <AlertDescription>
               The application cannot connect to Supabase. Please make sure the environment variables 
