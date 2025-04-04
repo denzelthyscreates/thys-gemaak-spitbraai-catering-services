@@ -3,7 +3,7 @@ import React from 'react';
 import { User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import NavLink from './NavLink';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 
 interface NavItem {
   name: string;
