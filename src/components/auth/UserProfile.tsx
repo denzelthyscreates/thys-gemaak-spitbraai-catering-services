@@ -2,9 +2,10 @@
 import React from 'react';
 import { useAuth } from '@/contexts/auth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CalendarIcon, InfoIcon } from 'lucide-react';
+import { CalendarIcon, ImageIcon, InfoIcon } from 'lucide-react';
 import ProfileTab from './ProfileTab';
 import BookingsTab from './BookingsTab';
+import FacebookGallery from '../gallery/FacebookGallery';
 
 const UserProfile = () => {
   const { user, signOut, loading } = useAuth();
@@ -15,7 +16,7 @@ const UserProfile = () => {
 
   return (
     <Tabs defaultValue="profile" className="w-full">
-      <TabsList className="grid grid-cols-2 mb-8">
+      <TabsList className="grid grid-cols-3 mb-8">
         <TabsTrigger value="profile" className="flex items-center gap-2">
           <InfoIcon className="h-4 w-4" />
           Profile
@@ -23,6 +24,10 @@ const UserProfile = () => {
         <TabsTrigger value="bookings" className="flex items-center gap-2">
           <CalendarIcon className="h-4 w-4" />
           My Bookings
+        </TabsTrigger>
+        <TabsTrigger value="gallery" className="flex items-center gap-2">
+          <ImageIcon className="h-4 w-4" />
+          Gallery
         </TabsTrigger>
       </TabsList>
       
@@ -36,6 +41,10 @@ const UserProfile = () => {
       
       <TabsContent value="bookings">
         <BookingsTab />
+      </TabsContent>
+
+      <TabsContent value="gallery">
+        <FacebookGallery />
       </TabsContent>
     </Tabs>
   );
