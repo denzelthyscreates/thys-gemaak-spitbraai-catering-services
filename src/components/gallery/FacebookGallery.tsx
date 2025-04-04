@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Gallery, ImageIcon, Loader2 } from 'lucide-react';
+import { ImageIcon, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -20,6 +20,15 @@ interface FacebookPhoto {
   created_time: string;
 }
 
+// Extend Window interface to include FB property
+declare global {
+  interface Window {
+    FB?: {
+      login: (callback: (response: { authResponse?: { accessToken: string } }) => void, options: { scope: string }) => void;
+    };
+  }
+}
+
 const FacebookGallery = () => {
   const [photos, setPhotos] = useState<FacebookPhoto[]>([]);
   const [loading, setLoading] = useState(false);
@@ -32,15 +41,23 @@ const FacebookGallery = () => {
     
     // This would typically be implemented with the Facebook SDK
     // and authentication flow. For this example, we'll simulate it
-    window.FB?.login((response) => {
-      if (response.authResponse) {
+    if (window.FB) {
+      window.FB.login((response) => {
+        if (response.authResponse) {
+          setIsConnected(true);
+          fetchPhotos(response.authResponse.accessToken);
+        } else {
+          setError('Facebook login was cancelled or failed');
+          setLoading(false);
+        }
+      }, { scope: 'user_photos,pages_show_list' });
+    } else {
+      // If FB SDK isn't loaded, just simulate a successful connection for demo purposes
+      setTimeout(() => {
         setIsConnected(true);
-        fetchPhotos(response.authResponse.accessToken);
-      } else {
-        setError('Facebook login was cancelled or failed');
-        setLoading(false);
-      }
-    }, { scope: 'user_photos,pages_show_list' });
+        fetchPhotos('mock-token');
+      }, 1500);
+    }
   };
 
   const fetchPhotos = (accessToken: string) => {
@@ -107,7 +124,7 @@ const FacebookGallery = () => {
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Gallery className="h-5 w-5" />
+          <ImageIcon className="h-5 w-5" />
           Facebook Gallery
         </CardTitle>
         <CardDescription>
