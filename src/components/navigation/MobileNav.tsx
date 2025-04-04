@@ -17,6 +17,7 @@ const MobileNav = ({ isMenuOpen, toggleMenu }: MobileNavProps) => {
     { name: 'Home', path: '/', isHashLink: false },
     { name: 'About', path: '/', isHashLink: true },
     { name: 'Services', path: '/', isHashLink: true },
+    { name: 'Gallery', path: '/', isHashLink: true },
     { name: 'Testimonials', path: '/', isHashLink: true },
     { name: 'Contact', path: '/', isHashLink: true },
   ];

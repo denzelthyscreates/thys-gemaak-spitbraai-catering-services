@@ -7,6 +7,7 @@ import Services from '../components/Services';
 import Testimonials from '../components/Testimonials';
 import Contact from '../components/Contact';
 import Footer from '../components/Footer';
+import FacebookGallery from '../components/gallery/FacebookGallery';
 
 const Index = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -83,6 +84,25 @@ const Index = () => {
         <div id="about"><About /></div>
         <div id="services"><Services /></div>
         <div id="testimonials"><Testimonials /></div>
+        
+        {/* Facebook Gallery Section */}
+        <section id="gallery" className="section py-16 bg-muted/30 scroll-mt-20">
+          <div className="container-width">
+            <div className="text-center max-w-3xl mx-auto mb-12">
+              <span className="inline-block px-4 py-1.5 mb-6 text-xl font-medium rounded-full bg-primary/10 text-primary">
+                Our Gallery
+              </span>
+              <h2 className="text-4xl md:text-5xl font-serif font-semibold tracking-tight text-foreground mb-6">
+                See Our Recent Events
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Browse through photos from our recent catering events and spitbraai experiences.
+              </p>
+            </div>
+            <FacebookGallery />
+          </div>
+        </section>
+        
         <div id="contact"><Contact /></div>
       </main>
       <Footer />
