@@ -1,80 +1,21 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
-import { supabase, getCurrentUser } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
-interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  error: Error | null;
-  signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signOut: () => Promise<void>;
+interface AuthMethodsProps {
+  setUser: (user: User | null) => void;
+  setLoading: (loading: boolean) => void;
   supabaseReady: boolean;
+  toast: ReturnType<typeof useToast>['toast'];
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [supabaseReady, setSupabaseReady] = useState(false);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    // Check if Supabase credentials are available
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-    
-    if (!supabaseUrl || !supabaseAnonKey) {
-      setLoading(false);
-      setSupabaseReady(false);
-      toast({
-        title: "Configuration Error",
-        description: "Supabase credentials are missing. Authentication features will not work.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setSupabaseReady(true);
-
-    // Check for existing session
-    const checkUser = async () => {
-      try {
-        setLoading(true);
-        const { user, error } = await getCurrentUser();
-        
-        if (error) {
-          throw error;
-        }
-        
-        setUser(user);
-      } catch (err: any) {
-        console.error('Auth error:', err);
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkUser();
-
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [toast]);
-
+export const createAuthMethods = ({
+  setUser,
+  setLoading,
+  supabaseReady,
+  toast
+}: AuthMethodsProps) => {
   const handleSignIn = async (email: string, password: string) => {
     if (!supabaseReady) {
       toast({
@@ -183,27 +124,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  return (
-    <AuthContext.Provider 
-      value={{
-        user,
-        loading,
-        error,
-        signIn: handleSignIn,
-        signUp: handleSignUp,
-        signOut: handleSignOut,
-        supabaseReady,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  return {
+    handleSignIn,
+    handleSignUp,
+    handleSignOut
+  };
 };

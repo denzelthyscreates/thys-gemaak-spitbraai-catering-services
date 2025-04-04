@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 import AuthForm from '@/components/auth/AuthForm';
 import UserProfile from '@/components/auth/UserProfile';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
