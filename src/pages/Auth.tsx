@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import AuthForm from '@/components/auth/AuthForm';
 import UserProfile from '@/components/auth/UserProfile';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 
 const Auth = () => {
   const { user, loading, supabaseReady } = useAuth();
@@ -17,12 +17,12 @@ const Auth = () => {
         </h2>
         <p className="text-lg text-muted-foreground">
           {user 
-            ? 'View and manage your account information.' 
+            ? 'View and manage your account information and bookings.' 
             : 'Sign in to access your booking history or create a new account to get started.'}
         </p>
       </div>
 
-      <div className="max-w-md mx-auto">
+      <div className="max-w-3xl mx-auto">
         {!supabaseReady && (
           <Alert variant="destructive" className="mb-6">
             <AlertTriangle className="h-4 w-4 mr-2" />
@@ -39,13 +39,16 @@ const Auth = () => {
         )}
 
         {loading ? (
-          <div className="text-center p-8">
-            <p>Loading...</p>
+          <div className="text-center p-16 flex flex-col items-center justify-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+            <p className="text-lg font-medium">Loading your account information...</p>
           </div>
         ) : user ? (
           <UserProfile />
         ) : (
-          <AuthForm />
+          <div className="max-w-md mx-auto">
+            <AuthForm />
+          </div>
         )}
       </div>
     </div>
