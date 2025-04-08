@@ -1,14 +1,16 @@
 
 import React from 'react';
-import { ImageIcon } from 'lucide-react';
+import { ImageIcon, Facebook } from 'lucide-react';
 import { 
   Card, 
   CardContent, 
   CardDescription, 
   CardHeader, 
-  CardTitle 
+  CardTitle,
+  CardFooter 
 } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Button } from '@/components/ui/button';
 
 // Gallery images with the provided URLs
 const galleryImages = [
@@ -89,6 +91,18 @@ const UploadGallery = () => {
           </div>
         )}
       </CardContent>
+      <CardFooter className="flex justify-center pt-2 pb-6">
+        <a 
+          href="https://www.facebook.com/profile.php?id=61559838444726&sk=photos" 
+          target="_blank" 
+          rel="noopener noreferrer"
+        >
+          <Button variant="outline" className="gap-2">
+            <Facebook className="h-4 w-4" />
+            View More Photos on Facebook
+          </Button>
+        </a>
+      </CardFooter>
     </Card>
   );
 };
