@@ -1,4 +1,3 @@
-
 import { Check, Users, Building, Cake } from 'lucide-react';
 
 const Services = () => {
@@ -11,7 +10,6 @@ const Services = () => {
       features: [
         'Customized menu options',
         'Flexible serving styles',
-        'Full setup and cleanup',
         'Experienced serving staff',
       ],
     },

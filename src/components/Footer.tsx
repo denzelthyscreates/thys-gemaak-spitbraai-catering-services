@@ -60,7 +60,7 @@ const Footer = () => {
             <ul className="space-y-4">
               {[
                 'Private Events', 
-                'Corporate Functions', 
+                'Business Functions', 
                 'Weddings', 
                 'Large Celebrations', 
                 'Custom Catering'
