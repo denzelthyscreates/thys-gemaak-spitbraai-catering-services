@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,7 +10,6 @@ const Contact = () => {
   const [activeTab, setActiveTab] = useState("menu");
   const [bookingFormData, setBookingFormData] = useState(null);
   
-  // Load saved active tab from localStorage on component mount
   useEffect(() => {
     const savedActiveTab = localStorage.getItem('activeTab');
     const savedMenuSelection = localStorage.getItem('menuSelection');
@@ -30,7 +28,6 @@ const Contact = () => {
     }
   }, []);
   
-  // Save active tab to localStorage when it changes
   useEffect(() => {
     localStorage.setItem('activeTab', activeTab);
   }, [activeTab]);
@@ -48,14 +45,12 @@ const Contact = () => {
     localStorage.setItem('bookingFormData', JSON.stringify(data));
   };
 
-  // Default values for PaymentOptions when no menu is selected
   const defaultNumGuests = 50;
   const defaultTotalPrice = 0;
 
   return (
     <section id="contact" className="section scroll-mt-20">
       <div className="container-width py-16">
-        {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block px-4 py-1.5 mb-6 text-xl font-medium rounded-full bg-primary/10 text-primary">
             Get In Touch
@@ -101,7 +96,6 @@ const Contact = () => {
         
         <Separator className="my-16" />
         
-        {/* Contact Information */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="p-6 rounded-xl bg-card shadow-subtle">
             <h3 className="text-xl font-semibold mb-3">Contact Us Directly</h3>
@@ -111,7 +105,7 @@ const Contact = () => {
             <div className="space-y-3">
               <div>
                 <div className="font-medium">Phone</div>
-                <a href="tel:+27604613766" className="text-primary hover:underline">+27 60 461 3766</a>
+                <a href="tel:+27674567784" className="text-primary hover:underline">+27 67 456 7784</a>
               </div>
               <div>
                 <div className="font-medium">Email</div>

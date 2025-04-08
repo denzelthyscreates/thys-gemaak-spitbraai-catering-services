@@ -82,7 +82,7 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-6">Contact</h4>
             <ul className="space-y-4 text-blue-100">
               <li>75 School Street, Kylemore, Stellenbosch, 7600</li>
-              <li>+27 60 461 3766</li>
+              <li>+27 67 456 7784</li>
               <li>info@thysgemaak.com</li>
               <li>Monday - Friday: 9:00 - 17:00</li>
             </ul>
