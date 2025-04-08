@@ -8,6 +8,7 @@ import Testimonials from '../components/Testimonials';
 import Contact from '../components/Contact';
 import Footer from '../components/Footer';
 import UploadGallery from '../components/gallery/UploadGallery';
+import ScrollToTop from '../components/ScrollToTop';
 
 const Index = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -106,6 +107,7 @@ const Index = () => {
         <div id="contact"><Contact /></div>
       </main>
       <Footer />
+      <ScrollToTop />
     </div>
   );
 };
