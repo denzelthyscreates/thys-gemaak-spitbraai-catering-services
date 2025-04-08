@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Checkbox } from '@/components/ui/checkbox';
-import { initializeConsentedScripts } from '@/utils/cookieConsent';
+import { initializeConsentedScripts, updateGoogleConsent } from '@/utils/cookieConsent';
 
 const CookieConsent = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -28,7 +28,12 @@ const CookieConsent = () => {
     localStorage.setItem('cookieAnalytics', 'true');
     localStorage.setItem('cookieMarketing', 'true');
     setIsVisible(false);
-    initializeConsentedScripts(); // Initialize scripts after consent
+    
+    // Update Google consent settings
+    updateGoogleConsent(true, true);
+    
+    // Initialize other scripts after consent
+    initializeConsentedScripts();
   };
   
   const acceptNecessaryCookies = () => {
@@ -36,7 +41,12 @@ const CookieConsent = () => {
     localStorage.setItem('cookieAnalytics', 'false');
     localStorage.setItem('cookieMarketing', 'false');
     setIsVisible(false);
-    initializeConsentedScripts(); // Initialize scripts after consent
+    
+    // Update Google consent settings
+    updateGoogleConsent(false, false);
+    
+    // Initialize necessary scripts only
+    initializeConsentedScripts();
   };
   
   const saveSelection = () => {
@@ -44,7 +54,12 @@ const CookieConsent = () => {
     localStorage.setItem('cookieAnalytics', analytics ? 'true' : 'false');
     localStorage.setItem('cookieMarketing', marketing ? 'true' : 'false');
     setIsVisible(false);
-    initializeConsentedScripts(); // Initialize scripts after consent
+    
+    // Update Google consent settings with user selections
+    updateGoogleConsent(analytics, marketing);
+    
+    // Initialize scripts based on selections
+    initializeConsentedScripts();
   };
   
   const handleClose = () => {
@@ -131,3 +146,4 @@ const CookieConsent = () => {
 };
 
 export default CookieConsent;
+
