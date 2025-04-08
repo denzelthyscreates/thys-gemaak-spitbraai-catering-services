@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for checking cookie consent preferences and Google Consent Mode
  */
@@ -6,7 +5,8 @@
 // Initialize Google Consent Mode with default consent states (all denied)
 export const initializeGoogleConsentMode = (): void => {
   window.dataLayer = window.dataLayer || [];
-  function gtag() {
+  // Define gtag function properly for TypeScript
+  function gtag(...args: any[]) {
     window.dataLayer.push(arguments);
   }
   
@@ -82,4 +82,3 @@ export const initializeConsentedScripts = (): void => {
     // Example: initializeMarketingPixels();
   }
 };
-
