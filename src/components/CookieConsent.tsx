@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Checkbox } from '@/components/ui/checkbox';
+import { initializeConsentedScripts } from '@/utils/cookieConsent';
 
 const CookieConsent = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -27,6 +27,7 @@ const CookieConsent = () => {
     localStorage.setItem('cookieAnalytics', 'true');
     localStorage.setItem('cookieMarketing', 'true');
     setIsVisible(false);
+    initializeConsentedScripts(); // Initialize scripts after consent
   };
   
   const acceptNecessaryCookies = () => {
@@ -34,6 +35,7 @@ const CookieConsent = () => {
     localStorage.setItem('cookieAnalytics', 'false');
     localStorage.setItem('cookieMarketing', 'false');
     setIsVisible(false);
+    initializeConsentedScripts(); // Initialize scripts after consent
   };
   
   const saveSelection = () => {
@@ -41,6 +43,7 @@ const CookieConsent = () => {
     localStorage.setItem('cookieAnalytics', analytics ? 'true' : 'false');
     localStorage.setItem('cookieMarketing', marketing ? 'true' : 'false');
     setIsVisible(false);
+    initializeConsentedScripts(); // Initialize scripts after consent
   };
   
   const handleClose = () => {

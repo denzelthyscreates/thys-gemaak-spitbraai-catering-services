@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/auth";
+import { useEffect } from "react";
+import { initializeConsentedScripts } from "@/utils/cookieConsent";
 import Index from './pages/Index';
 import NotFound from './pages/NotFound';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -16,6 +18,11 @@ import CookieConsent from './components/CookieConsent';
 const queryClient = new QueryClient();
 
 const App = () => {
+  // Initialize third-party scripts based on cookie consent
+  useEffect(() => {
+    initializeConsentedScripts();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
