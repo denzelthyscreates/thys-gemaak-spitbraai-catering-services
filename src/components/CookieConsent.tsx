@@ -1,11 +1,13 @@
 
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Save } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Checkbox } from '@/components/ui/checkbox';
 
 const CookieConsent = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [analytics, setAnalytics] = useState(true);
+  const [marketing, setMarketing] = useState(true);
   
   useEffect(() => {
     // Check if user has already given consent
@@ -22,11 +24,22 @@ const CookieConsent = () => {
   
   const acceptAllCookies = () => {
     localStorage.setItem('cookieConsent', 'all');
+    localStorage.setItem('cookieAnalytics', 'true');
+    localStorage.setItem('cookieMarketing', 'true');
     setIsVisible(false);
   };
   
   const acceptNecessaryCookies = () => {
     localStorage.setItem('cookieConsent', 'necessary');
+    localStorage.setItem('cookieAnalytics', 'false');
+    localStorage.setItem('cookieMarketing', 'false');
+    setIsVisible(false);
+  };
+  
+  const saveSelection = () => {
+    localStorage.setItem('cookieConsent', 'custom');
+    localStorage.setItem('cookieAnalytics', analytics ? 'true' : 'false');
+    localStorage.setItem('cookieMarketing', marketing ? 'true' : 'false');
     setIsVisible(false);
   };
   
@@ -58,13 +71,21 @@ const CookieConsent = () => {
                 </label>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="analytics" defaultChecked />
+                <Checkbox 
+                  id="analytics" 
+                  checked={analytics}
+                  onCheckedChange={(checked) => setAnalytics(checked as boolean)}
+                />
                 <label htmlFor="analytics" className="text-sm font-medium leading-none">
                   Analytics cookies
                 </label>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="marketing" defaultChecked />
+                <Checkbox 
+                  id="marketing" 
+                  checked={marketing}
+                  onCheckedChange={(checked) => setMarketing(checked as boolean)}  
+                />
                 <label htmlFor="marketing" className="text-sm font-medium leading-none">
                   Marketing cookies
                 </label>
@@ -78,6 +99,12 @@ const CookieConsent = () => {
               className="px-4 py-2 border border-primary text-primary text-sm rounded-md hover:bg-primary/10 transition-colors whitespace-nowrap"
             >
               Necessary Only
+            </button>
+            <button 
+              onClick={saveSelection}
+              className="px-4 py-2 border border-primary bg-white text-primary text-sm rounded-md hover:bg-primary/10 transition-colors whitespace-nowrap flex items-center gap-1"
+            >
+              <Save size={16} /> Save Selection
             </button>
             <button 
               onClick={acceptAllCookies}
