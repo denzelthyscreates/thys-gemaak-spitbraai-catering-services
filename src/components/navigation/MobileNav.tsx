@@ -11,11 +11,11 @@ interface MobileNavProps {
 
 const MobileNav = ({ isMenuOpen, toggleMenu }: MobileNavProps) => {
   const navItems = [
-    { name: 'Home', path: '/', isHashLink: false },
+    { name: 'Home', path: '#home', isHashLink: true },
     { name: 'About', path: '/', isHashLink: true },
     { name: 'Services', path: '/', isHashLink: true },
-    { name: 'Gallery', path: '/', isHashLink: true },
     { name: 'Testimonials', path: '/', isHashLink: true },
+    { name: 'Gallery', path: '/', isHashLink: true },
     { name: 'Contact', path: '/', isHashLink: true },
   ];
 
@@ -47,7 +47,7 @@ const MobileNav = ({ isMenuOpen, toggleMenu }: MobileNavProps) => {
                 <NavLink
                   to={item.path}
                   isHashLink={item.isHashLink}
-                  hashTarget={item.isHashLink ? item.name.toLowerCase() : undefined}
+                  hashTarget={item.isHashLink && item.name !== 'Home' ? item.name.toLowerCase() : item.name === 'Home' ? 'home' : undefined}
                   onClick={toggleMenu}
                   className="block py-3 text-center text-lg font-medium text-foreground hover:text-primary transition-colors"
                 >

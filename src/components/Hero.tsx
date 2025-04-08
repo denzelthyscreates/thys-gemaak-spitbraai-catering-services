@@ -62,7 +62,7 @@ const Hero = () => {
           
           <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto animate-slide-down delay-100">
             Providing expertly prepared spitbraai with effective methods to deliver exceptional 
-            catering experiences for private, corporate, and large-scale events.
+            catering experiences for private, business, and large-scale events.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-down delay-200">

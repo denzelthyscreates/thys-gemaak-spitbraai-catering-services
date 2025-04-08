@@ -15,11 +15,11 @@ interface DesktopNavProps {
 
 const DesktopNav = ({ isScrolled }: DesktopNavProps) => {
   const navItems: NavItem[] = [
-    { name: 'Home', path: '/', isHashLink: false },
+    { name: 'Home', path: '#home', isHashLink: true },
     { name: 'About', path: '/', isHashLink: true },
     { name: 'Services', path: '/', isHashLink: true },
-    { name: 'Gallery', path: '/', isHashLink: true },
     { name: 'Testimonials', path: '/', isHashLink: true },
+    { name: 'Gallery', path: '/', isHashLink: true },
     { name: 'Contact', path: '/', isHashLink: true },
   ];
 
@@ -31,7 +31,7 @@ const DesktopNav = ({ isScrolled }: DesktopNavProps) => {
             <NavLink
               to={item.path}
               isHashLink={item.isHashLink}
-              hashTarget={item.isHashLink ? item.name.toLowerCase() : undefined}
+              hashTarget={item.isHashLink && item.name !== 'Home' ? item.name.toLowerCase() : item.name === 'Home' ? 'home' : undefined}
               className={`text-base font-medium transition-colors duration-200 hover:text-primary ${
                 isScrolled ? 'text-foreground' : 'text-foreground'
               }`}
