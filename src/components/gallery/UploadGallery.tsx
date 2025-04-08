@@ -10,43 +10,67 @@ import {
 } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
-// Gallery images - replace these URLs with your own
+// Gallery images with the provided URLs
 const galleryImages = [
   {
     id: '1',
-    url: 'https://source.unsplash.com/random/800x600?spitbraai',
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788469/IMG-20241110-WA0010_umlczd.jpg',
     caption: 'Spitbraai Event',
     date: '2025-03-15'
   },
   {
     id: '2',
-    url: 'https://source.unsplash.com/random/800x600?catering',
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788468/IMG-20241110-WA0014_wfywk3.jpg',
     caption: 'Wedding Catering',
     date: '2025-02-20'
   },
   {
     id: '3',
-    url: 'https://source.unsplash.com/random/800x600?bbq',
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788467/IMG-20241110-WA0015_xrads9.jpg',
     caption: 'Corporate BBQ',
     date: '2025-01-10'
   },
   {
     id: '4',
-    url: 'https://source.unsplash.com/random/800x600?event',
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788467/IMG-20241110-WA0012_k3zeob.jpg',
     caption: 'Birthday Party',
     date: '2025-04-05'
   },
   {
     id: '5',
-    url: 'https://source.unsplash.com/random/800x600?food',
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788466/IMG-20241110-WA0022_k5cdid.jpg',
     caption: 'Gourmet Catering',
     date: '2025-03-28'
   },
   {
     id: '6',
-    url: 'https://source.unsplash.com/random/800x600?celebration',
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788466/IMG-20241110-WA0033_vcwpvp.jpg',
     caption: 'Anniversary Celebration',
     date: '2025-02-14'
+  },
+  {
+    id: '7',
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788465/IMG-20241110-WA0036_snwetl.jpg',
+    caption: 'Family Gathering',
+    date: '2025-01-05'
+  },
+  {
+    id: '8',
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788463/IMG-20241110-WA0024_fasc43.jpg',
+    caption: 'Corporate Event',
+    date: '2025-05-22'
+  },
+  {
+    id: '9',
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788463/IMG-20241110-WA0028_og9dmr.jpg',
+    caption: 'Outdoor Catering',
+    date: '2025-06-10'
+  },
+  {
+    id: '10',
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740791600/IMG-20240826-WA0043_zlnaci.jpg',
+    caption: 'Special Occasion',
+    date: '2025-07-15'
   }
 ];
 
