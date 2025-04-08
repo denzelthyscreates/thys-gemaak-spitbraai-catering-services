@@ -28,7 +28,8 @@ export const initializeGoogleConsentMode = (): void => {
 // Update Google consent settings based on user preferences
 export const updateGoogleConsent = (
   analytics: boolean, 
-  marketing: boolean
+  marketing: boolean,
+  preferences: boolean = false
 ): void => {
   if (!window.dataLayer) return;
   
@@ -38,12 +39,12 @@ export const updateGoogleConsent = (
       'analytics_storage': analytics ? 'granted' : 'denied',
       'ad_storage': marketing ? 'granted' : 'denied',
       'functionality_storage': 'granted', // Always allowed (necessary)
-      'personalization_storage': marketing ? 'granted' : 'denied',
+      'personalization_storage': preferences ? 'granted' : 'denied',
       'security_storage': 'granted' // Always allowed (necessary)
     }
   });
   
-  console.log('Google Consent updated - analytics:', analytics ? 'granted' : 'denied', 'marketing:', marketing ? 'granted' : 'denied');
+  console.log('Google Consent updated - analytics:', analytics ? 'granted' : 'denied', 'marketing:', marketing ? 'granted' : 'denied', 'personalization:', preferences ? 'granted' : 'denied');
 };
 
 // Check if user has given consent for all cookies
@@ -53,14 +54,14 @@ export const hasFullCookieConsent = (): boolean => {
 };
 
 // Check if user has given consent for a specific cookie type
-export const hasCookieConsent = (type: 'necessary' | 'analytics' | 'marketing'): boolean => {
+export const hasCookieConsent = (type: 'necessary' | 'analytics' | 'marketing' | 'preferences'): boolean => {
   // Necessary cookies are always allowed if any consent is given
   if (type === 'necessary') {
     const consent = localStorage.getItem('cookieConsent');
     return !!consent && consent !== 'dismissed';
   }
   
-  // For analytics and marketing, check the specific setting
+  // For other cookie types, check the specific setting
   const consent = localStorage.getItem(`cookie${type.charAt(0).toUpperCase() + type.slice(1)}`);
   return consent === 'true';
 };
@@ -70,7 +71,8 @@ export const initializeConsentedScripts = (): void => {
   // Initialize Google Consent Mode (updates consent if needed)
   const analyticsConsent = hasCookieConsent('analytics');
   const marketingConsent = hasCookieConsent('marketing');
-  updateGoogleConsent(analyticsConsent, marketingConsent);
+  const preferencesConsent = hasCookieConsent('preferences');
+  updateGoogleConsent(analyticsConsent, marketingConsent, preferencesConsent);
   
   // Example: Initialize Google Analytics if analytics cookies are allowed
   if (hasCookieConsent('analytics')) {
@@ -82,5 +84,11 @@ export const initializeConsentedScripts = (): void => {
   if (hasCookieConsent('marketing')) {
     console.log('Marketing consent given: initializing marketing scripts');
     // Example: initializeMarketingPixels();
+  }
+  
+  // Example: Initialize preference cookies if allowed
+  if (hasCookieConsent('preferences')) {
+    console.log('Preferences consent given: initializing preference scripts');
+    // Example: initializePreferenceScripts();
   }
 };

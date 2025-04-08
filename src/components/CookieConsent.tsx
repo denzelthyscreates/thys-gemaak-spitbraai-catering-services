@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { X, Save } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Checkbox } from '@/components/ui/checkbox';
 import { initializeConsentedScripts, updateGoogleConsent } from '@/utils/cookieConsent';
@@ -9,6 +9,7 @@ const CookieConsent = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [analytics, setAnalytics] = useState(false); // Default to false (opt-in)
   const [marketing, setMarketing] = useState(false); // Default to false (opt-in)
+  const [preferences, setPreferences] = useState(false); // Default to false (opt-in)
   
   useEffect(() => {
     // Check if user has already given consent
@@ -27,6 +28,7 @@ const CookieConsent = () => {
     localStorage.setItem('cookieConsent', 'all');
     localStorage.setItem('cookieAnalytics', 'true');
     localStorage.setItem('cookieMarketing', 'true');
+    localStorage.setItem('cookiePreferences', 'true');
     setIsVisible(false);
     
     // Update Google consent settings
@@ -36,10 +38,11 @@ const CookieConsent = () => {
     initializeConsentedScripts();
   };
   
-  const acceptNecessaryCookies = () => {
+  const rejectAllCookies = () => {
     localStorage.setItem('cookieConsent', 'necessary');
     localStorage.setItem('cookieAnalytics', 'false');
     localStorage.setItem('cookieMarketing', 'false');
+    localStorage.setItem('cookiePreferences', 'false');
     setIsVisible(false);
     
     // Update Google consent settings
@@ -49,10 +52,11 @@ const CookieConsent = () => {
     initializeConsentedScripts();
   };
   
-  const saveSelection = () => {
+  const acceptSelection = () => {
     localStorage.setItem('cookieConsent', 'custom');
     localStorage.setItem('cookieAnalytics', analytics ? 'true' : 'false');
     localStorage.setItem('cookieMarketing', marketing ? 'true' : 'false');
+    localStorage.setItem('cookiePreferences', preferences ? 'true' : 'false');
     setIsVisible(false);
     
     // Update Google consent settings with user selections
@@ -71,73 +75,86 @@ const CookieConsent = () => {
   if (!isVisible) return null;
   
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border shadow-md py-4 animate-slide-up">
-      <div className="container-width">
-        <div className="flex flex-col md:flex-row items-start justify-between gap-4">
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold mb-2">Cookie Preferences</h3>
-            <p className="text-muted-foreground mb-3">
-              We use cookies to enhance your browsing experience and provide essential website functionality. 
-              Non-essential cookies are disabled by default and require your explicit consent.
-              Visit our <Link to="/cookie-policy" className="text-primary hover:underline">Cookie Policy</Link> to learn more.
-            </p>
-            
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="necessary" checked={true} disabled />
-                <label htmlFor="necessary" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Necessary cookies (required)
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="analytics" 
-                  checked={analytics}
-                  onCheckedChange={(checked) => setAnalytics(checked as boolean)}
-                />
-                <label htmlFor="analytics" className="text-sm font-medium leading-none">
-                  Analytics cookies
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="marketing" 
-                  checked={marketing}
-                  onCheckedChange={(checked) => setMarketing(checked as boolean)}  
-                />
-                <label htmlFor="marketing" className="text-sm font-medium leading-none">
-                  Marketing cookies
-                </label>
-              </div>
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 border-t border-border shadow-md py-4 animate-slide-up">
+      <div className="container-width max-w-4xl">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <button 
+            onClick={handleClose} 
+            className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+            aria-label="Close cookie banner"
+          >
+            <X size={18} />
+          </button>
+          
+          <h3 className="text-xl font-semibold text-center">Cookie settings</h3>
+          <p className="text-center text-muted-foreground mb-2">
+            We use cookies to provide you with the best possible experience. They also allow us to analyze user behavior in order to constantly improve the website for you.
+          </p>
+          
+          <div className="flex flex-wrap justify-center gap-2 mb-4">
+            <button 
+              onClick={acceptAllCookies}
+              className="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors"
+            >
+              Accept All
+            </button>
+            <button 
+              onClick={acceptSelection}
+              className="px-4 py-2 bg-white border border-green-600 text-green-600 text-sm rounded-md hover:bg-green-50 transition-colors"
+            >
+              Accept Selection
+            </button>
+            <button 
+              onClick={rejectAllCookies}
+              className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors"
+            >
+              Reject All
+            </button>
+          </div>
+          
+          <div className="flex flex-wrap justify-center items-center gap-6 text-sm">
+            <div className="flex items-center space-x-2">
+              <Checkbox id="necessary" checked={true} disabled />
+              <label htmlFor="necessary" className="font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Necessary
+              </label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="analytics" 
+                checked={analytics}
+                onCheckedChange={(checked) => setAnalytics(checked as boolean)}
+              />
+              <label htmlFor="analytics" className="font-medium leading-none">
+                Analytics
+              </label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="preferences" 
+                checked={preferences}
+                onCheckedChange={(checked) => setPreferences(checked as boolean)}  
+              />
+              <label htmlFor="preferences" className="font-medium leading-none">
+                Preferences
+              </label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="marketing" 
+                checked={marketing}
+                onCheckedChange={(checked) => setMarketing(checked as boolean)}  
+              />
+              <label htmlFor="marketing" className="font-medium leading-none">
+                Marketing
+              </label>
             </div>
           </div>
           
-          <div className="flex flex-col md:flex-row gap-2 items-center md:items-start">
-            <button 
-              onClick={acceptNecessaryCookies}
-              className="px-4 py-2 border border-primary text-primary text-sm rounded-md hover:bg-primary/10 transition-colors whitespace-nowrap"
-            >
-              Necessary Only
-            </button>
-            <button 
-              onClick={saveSelection}
-              className="px-4 py-2 border border-primary bg-white text-primary text-sm rounded-md hover:bg-primary/10 transition-colors whitespace-nowrap flex items-center gap-1"
-            >
-              <Save size={16} /> Save Selection
-            </button>
-            <button 
-              onClick={acceptAllCookies}
-              className="px-4 py-2 bg-primary text-white text-sm rounded-md hover:bg-primary/90 transition-colors whitespace-nowrap"
-            >
-              Accept All Cookies
-            </button>
-            <button 
-              onClick={handleClose} 
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 md:static"
-              aria-label="Close cookie banner"
-            >
-              <X size={20} />
-            </button>
+          <div className="text-xs text-center text-muted-foreground mt-2">
+            <Link to="/cookie-policy" className="text-primary hover:underline">
+              Learn more about cookies
+            </Link>
           </div>
         </div>
       </div>
@@ -146,4 +163,3 @@ const CookieConsent = () => {
 };
 
 export default CookieConsent;
-
