@@ -1,9 +1,7 @@
 
 import React from 'react';
-import { User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import NavLink from './NavLink';
-import { useAuth } from '@/contexts/auth';
 
 interface NavItem {
   name: string;
@@ -16,8 +14,6 @@ interface DesktopNavProps {
 }
 
 const DesktopNav = ({ isScrolled }: DesktopNavProps) => {
-  const { user } = useAuth();
-  
   const navItems: NavItem[] = [
     { name: 'Home', path: '/', isHashLink: false },
     { name: 'About', path: '/', isHashLink: true },
@@ -44,19 +40,6 @@ const DesktopNav = ({ isScrolled }: DesktopNavProps) => {
             </NavLink>
           </li>
         ))}
-        
-        {/* Account Link */}
-        <li>
-          <NavLink
-            to="/auth"
-            className={`flex items-center gap-1 text-base font-medium transition-colors duration-200 hover:text-primary ${
-              isScrolled ? 'text-foreground' : 'text-foreground'
-            }`}
-          >
-            <User size={18} />
-            {user ? 'Account' : 'Sign In'}
-          </NavLink>
-        </li>
       </ul>
       
       <NavLink 
