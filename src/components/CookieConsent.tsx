@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -6,8 +7,8 @@ import { initializeConsentedScripts } from '@/utils/cookieConsent';
 
 const CookieConsent = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [analytics, setAnalytics] = useState(true);
-  const [marketing, setMarketing] = useState(true);
+  const [analytics, setAnalytics] = useState(false); // Default to false (opt-in)
+  const [marketing, setMarketing] = useState(false); // Default to false (opt-in)
   
   useEffect(() => {
     // Check if user has already given consent
@@ -61,8 +62,8 @@ const CookieConsent = () => {
           <div className="flex-1">
             <h3 className="text-lg font-semibold mb-2">Cookie Preferences</h3>
             <p className="text-muted-foreground mb-3">
-              We use cookies to enhance your browsing experience, analyze site traffic, and personalize content.
-              By clicking "Accept All Cookies", you agree to the storing of cookies on your device.
+              We use cookies to enhance your browsing experience and provide essential website functionality. 
+              Non-essential cookies are disabled by default and require your explicit consent.
               Visit our <Link to="/cookie-policy" className="text-primary hover:underline">Cookie Policy</Link> to learn more.
             </p>
             

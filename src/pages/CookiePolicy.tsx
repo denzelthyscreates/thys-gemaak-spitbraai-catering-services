@@ -52,7 +52,34 @@ const CookiePolicy = () => {
               <li><strong>Advertising Cookies:</strong> These cookies are used to make advertising messages more relevant to you. They perform functions like preventing the same ad from continuously reappearing, ensuring that ads are properly displayed, and in some cases selecting advertisements that are based on your interests.</li>
             </ul>
             
-            <h2 className="text-2xl font-semibold mt-8 mb-4">5. How Can You Control Cookies?</h2>
+            <h2 className="text-2xl font-semibold mt-8 mb-4">5. Our Cookie Banner and Your Choices</h2>
+            <p>
+              When you first visit our website, you will see a cookie banner that allows you to:
+            </p>
+            <ul className="list-disc pl-6 mb-6">
+              <li>Accept all cookies</li>
+              <li>Accept only necessary cookies</li>
+              <li>Select specific categories of cookies to accept</li>
+            </ul>
+            <p className="mt-4">
+              In compliance with South African data protection laws (POPIA), non-essential cookies (analytics and marketing) 
+              are disabled by default and require your explicit opt-in consent before they are activated.
+            </p>
+            
+            <h2 className="text-2xl font-semibold mt-8 mb-4">6. Data Minimality</h2>
+            <p>
+              We affirm that we only collect the minimum amount of data necessary through cookies to fulfill the stated 
+              purposes. This approach is in alignment with the data minimality principle under POPIA.
+            </p>
+            
+            <h2 className="text-2xl font-semibold mt-8 mb-4">7. Third-Party Compliance</h2>
+            <p>
+              All third-party cookie providers used on our website are required to comply with South African Protection of 
+              Personal Information Act (POPIA) or equivalent data protection laws. We regularly review our third-party 
+              relationships to ensure ongoing compliance.
+            </p>
+            
+            <h2 className="text-2xl font-semibold mt-8 mb-4">8. How Can You Control Cookies?</h2>
             <p>
               You have the right to decide whether to accept or reject cookies. You can exercise your cookie preferences by 
               clicking on the appropriate opt-out links provided in the cookie banner on our website.
@@ -62,13 +89,13 @@ const CookiePolicy = () => {
               you may still use our website though your access to some functionality and areas of our website may be restricted.
             </p>
             
-            <h2 className="text-2xl font-semibold mt-8 mb-4">6. Contact Us</h2>
+            <h2 className="text-2xl font-semibold mt-8 mb-4">9. Contact Us</h2>
             <p>
               If you have any questions about our use of cookies or other technologies, please contact us at:
             </p>
             <p className="mt-4">
               <strong>Email:</strong> info@thysgemaak.com<br />
-              <strong>Phone:</strong> +27 60 461 3766<br />
+              <strong>Phone:</strong> +27 67 456 7784<br />
               <strong>Address:</strong> 75 School Street, Kylemore, Stellenbosch, 7600
             </p>
           </div>
