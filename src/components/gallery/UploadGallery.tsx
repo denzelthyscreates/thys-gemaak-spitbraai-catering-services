@@ -14,63 +14,43 @@ import { AspectRatio } from '@/components/ui/aspect-ratio';
 const galleryImages = [
   {
     id: '1',
-    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788469/IMG-20241110-WA0010_umlczd.jpg',
-    caption: 'Spitbraai Event',
-    date: '2025-03-15'
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788469/IMG-20241110-WA0010_umlczd.jpg'
   },
   {
     id: '2',
-    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788468/IMG-20241110-WA0014_wfywk3.jpg',
-    caption: 'Wedding Catering',
-    date: '2025-02-20'
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788468/IMG-20241110-WA0014_wfywk3.jpg'
   },
   {
     id: '3',
-    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788467/IMG-20241110-WA0015_xrads9.jpg',
-    caption: 'Corporate BBQ',
-    date: '2025-01-10'
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788467/IMG-20241110-WA0015_xrads9.jpg'
   },
   {
     id: '4',
-    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788467/IMG-20241110-WA0012_k3zeob.jpg',
-    caption: 'Birthday Party',
-    date: '2025-04-05'
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788467/IMG-20241110-WA0012_k3zeob.jpg'
   },
   {
     id: '5',
-    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788466/IMG-20241110-WA0022_k5cdid.jpg',
-    caption: 'Gourmet Catering',
-    date: '2025-03-28'
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788466/IMG-20241110-WA0022_k5cdid.jpg'
   },
   {
     id: '6',
-    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788466/IMG-20241110-WA0033_vcwpvp.jpg',
-    caption: 'Anniversary Celebration',
-    date: '2025-02-14'
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788466/IMG-20241110-WA0033_vcwpvp.jpg'
   },
   {
     id: '7',
-    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788465/IMG-20241110-WA0036_snwetl.jpg',
-    caption: 'Family Gathering',
-    date: '2025-01-05'
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788465/IMG-20241110-WA0036_snwetl.jpg'
   },
   {
     id: '8',
-    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788463/IMG-20241110-WA0024_fasc43.jpg',
-    caption: 'Corporate Event',
-    date: '2025-05-22'
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788463/IMG-20241110-WA0024_fasc43.jpg'
   },
   {
     id: '9',
-    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788463/IMG-20241110-WA0028_og9dmr.jpg',
-    caption: 'Outdoor Catering',
-    date: '2025-06-10'
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788463/IMG-20241110-WA0028_og9dmr.jpg'
   },
   {
     id: '10',
-    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740791600/IMG-20240826-WA0043_zlnaci.jpg',
-    caption: 'Special Occasion',
-    date: '2025-07-15'
+    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740791600/IMG-20240826-WA0043_zlnaci.jpg'
   }
 ];
 
@@ -94,14 +74,10 @@ const UploadGallery = () => {
               <AspectRatio ratio={4/3}>
                 <img
                   src={image.url}
-                  alt={image.caption}
+                  alt="Event photo"
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               </AspectRatio>
-              <div className="p-3">
-                <h4 className="font-medium truncate">{image.caption}</h4>
-                <p className="text-sm text-muted-foreground">{image.date}</p>
-              </div>
             </div>
           ))}
         </div>
