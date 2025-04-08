@@ -93,7 +93,7 @@ const Index = () => {
                 Our Gallery
               </span>
               <h2 className="text-4xl md:text-5xl font-serif font-semibold tracking-tight text-foreground mb-6">
-                See Our Recent Events
+                Our Event Showcase
               </h2>
               <p className="text-lg text-muted-foreground">
                 Browse through photos from our recent catering events and spitbraai experiences.

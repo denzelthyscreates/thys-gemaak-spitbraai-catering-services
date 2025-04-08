@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { ImageIcon, Upload, X, AlertCircle, LockIcon } from 'lucide-react';
+import React from 'react';
+import { ImageIcon } from 'lucide-react';
 import { 
   Card, 
   CardContent, 
@@ -8,30 +8,10 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { 
-  Form, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormControl, 
-  FormMessage 
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { useForm } from 'react-hook-form';
 
-// Sample initial gallery images (you can replace these with your own)
-const initialImages = [
+// Gallery images - replace these URLs with your own
+const galleryImages = [
   {
     id: '1',
     url: 'https://source.unsplash.com/random/800x600?spitbraai',
@@ -49,90 +29,28 @@ const initialImages = [
     url: 'https://source.unsplash.com/random/800x600?bbq',
     caption: 'Corporate BBQ',
     date: '2025-01-10'
+  },
+  {
+    id: '4',
+    url: 'https://source.unsplash.com/random/800x600?event',
+    caption: 'Birthday Party',
+    date: '2025-04-05'
+  },
+  {
+    id: '5',
+    url: 'https://source.unsplash.com/random/800x600?food',
+    caption: 'Gourmet Catering',
+    date: '2025-03-28'
+  },
+  {
+    id: '6',
+    url: 'https://source.unsplash.com/random/800x600?celebration',
+    caption: 'Anniversary Celebration',
+    date: '2025-02-14'
   }
 ];
 
-interface GalleryImage {
-  id: string;
-  url: string;
-  caption: string;
-  date: string;
-}
-
-interface LoginFormValues {
-  password: string;
-}
-
 const UploadGallery = () => {
-  const [images, setImages] = useState<GalleryImage[]>(initialImages);
-  const [error, setError] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [showLoginError, setShowLoginError] = useState(false);
-  
-  const adminForm = useForm<LoginFormValues>({
-    defaultValues: { password: '' }
-  });
-
-  const handleAdminLogin = (data: LoginFormValues) => {
-    // This is a simple implementation. In a real app, you would use a proper authentication system.
-    // In production, NEVER hardcode passwords like this. Use Supabase or another auth provider.
-    if (data.password === 'admin123') {
-      setIsAdmin(true);
-      setShowLoginError(false);
-    } else {
-      setShowLoginError(true);
-    }
-  };
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    
-    if (!files || files.length === 0) return;
-    
-    setIsUploading(true);
-    setError(null);
-    
-    // Process each file
-    Array.from(files).forEach(file => {
-      // Check file type
-      if (!file.type.startsWith('image/')) {
-        setError('Only image files are allowed');
-        setIsUploading(false);
-        return;
-      }
-      
-      // Check file size (limit to 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setError('Image size must be less than 5MB');
-        setIsUploading(false);
-        return;
-      }
-      
-      // Create a URL for the file
-      const imageUrl = URL.createObjectURL(file);
-      
-      // Add the new image to the gallery
-      const newImage: GalleryImage = {
-        id: Date.now().toString(),
-        url: imageUrl,
-        caption: file.name.split('.')[0], // Use filename as caption
-        date: new Date().toISOString().split('T')[0] // Today's date
-      };
-      
-      setImages(prevImages => [...prevImages, newImage]);
-    });
-    
-    setIsUploading(false);
-    
-    // Reset the input field
-    event.target.value = '';
-  };
-
-  const removeImage = (id: string) => {
-    setImages(images.filter(image => image.id !== id));
-  };
-
   return (
     <Card className="w-full">
       <CardHeader>
@@ -141,101 +59,13 @@ const UploadGallery = () => {
           Event Gallery
         </CardTitle>
         <CardDescription>
-          View photos from our catering events
+          Photos from our recent catering events
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        
-        {/* Admin Area - Only visible after login */}
-        {isAdmin ? (
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Upload className="h-4 w-4" />
-              <h3 className="font-medium">Upload Images</h3>
-            </div>
-            <label className="block">
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors">
-                <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-muted-foreground mb-2">
-                  Drag and drop images here or click to browse
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Supported formats: JPG, PNG, GIF (max 5MB)
-                </p>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageUpload}
-                  disabled={isUploading}
-                />
-                <Button 
-                  variant="outline" 
-                  className="mt-4"
-                  disabled={isUploading}
-                >
-                  {isUploading ? 'Uploading...' : 'Select Images'}
-                </Button>
-              </div>
-            </label>
-          </div>
-        ) : (
-          <div className="mb-6">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <LockIcon className="h-4 w-4" />
-                  Admin Upload Area
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Administrator Login</DialogTitle>
-                  <DialogDescription>
-                    Please enter the administrator password to access the upload functionality.
-                  </DialogDescription>
-                </DialogHeader>
-                <Form {...adminForm}>
-                  <form onSubmit={adminForm.handleSubmit(handleAdminLogin)} className="space-y-4">
-                    <FormField
-                      control={adminForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="password" 
-                              placeholder="Enter admin password" 
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    {showLoginError && (
-                      <p className="text-sm text-destructive">Incorrect password. Please try again.</p>
-                    )}
-                    <Button type="submit" className="w-full">Login</Button>
-                  </form>
-                </Form>
-              </DialogContent>
-            </Dialog>
-          </div>
-        )}
-        
-        {/* Gallery Grid - Visible to everyone */}
+        {/* Gallery Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {images.map((image) => (
+          {galleryImages.map((image) => (
             <div key={image.id} className="group relative rounded-lg overflow-hidden border">
               <AspectRatio ratio={4/3}>
                 <img
@@ -244,15 +74,6 @@ const UploadGallery = () => {
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               </AspectRatio>
-              {isAdmin && (
-                <button
-                  onClick={() => removeImage(image.id)}
-                  className="absolute top-2 right-2 p-1 bg-black/60 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  aria-label="Remove image"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
               <div className="p-3">
                 <h4 className="font-medium truncate">{image.caption}</h4>
                 <p className="text-sm text-muted-foreground">{image.date}</p>
@@ -261,7 +82,7 @@ const UploadGallery = () => {
           ))}
         </div>
         
-        {images.length === 0 && (
+        {galleryImages.length === 0 && (
           <div className="text-center py-8 border rounded-lg">
             <ImageIcon className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
             <p className="text-muted-foreground">No images in the gallery</p>
