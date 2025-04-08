@@ -1,8 +1,10 @@
+
 /**
  * Utility functions for checking cookie consent preferences and Google Consent Mode
+ * Compliant with Protection of Personal Information Act (POPIA) requirements
  */
 
-// Initialize Google Consent Mode with default consent states (all denied)
+// Initialize Google Consent Mode with default consent states (all denied by default - opt-in model)
 export const initializeGoogleConsentMode = (): void => {
   window.dataLayer = window.dataLayer || [];
   // Define gtag function properly for TypeScript
@@ -14,9 +16,9 @@ export const initializeGoogleConsentMode = (): void => {
   gtag('consent', 'default', {
     'analytics_storage': 'denied',
     'ad_storage': 'denied',
-    'functionality_storage': 'granted',
+    'functionality_storage': 'granted', // Necessary for website function
     'personalization_storage': 'denied',
-    'security_storage': 'granted',
+    'security_storage': 'granted', // Necessary for security features
     'wait_for_update': 500 // Wait for user input for consent update
   });
   

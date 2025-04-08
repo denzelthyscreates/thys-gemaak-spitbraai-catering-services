@@ -8,4 +8,3 @@ import { initializeGoogleConsentMode } from './utils/cookieConsent'
 initializeGoogleConsentMode();
 
 createRoot(document.getElementById("root")!).render(<App />);
-
