@@ -5,35 +5,35 @@ const About = () => {
   const stats = [
     { 
       id: 1, 
-      icon: <Calendar className="h-6 w-6 text-earth-700" />,
+      icon: <Calendar className="h-6 w-6 text-primary" />,
       label: 'Founded', 
       value: 'January 2024' 
     },
     { 
       id: 2, 
-      icon: <Users className="h-6 w-6 text-earth-700" />,
+      icon: <Users className="h-6 w-6 text-primary" />,
       label: 'Team Members', 
-      value: '6+' // Changed from 15+ to 6+
+      value: '6+' 
     },
     { 
       id: 3, 
-      icon: <CookingPot className="h-6 w-6 text-earth-700" />,
+      icon: <CookingPot className="h-6 w-6 text-primary" />,
       label: 'Events Catered', 
       value: '100+' 
     },
   ];
 
   return (
-    <section id="about" className="section bg-secondary/30">
+    <section id="about" className="section bg-primary/10">
       <div className="container-width">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           {/* Image Column - Moved to align with title */}
           <div className="relative">
-            <span className="inline-block px-4 py-1.5 mb-6 text-xl font-medium rounded-full bg-primary/10 text-primary">
+            <span className="inline-block px-4 py-1.5 mb-6 text-xl font-medium rounded-full bg-primary/20 text-primary">
               Our Story
             </span>
             
-<h2 className="text-4xl md:text-5xl font-serif font-semibold tracking-tight text-foreground mb-3">Improving Spitbraai Catering in South Africa</h2>
+            <h2 className="text-4xl md:text-5xl font-serif font-semibold tracking-tight text-foreground mb-3">Improving Spitbraai Catering in South Africa</h2>
             
             <div className="relative z-10 rounded-xl overflow-hidden shadow-prominent mb-8">
               <img 
@@ -62,13 +62,13 @@ const About = () => {
             </div>
             
             {/* Decorative elements */}
-            <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-primary/10 rounded-xl -z-10"></div>
-            <div className="absolute -top-6 -left-6 w-24 h-24 bg-spice-100 rounded-xl -z-10"></div>
+            <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-primary/5 rounded-xl -z-10"></div>
+            <div className="absolute -top-6 -left-6 w-24 h-24 bg-white/40 rounded-xl -z-10"></div>
           </div>
 
           {/* Content Column */}
           <div>
-            <div className="space-y-6 text-muted-foreground">
+            <div className="space-y-6 text-foreground">
               <p>
                 At Thys Gemaak Spitbraai Catering, we're not just changing the game, we're defining the future of catering. 
                 Spitbraai is more than a meal; it's an experience, a symbol of togetherness, and a celebration. 
@@ -87,7 +87,7 @@ const About = () => {
                 catering experiences globally.
               </p>
               
-              <div className="p-4 bg-white/50 rounded-lg border border-primary/20">
+              <div className="p-4 bg-white/60 rounded-lg border border-primary/30 shadow-subtle">
                 <h4 className="font-semibold text-foreground mb-2">Key Vision:</h4>
                 <p className="text-muted-foreground">
                   We aim to create an inclusive, culturally rich catering ecosystem where premium spitbraai experiences are no longer 
@@ -95,7 +95,7 @@ const About = () => {
                 </p>
               </div>
               
-              <div className="p-4 bg-white/50 rounded-lg border border-primary/20">
+              <div className="p-4 bg-white/60 rounded-lg border border-primary/30 shadow-subtle">
                 <h4 className="font-semibold text-foreground mb-2">Mission Statement:</h4>
                 <p className="text-muted-foreground">
                   To redefine spitbraai catering by using a scalable operational model to deliver 
@@ -107,7 +107,7 @@ const About = () => {
             {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10">
               {stats.map((stat) => (
-                <div key={stat.id} className="bg-white rounded-lg p-6 shadow-subtle border border-border">
+                <div key={stat.id} className="bg-white/70 rounded-lg p-6 shadow-subtle border border-primary/20">
                   <div className="flex items-center gap-3 mb-2">
                     {stat.icon}
                     <span className="text-sm font-medium text-muted-foreground">{stat.label}</span>
