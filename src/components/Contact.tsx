@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -61,6 +62,14 @@ const Contact = () => {
     }
     setActiveTab(value);
   };
+  
+  const handleNavigateTab = (tabValue: string) => {
+    // Direct tab navigation from child components
+    if (tabValue === 'book' && !menuSelection) {
+      return;
+    }
+    setActiveTab(tabValue);
+  };
 
   const handleBookingFormDataChange = (data: any) => {
     setBookingFormData(data);
@@ -103,6 +112,7 @@ const Contact = () => {
             <MenuBuilder 
               onSelectionChange={handleMenuSelectionChange} 
               initialSelection={menuSelection}
+              onNavigateTab={handleNavigateTab}
             />
           </TabsContent>
           

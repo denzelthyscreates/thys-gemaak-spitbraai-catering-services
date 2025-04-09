@@ -10,9 +10,10 @@ import { MenuOption, MenuBuilderProps } from '@/types/menu';
 import { useToast } from '@/hooks/use-toast';
 import { menuOptions } from '@/data/menuData';
 
-const MenuBuilderContent = ({ onSelectionChange, menuOptions }: { 
+const MenuBuilderContent = ({ onSelectionChange, menuOptions, onNavigateTab }: { 
   onSelectionChange: (selection: any) => void,
-  menuOptions: MenuOption[]
+  menuOptions: MenuOption[],
+  onNavigateTab?: (tab: string) => void
 }) => {
   const { 
     selectedMenu, 
@@ -73,12 +74,9 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions }: {
   };
   
   const handleNextStep = () => {
-    // Change to the 'book' tab
-    localStorage.setItem('activeTab', 'book');
-    // Trigger tab change
-    const bookTabElement = document.querySelector('[data-value="book"]');
-    if (bookTabElement) {
-      (bookTabElement as HTMLElement).click();
+    // Use the callback from parent to change tabs
+    if (onNavigateTab) {
+      onNavigateTab('book');
     }
   };
   
@@ -110,7 +108,7 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions }: {
   );
 };
 
-const MenuBuilder = ({ onSelectionChange, initialSelection }: MenuBuilderProps) => {
+const MenuBuilder = ({ onSelectionChange, initialSelection, onNavigateTab }: MenuBuilderProps & { onNavigateTab?: (tab: string) => void }) => {
   useEffect(() => {
     if (initialSelection) {
       console.log("Using initial selection in MenuBuilder:", initialSelection);
@@ -121,7 +119,8 @@ const MenuBuilder = ({ onSelectionChange, initialSelection }: MenuBuilderProps) 
     <MenuProvider>
       <MenuBuilderContent 
         onSelectionChange={onSelectionChange} 
-        menuOptions={menuOptions} 
+        menuOptions={menuOptions}
+        onNavigateTab={onNavigateTab}
       />
     </MenuProvider>
   );
