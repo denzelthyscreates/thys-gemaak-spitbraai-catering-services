@@ -30,18 +30,33 @@ const FacebookReviews = () => {
     fetchReviews();
   }, []);
 
-  const fetchReviews = () => {
+  const fetchReviews = async () => {
     setLoading(true);
     setError(null);
 
-    // Using demo data since direct API access requires a server-side implementation
-    // with a long-lived access token that shouldn't be exposed in the client
-    useMockReviews();
+    try {
+      // In a production app, you would make a server-side request to Facebook Graph API
+      // using a long-lived access token stored securely on your server
+      
+      // For now, we'll use mock data since client-side API access requires user authentication
+      // which is not what we want for automatic reviews
+      const mockReviews = getMockReviews();
+      setReviews(mockReviews);
+    } catch (err) {
+      console.error('Error fetching Facebook reviews:', err);
+      setError('Failed to load reviews. Please try again later.');
+      toast({
+        title: "Error",
+        description: "Failed to load Facebook reviews",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const useMockReviews = () => {
-    // Fallback to mock data if no reviews are found or for demo purposes
-    const mockReviews: FacebookReview[] = [
+  const getMockReviews = (): FacebookReview[] => {
+    return [
       {
         id: '1',
         reviewer: {
@@ -81,11 +96,8 @@ const FacebookReviews = () => {
         rating: 5,
         review_text: "Best spitbraai in the Western Cape! We've used them for multiple family gatherings and they never disappoint.",
         created_time: '2025-02-10T11:00:00Z'
-      },
+      }
     ];
-    
-    setReviews(mockReviews);
-    setLoading(false);
   };
 
   const formatDate = (dateString: string) => {

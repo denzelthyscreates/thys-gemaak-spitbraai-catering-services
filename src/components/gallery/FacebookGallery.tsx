@@ -33,17 +33,33 @@ const FacebookGallery = () => {
     fetchPhotos();
   }, []);
 
-  const fetchPhotos = () => {
+  const fetchPhotos = async () => {
     setLoading(true);
     setError(null);
 
-    // Using demo data since direct API access requires a server-side implementation
-    // with a long-lived access token that shouldn't be exposed in the client
-    useMockPhotos();
+    try {
+      // In a production app, you would make a server-side request to Facebook Graph API
+      // using a long-lived access token stored securely on your server
+      
+      // For now, we'll use mock data since client-side API access requires user authentication
+      // which is not what we want for an automatic gallery
+      const mockPhotos = getMockPhotos();
+      setPhotos(mockPhotos);
+    } catch (err) {
+      console.error('Error fetching Facebook photos:', err);
+      setError('Failed to load photos. Please try again later.');
+      toast({
+        title: "Error",
+        description: "Failed to load Facebook photos",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const useMockPhotos = () => {
-    const mockPhotos: FacebookPhoto[] = [
+  const getMockPhotos = (): FacebookPhoto[] => {
+    return [
       {
         id: '1',
         source: 'https://source.unsplash.com/random/800x600?food',
@@ -69,9 +85,6 @@ const FacebookGallery = () => {
         created_time: '2025-02-10T11:00:00Z'
       },
     ];
-    
-    setPhotos(mockPhotos);
-    setLoading(false);
   };
 
   const formatDate = (dateString: string) => {
