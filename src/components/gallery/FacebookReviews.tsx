@@ -1,7 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Star, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useToast } from '@/hooks/use-toast';
@@ -17,110 +17,26 @@ interface FacebookReview {
   created_time: string;
 }
 
+// Facebook page ID for Thys Gemaak Spitbraai
+const FACEBOOK_PAGE_ID = '61559838444726';
+
 const FacebookReviews = () => {
   const [reviews, setReviews] = useState<FacebookReview[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
   const { toast } = useToast();
 
-  const connectToFacebook = () => {
+  useEffect(() => {
+    fetchReviews();
+  }, []);
+
+  const fetchReviews = () => {
     setLoading(true);
     setError(null);
-    
-    if (window.FB) {
-      window.FB.login((response) => {
-        if (response.authResponse) {
-          setIsConnected(true);
-          fetchReviews(response.authResponse.accessToken);
-          toast({
-            title: "Success",
-            description: "Successfully connected to Facebook",
-          });
-        } else {
-          setError('Facebook login was cancelled or failed');
-          setLoading(false);
-          toast({
-            title: "Login Failed",
-            description: "Facebook login was cancelled or failed",
-            variant: "destructive",
-          });
-        }
-      }, { scope: 'pages_show_list,pages_read_engagement,pages_read_user_content' });
-    } else {
-      setError('Facebook SDK not loaded. Please reload the page and try again.');
-      setLoading(false);
-      toast({
-        title: "SDK Not Loaded",
-        description: "Facebook SDK not loaded. Please reload the page and try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
-  const fetchReviews = (accessToken: string) => {
-    if (!window.FB) {
-      setError('Facebook SDK not loaded');
-      setLoading(false);
-      return;
-    }
-
-    // First, get the pages the user has access to
-    window.FB.api(
-      '/me/accounts',
-      'GET',
-      {},
-      (response) => {
-        if (response.error) {
-          setError(response.error.message || 'Error fetching Facebook pages');
-          setLoading(false);
-          return;
-        }
-
-        if (!response.data || response.data.length === 0) {
-          setError('No Facebook pages found or no access to pages');
-          setLoading(false);
-          return;
-        }
-
-        // Use the first page ID to fetch ratings
-        const pageId = response.data[0].id;
-        
-        window.FB.api(
-          `/${pageId}/ratings`,
-          'GET',
-          { fields: 'reviewer{name,picture},rating,review_text,created_time' },
-          (ratingsResponse) => {
-            if (ratingsResponse.error) {
-              setError(ratingsResponse.error.message || 'Error fetching Facebook reviews');
-              setLoading(false);
-              return;
-            }
-
-            if (!ratingsResponse.data) {
-              // If no actual reviews are found, we'll use the mock data for demonstration
-              useMockReviews();
-              return;
-            }
-
-            // Format the response to match our interface
-            const formattedReviews: FacebookReview[] = ratingsResponse.data.map((item: any) => ({
-              id: item.id,
-              reviewer: {
-                name: item.reviewer?.name || 'Anonymous',
-                picture: item.reviewer?.picture?.data?.url
-              },
-              rating: item.rating || 5,
-              review_text: item.review_text || '',
-              created_time: item.created_time
-            }));
-
-            setReviews(formattedReviews);
-            setLoading(false);
-          }
-        );
-      }
-    );
+    // Using demo data since direct API access requires a server-side implementation
+    // with a long-lived access token that shouldn't be exposed in the client
+    useMockReviews();
   };
 
   const useMockReviews = () => {
@@ -170,32 +86,7 @@ const FacebookReviews = () => {
     
     setReviews(mockReviews);
     setLoading(false);
-    toast({
-      title: "Using Demo Data",
-      description: "No Facebook reviews found. Showing demonstration data instead.",
-    });
   };
-
-  useEffect(() => {
-    // Check if the Facebook SDK is loaded
-    const checkFBSDK = () => {
-      if (window.FB) {
-        console.log('Facebook SDK loaded');
-        // Check if the user is already logged in
-        window.FB.api('/me', 'GET', {}, (response: any) => {
-          if (response && !response.error) {
-            setIsConnected(true);
-            // You might want to fetch reviews here if the user is already connected
-          }
-        });
-      } else {
-        // If the SDK isn't loaded yet, wait a bit and try again
-        setTimeout(checkFBSDK, 1000);
-      }
-    };
-    
-    checkFBSDK();
-  }, []);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
@@ -220,23 +111,7 @@ const FacebookReviews = () => {
           </Alert>
         )}
         
-        {!isConnected ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Connect to Facebook</h3>
-            <p className="text-muted-foreground mb-4">
-              Connect your Facebook account to display client reviews
-            </p>
-            <Button 
-              onClick={connectToFacebook} 
-              disabled={loading}
-              className="flex items-center gap-2"
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {loading ? 'Connecting...' : 'Connect to Facebook'}
-            </Button>
-          </div>
-        ) : loading ? (
+        {loading ? (
           <div className="flex flex-col items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
             <p className="text-muted-foreground">Loading reviews...</p>

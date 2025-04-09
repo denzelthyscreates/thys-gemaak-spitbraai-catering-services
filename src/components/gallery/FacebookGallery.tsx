@@ -1,7 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { ImageIcon, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { 
   Carousel,
@@ -20,102 +20,26 @@ interface FacebookPhoto {
   created_time: string;
 }
 
+// Facebook page ID for Thys Gemaak Spitbraai
+const FACEBOOK_PAGE_ID = '61559838444726';
+
 const FacebookGallery = () => {
   const [photos, setPhotos] = useState<FacebookPhoto[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
   const { toast } = useToast();
 
-  const connectToFacebook = () => {
+  useEffect(() => {
+    fetchPhotos();
+  }, []);
+
+  const fetchPhotos = () => {
     setLoading(true);
     setError(null);
-    
-    if (window.FB) {
-      window.FB.login((response) => {
-        if (response.authResponse) {
-          setIsConnected(true);
-          fetchPhotos(response.authResponse.accessToken);
-          toast({
-            title: "Success",
-            description: "Successfully connected to Facebook",
-          });
-        } else {
-          setError('Facebook login was cancelled or failed');
-          setLoading(false);
-          toast({
-            title: "Login Failed",
-            description: "Facebook login was cancelled or failed",
-            variant: "destructive",
-          });
-        }
-      }, { scope: 'user_photos,pages_show_list' });
-    } else {
-      setError('Facebook SDK not loaded. Please reload the page and try again.');
-      setLoading(false);
-      toast({
-        title: "SDK Not Loaded",
-        description: "Facebook SDK not loaded. Please reload the page and try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
-  const fetchPhotos = (accessToken: string) => {
-    if (!window.FB) {
-      setError('Facebook SDK not loaded');
-      setLoading(false);
-      return;
-    }
-
-    window.FB.api(
-      '/me/accounts',
-      'GET',
-      {},
-      (response) => {
-        if (response.error) {
-          setError(response.error.message || 'Error fetching Facebook pages');
-          setLoading(false);
-          return;
-        }
-
-        if (!response.data || response.data.length === 0) {
-          setError('No Facebook pages found or no access to pages');
-          setLoading(false);
-          return;
-        }
-
-        const pageId = response.data[0].id;
-        
-        window.FB.api(
-          `/${pageId}/photos`,
-          'GET',
-          { fields: 'source,name,created_time' },
-          (photosResponse) => {
-            if (photosResponse.error) {
-              setError(photosResponse.error.message || 'Error fetching Facebook photos');
-              setLoading(false);
-              return;
-            }
-
-            if (!photosResponse.data || photosResponse.data.length === 0) {
-              useMockPhotos();
-              return;
-            }
-
-            const formattedPhotos: FacebookPhoto[] = photosResponse.data.map((item: any) => ({
-              id: item.id,
-              source: item.source,
-              name: item.name || 'Untitled',
-              created_time: item.created_time
-            }));
-
-            setPhotos(formattedPhotos);
-            setLoading(false);
-          }
-        );
-      }
-    );
+    // Using demo data since direct API access requires a server-side implementation
+    // with a long-lived access token that shouldn't be exposed in the client
+    useMockPhotos();
   };
 
   const useMockPhotos = () => {
@@ -148,28 +72,7 @@ const FacebookGallery = () => {
     
     setPhotos(mockPhotos);
     setLoading(false);
-    toast({
-      title: "Using Demo Data",
-      description: "No Facebook photos found. Showing demonstration data instead.",
-    });
   };
-
-  useEffect(() => {
-    const checkFBSDK = () => {
-      if (window.FB) {
-        console.log('Facebook SDK loaded');
-        window.FB.api('/me', 'GET', {}, (response: any) => {
-          if (response && !response.error) {
-            setIsConnected(true);
-          }
-        });
-      } else {
-        setTimeout(checkFBSDK, 1000);
-      }
-    };
-    
-    checkFBSDK();
-  }, []);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
@@ -194,23 +97,7 @@ const FacebookGallery = () => {
           </Alert>
         )}
         
-        {!isConnected ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <ImageIcon className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Connect to Facebook</h3>
-            <p className="text-muted-foreground mb-4">
-              Connect your Facebook account to display your photos
-            </p>
-            <Button 
-              onClick={connectToFacebook} 
-              disabled={loading}
-              className="flex items-center gap-2"
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {loading ? 'Connecting...' : 'Connect to Facebook'}
-            </Button>
-          </div>
-        ) : loading ? (
+        {loading ? (
           <div className="flex flex-col items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
             <p className="text-muted-foreground">Loading photos...</p>
