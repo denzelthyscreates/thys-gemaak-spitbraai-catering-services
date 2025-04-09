@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ImageIcon, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +11,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { useToast } from '@/hooks/use-toast';
 
 interface FacebookPhoto {
   id: string;
@@ -25,6 +25,7 @@ declare global {
   interface Window {
     FB?: {
       login: (callback: (response: { authResponse?: { accessToken: string } }) => void, options: { scope: string }) => void;
+      api: (path: string, method: string, params: any, callback: (response: any) => void) => void;
     };
   }
 }
@@ -34,86 +35,159 @@ const FacebookGallery = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const { toast } = useToast();
 
   const connectToFacebook = () => {
     setLoading(true);
     setError(null);
     
-    // This would typically be implemented with the Facebook SDK
-    // and authentication flow. For this example, we'll simulate it
     if (window.FB) {
       window.FB.login((response) => {
         if (response.authResponse) {
           setIsConnected(true);
           fetchPhotos(response.authResponse.accessToken);
+          toast({
+            title: "Success",
+            description: "Successfully connected to Facebook",
+          });
         } else {
           setError('Facebook login was cancelled or failed');
           setLoading(false);
+          toast({
+            title: "Login Failed",
+            description: "Facebook login was cancelled or failed",
+            variant: "destructive",
+          });
         }
       }, { scope: 'user_photos,pages_show_list' });
     } else {
-      // If FB SDK isn't loaded, just simulate a successful connection for demo purposes
-      setTimeout(() => {
-        setIsConnected(true);
-        fetchPhotos('mock-token');
-      }, 1500);
+      setError('Facebook SDK not loaded. Please reload the page and try again.');
+      setLoading(false);
+      toast({
+        title: "SDK Not Loaded",
+        description: "Facebook SDK not loaded. Please reload the page and try again.",
+        variant: "destructive",
+      });
     }
   };
 
   const fetchPhotos = (accessToken: string) => {
-    // In a real implementation, we would use the accessToken to fetch photos
-    // For now, we'll use a mock implementation
-    setTimeout(() => {
-      try {
-        // Mock data - in a real implementation, this would come from the Facebook API
-        const mockPhotos: FacebookPhoto[] = [
-          {
-            id: '1',
-            source: 'https://source.unsplash.com/random/800x600?food',
-            name: 'Catering Event 1',
-            created_time: '2025-03-01T12:00:00Z'
-          },
-          {
-            id: '2',
-            source: 'https://source.unsplash.com/random/800x600?dinner',
-            name: 'Wedding Reception',
-            created_time: '2025-03-15T14:30:00Z'
-          },
-          {
-            id: '3',
-            source: 'https://source.unsplash.com/random/800x600?party',
-            name: 'Corporate Event',
-            created_time: '2025-02-25T18:00:00Z'
-          },
-          {
-            id: '4',
-            source: 'https://source.unsplash.com/random/800x600?buffet',
-            name: 'Buffet Setup',
-            created_time: '2025-02-10T11:00:00Z'
-          },
-        ];
+    if (!window.FB) {
+      setError('Facebook SDK not loaded');
+      setLoading(false);
+      return;
+    }
+
+    // First, get the pages the user has access to
+    window.FB.api(
+      '/me/accounts',
+      'GET',
+      {},
+      (response) => {
+        if (response.error) {
+          setError(response.error.message || 'Error fetching Facebook pages');
+          setLoading(false);
+          return;
+        }
+
+        if (!response.data || response.data.length === 0) {
+          setError('No Facebook pages found or no access to pages');
+          setLoading(false);
+          return;
+        }
+
+        // Use the first page ID to fetch photos
+        const pageId = response.data[0].id;
         
-        setPhotos(mockPhotos);
-        setLoading(false);
-      } catch (err) {
-        setError('Error fetching photos');
-        setLoading(false);
+        window.FB.api(
+          `/${pageId}/photos`,
+          'GET',
+          { fields: 'source,name,created_time' },
+          (photosResponse) => {
+            if (photosResponse.error) {
+              setError(photosResponse.error.message || 'Error fetching Facebook photos');
+              setLoading(false);
+              return;
+            }
+
+            if (!photosResponse.data || photosResponse.data.length === 0) {
+              // If no actual photos are found, we'll use the mock data for demonstration
+              useMockPhotos();
+              return;
+            }
+
+            // Format the response to match our interface
+            const formattedPhotos: FacebookPhoto[] = photosResponse.data.map((item: any) => ({
+              id: item.id,
+              source: item.source,
+              name: item.name || 'Untitled',
+              created_time: item.created_time
+            }));
+
+            setPhotos(formattedPhotos);
+            setLoading(false);
+          }
+        );
       }
-    }, 1500);
+    );
+  };
+
+  const useMockPhotos = () => {
+    // Fallback to mock data if no photos are found or for demo purposes
+    const mockPhotos: FacebookPhoto[] = [
+      {
+        id: '1',
+        source: 'https://source.unsplash.com/random/800x600?food',
+        name: 'Catering Event 1',
+        created_time: '2025-03-01T12:00:00Z'
+      },
+      {
+        id: '2',
+        source: 'https://source.unsplash.com/random/800x600?dinner',
+        name: 'Wedding Reception',
+        created_time: '2025-03-15T14:30:00Z'
+      },
+      {
+        id: '3',
+        source: 'https://source.unsplash.com/random/800x600?party',
+        name: 'Corporate Event',
+        created_time: '2025-02-25T18:00:00Z'
+      },
+      {
+        id: '4',
+        source: 'https://source.unsplash.com/random/800x600?buffet',
+        name: 'Buffet Setup',
+        created_time: '2025-02-10T11:00:00Z'
+      },
+    ];
+    
+    setPhotos(mockPhotos);
+    setLoading(false);
+    toast({
+      title: "Using Demo Data",
+      description: "No Facebook photos found. Showing demonstration data instead.",
+    });
   };
 
   useEffect(() => {
-    // Initialize Facebook SDK
-    // This would typically be done in a more central location
-    const initFacebookSDK = () => {
-      if (window.FB) return;
-      
-      // This would be loaded from the Facebook SDK script
-      console.log('Facebook SDK would be initialized here');
-      // In a real implementation, we would check for an existing session
+    // Check if the Facebook SDK is loaded
+    const checkFBSDK = () => {
+      if (window.FB) {
+        console.log('Facebook SDK loaded');
+        // Check if the user is already logged in
+        window.FB.api('/me', (response: any) => {
+          if (response && !response.error) {
+            setIsConnected(true);
+            // You might want to fetch photos here if the user is already connected
+          }
+        });
+      } else {
+        // If the SDK isn't loaded yet, wait a bit and try again
+        setTimeout(checkFBSDK, 1000);
+      }
     };
     
-    initFacebookSDK();
+    checkFBSDK();
   }, []);
 
   const formatDate = (dateString: string) => {

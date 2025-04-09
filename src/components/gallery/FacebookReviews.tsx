@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Star, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { useToast } from '@/hooks/use-toast';
 
 interface FacebookReview {
   id: string;
@@ -22,6 +22,7 @@ declare global {
   interface Window {
     FB?: {
       login: (callback: (response: { authResponse?: { accessToken: string } }) => void, options: { scope: string }) => void;
+      api: (path: string, method: string, params: any, callback: (response: any) => void) => void;
     };
   }
 }
@@ -31,102 +32,179 @@ const FacebookReviews = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const { toast } = useToast();
 
   const connectToFacebook = () => {
     setLoading(true);
     setError(null);
     
-    // This would typically be implemented with the Facebook SDK
-    // and authentication flow. For this example, we'll simulate it
     if (window.FB) {
       window.FB.login((response) => {
         if (response.authResponse) {
           setIsConnected(true);
           fetchReviews(response.authResponse.accessToken);
+          toast({
+            title: "Success",
+            description: "Successfully connected to Facebook",
+          });
         } else {
           setError('Facebook login was cancelled or failed');
           setLoading(false);
+          toast({
+            title: "Login Failed",
+            description: "Facebook login was cancelled or failed",
+            variant: "destructive",
+          });
         }
       }, { scope: 'pages_show_list,pages_read_engagement,pages_read_user_content' });
     } else {
-      // If FB SDK isn't loaded, just simulate a successful connection for demo purposes
-      setTimeout(() => {
-        setIsConnected(true);
-        fetchReviews('mock-token');
-      }, 1500);
+      setError('Facebook SDK not loaded. Please reload the page and try again.');
+      setLoading(false);
+      toast({
+        title: "SDK Not Loaded",
+        description: "Facebook SDK not loaded. Please reload the page and try again.",
+        variant: "destructive",
+      });
     }
   };
 
   const fetchReviews = (accessToken: string) => {
-    // In a real implementation, we would use the accessToken to fetch reviews
-    // For now, we'll use a mock implementation
-    setTimeout(() => {
-      try {
-        // Mock data - in a real implementation, this would come from the Facebook API
-        const mockReviews: FacebookReview[] = [
-          {
-            id: '1',
-            reviewer: {
-              name: 'James Wilson',
-              picture: 'https://randomuser.me/api/portraits/men/1.jpg'
-            },
-            rating: 5,
-            review_text: 'Absolute game-changer for our wedding! The spitbraai was the talk of the event - perfectly cooked meat and amazing service from the team.',
-            created_time: '2025-03-01T12:00:00Z'
-          },
-          {
-            id: '2',
-            reviewer: {
-              name: 'Lerato Ndlovu',
-              picture: 'https://randomuser.me/api/portraits/women/2.jpg'
-            },
-            rating: 5,
-            review_text: 'Hired Thys Gemaak for our company year-end function and they delivered beyond expectations. Professional service and the food was exceptional!',
-            created_time: '2025-03-15T14:30:00Z'
-          },
-          {
-            id: '3',
-            reviewer: {
-              name: 'Thomas Brown',
-              picture: 'https://randomuser.me/api/portraits/men/3.jpg'
-            },
-            rating: 4,
-            review_text: 'Great experience with this team. The booking process was simple and they were very accommodating with our special requests.',
-            created_time: '2025-02-25T18:00:00Z'
-          },
-          {
-            id: '4',
-            reviewer: {
-              name: 'Catherine van der Merwe',
-              picture: 'https://randomuser.me/api/portraits/women/4.jpg'
-            },
-            rating: 5,
-            review_text: "Best spitbraai in the Western Cape! We've used them for multiple family gatherings and they never disappoint.",
-            created_time: '2025-02-10T11:00:00Z'
-          },
-        ];
+    if (!window.FB) {
+      setError('Facebook SDK not loaded');
+      setLoading(false);
+      return;
+    }
+
+    // First, get the pages the user has access to
+    window.FB.api(
+      '/me/accounts',
+      'GET',
+      {},
+      (response) => {
+        if (response.error) {
+          setError(response.error.message || 'Error fetching Facebook pages');
+          setLoading(false);
+          return;
+        }
+
+        if (!response.data || response.data.length === 0) {
+          setError('No Facebook pages found or no access to pages');
+          setLoading(false);
+          return;
+        }
+
+        // Use the first page ID to fetch ratings
+        const pageId = response.data[0].id;
         
-        setReviews(mockReviews);
-        setLoading(false);
-      } catch (err) {
-        setError('Error fetching reviews');
-        setLoading(false);
+        window.FB.api(
+          `/${pageId}/ratings`,
+          'GET',
+          { fields: 'reviewer{name,picture},rating,review_text,created_time' },
+          (ratingsResponse) => {
+            if (ratingsResponse.error) {
+              setError(ratingsResponse.error.message || 'Error fetching Facebook reviews');
+              setLoading(false);
+              return;
+            }
+
+            if (!ratingsResponse.data) {
+              // If no actual reviews are found, we'll use the mock data for demonstration
+              useMockReviews();
+              return;
+            }
+
+            // Format the response to match our interface
+            const formattedReviews: FacebookReview[] = ratingsResponse.data.map((item: any) => ({
+              id: item.id,
+              reviewer: {
+                name: item.reviewer?.name || 'Anonymous',
+                picture: item.reviewer?.picture?.data?.url
+              },
+              rating: item.rating || 5,
+              review_text: item.review_text || '',
+              created_time: item.created_time
+            }));
+
+            setReviews(formattedReviews);
+            setLoading(false);
+          }
+        );
       }
-    }, 1500);
+    );
+  };
+
+  const useMockReviews = () => {
+    // Fallback to mock data if no reviews are found or for demo purposes
+    const mockReviews: FacebookReview[] = [
+      {
+        id: '1',
+        reviewer: {
+          name: 'James Wilson',
+          picture: 'https://randomuser.me/api/portraits/men/1.jpg'
+        },
+        rating: 5,
+        review_text: 'Absolute game-changer for our wedding! The spitbraai was the talk of the event - perfectly cooked meat and amazing service from the team.',
+        created_time: '2025-03-01T12:00:00Z'
+      },
+      {
+        id: '2',
+        reviewer: {
+          name: 'Lerato Ndlovu',
+          picture: 'https://randomuser.me/api/portraits/women/2.jpg'
+        },
+        rating: 5,
+        review_text: 'Hired Thys Gemaak for our company year-end function and they delivered beyond expectations. Professional service and the food was exceptional!',
+        created_time: '2025-03-15T14:30:00Z'
+      },
+      {
+        id: '3',
+        reviewer: {
+          name: 'Thomas Brown',
+          picture: 'https://randomuser.me/api/portraits/men/3.jpg'
+        },
+        rating: 4,
+        review_text: 'Great experience with this team. The booking process was simple and they were very accommodating with our special requests.',
+        created_time: '2025-02-25T18:00:00Z'
+      },
+      {
+        id: '4',
+        reviewer: {
+          name: 'Catherine van der Merwe',
+          picture: 'https://randomuser.me/api/portraits/women/4.jpg'
+        },
+        rating: 5,
+        review_text: "Best spitbraai in the Western Cape! We've used them for multiple family gatherings and they never disappoint.",
+        created_time: '2025-02-10T11:00:00Z'
+      },
+    ];
+    
+    setReviews(mockReviews);
+    setLoading(false);
+    toast({
+      title: "Using Demo Data",
+      description: "No Facebook reviews found. Showing demonstration data instead.",
+    });
   };
 
   useEffect(() => {
-    // Initialize Facebook SDK
-    // This would typically be done in a more central location
-    const initFacebookSDK = () => {
-      if (window.FB) return;
-      
-      // This would be loaded from the Facebook SDK script
-      console.log('Facebook SDK would be initialized here');
-      // In a real implementation, we would check for an existing session
+    // Check if the Facebook SDK is loaded
+    const checkFBSDK = () => {
+      if (window.FB) {
+        console.log('Facebook SDK loaded');
+        // Check if the user is already logged in
+        window.FB.api('/me', (response: any) => {
+          if (response && !response.error) {
+            setIsConnected(true);
+            // You might want to fetch reviews here if the user is already connected
+          }
+        });
+      } else {
+        // If the SDK isn't loaded yet, wait a bit and try again
+        setTimeout(checkFBSDK, 1000);
+      }
     };
     
-    initFacebookSDK();
+    checkFBSDK();
   }, []);
 
   const formatDate = (dateString: string) => {

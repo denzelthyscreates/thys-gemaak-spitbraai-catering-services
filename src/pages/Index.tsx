@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
@@ -9,20 +8,19 @@ import Contact from '../components/Contact';
 import Footer from '../components/Footer';
 import UploadGallery from '../components/gallery/UploadGallery';
 import FacebookReviews from '../components/gallery/FacebookReviews';
+import FacebookGallery from '../components/gallery/FacebookGallery';
 import ScrollToTop from '../components/ScrollToTop';
+import { Toaster } from '../components/ui/toaster';
 
 const Index = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  // Handle scroll animations and scroll progress
   useEffect(() => {
     const handleScroll = () => {
-      // Calculate scroll progress for the progress bar
       const totalHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
       const progress = (window.scrollY / totalHeight) * 100;
       setScrollProgress(progress);
       
-      // Handle section animations
       const sections = document.querySelectorAll('section[id]');
       
       sections.forEach(section => {
@@ -35,7 +33,6 @@ const Index = () => {
       });
     };
     
-    // Smooth scroll to element
     const handleScrollToElement = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const href = target.getAttribute('href');
@@ -47,23 +44,20 @@ const Index = () => {
         
         if (element) {
           window.scrollTo({
-            top: element.offsetTop - 80, // Offset for navbar
+            top: element.offsetTop - 80,
             behavior: 'smooth'
           });
         }
       }
     };
 
-    // Add event listeners
     window.addEventListener('scroll', handleScroll);
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', handleScrollToElement as EventListener);
     });
 
-    // Initial call to set up animations for elements already in view
     handleScroll();
 
-    // Cleanup
     return () => {
       window.removeEventListener('scroll', handleScroll);
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -74,7 +68,6 @@ const Index = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Scroll Progress Indicator */}
       <div 
         className="scroll-indicator" 
         style={{ width: `${scrollProgress}%` }}
@@ -87,7 +80,6 @@ const Index = () => {
         <div id="services"><Services /></div>
         <div id="testimonials"><Testimonials /></div>
         
-        {/* Gallery Section */}
         <section id="gallery" className="section py-16 bg-muted/30 scroll-mt-20">
           <div className="container-width">
             <div className="text-center max-w-3xl mx-auto mb-12">
@@ -103,8 +95,12 @@ const Index = () => {
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <UploadGallery />
+              <FacebookGallery />
               <FacebookReviews />
+            </div>
+            
+            <div className="mt-12">
+              <UploadGallery />
             </div>
           </div>
         </section>
@@ -113,6 +109,7 @@ const Index = () => {
       </main>
       <Footer />
       <ScrollToTop />
+      <Toaster />
     </div>
   );
 };
