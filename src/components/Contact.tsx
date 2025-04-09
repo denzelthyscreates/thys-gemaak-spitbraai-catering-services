@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MenuBuilder from './MenuBuilder';
@@ -11,6 +11,7 @@ const Contact = () => {
   const [activeTab, setActiveTab] = useState("menu");
   const [bookingFormData, setBookingFormData] = useState(null);
   const [bookingSubmitted, setBookingSubmitted] = useState(false);
+  const contactSectionRef = useRef<HTMLElement>(null);
   
   useEffect(() => {
     const savedActiveTab = localStorage.getItem('activeTab');
@@ -61,6 +62,14 @@ const Contact = () => {
       return;
     }
     setActiveTab(value);
+    
+    // Scroll to the top of the contact section when changing tabs
+    if (contactSectionRef.current) {
+      contactSectionRef.current.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
   };
   
   const handleNavigateTab = (tabValue: string) => {
@@ -69,6 +78,14 @@ const Contact = () => {
       return;
     }
     setActiveTab(tabValue);
+    
+    // Scroll to the top of the contact section when navigating tabs
+    if (contactSectionRef.current) {
+      contactSectionRef.current.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
   };
 
   const handleBookingFormDataChange = (data: any) => {
@@ -86,7 +103,7 @@ const Contact = () => {
   const defaultTotalPrice = 0;
 
   return (
-    <section id="contact" className="section scroll-mt-20">
+    <section id="contact" className="section scroll-mt-20" ref={contactSectionRef}>
       <div className="container-width py-16">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block px-4 py-1.5 mb-6 text-xl font-medium rounded-full bg-primary/10 text-primary">
