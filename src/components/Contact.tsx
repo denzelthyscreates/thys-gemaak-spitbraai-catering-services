@@ -45,6 +45,11 @@ const Contact = () => {
     if (bookingSubmitted) {
       localStorage.setItem('bookingSubmitted', 'true');
       setActiveTab('payment');
+      
+      // Scroll to the top of the contact section after form submission
+      setTimeout(() => {
+        scrollToSectionTop();
+      }, 100);
     }
   }, [bookingSubmitted]);
 
@@ -64,6 +69,10 @@ const Contact = () => {
     setActiveTab(value);
     
     // Scroll to the top of the contact section when changing tabs
+    scrollToSectionTop();
+  };
+  
+  const scrollToSectionTop = () => {
     if (contactSectionRef.current) {
       contactSectionRef.current.scrollIntoView({ 
         behavior: 'smooth',
@@ -80,12 +89,7 @@ const Contact = () => {
     setActiveTab(tabValue);
     
     // Scroll to the top of the contact section when navigating tabs
-    if (contactSectionRef.current) {
-      contactSectionRef.current.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }
+    scrollToSectionTop();
   };
 
   const handleBookingFormDataChange = (data: any) => {
@@ -97,6 +101,11 @@ const Contact = () => {
     setBookingSubmitted(true);
     setBookingFormData(null);
     localStorage.removeItem('bookingFormData');
+    
+    // Ensure we scroll to the top after submission
+    setTimeout(() => {
+      scrollToSectionTop();
+    }, 100);
   };
 
   const defaultNumGuests = 50;

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
@@ -340,7 +341,7 @@ const HubSpotForm = ({ menuSelection, savedFormData, onFormDataChange, onFormSub
         <div className="bg-green-50 border border-green-200 rounded-lg p-8 text-center">
           <div className="flex justify-center mb-4">
             <div className="bg-green-100 p-3 rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-green-600">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
             </div>
