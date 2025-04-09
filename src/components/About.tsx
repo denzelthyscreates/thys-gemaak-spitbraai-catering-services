@@ -24,7 +24,7 @@ const About = () => {
   ];
 
   return (
-    <section id="about" className="section bg-primary/10">
+    <section id="about" className="section bg-primary/30">
       <div className="container-width">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           {/* Image Column - Moved to align with title */}
