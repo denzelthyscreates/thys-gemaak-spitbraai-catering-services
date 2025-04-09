@@ -17,16 +17,6 @@ interface FacebookReview {
   created_time: string;
 }
 
-// Extend Window interface to include FB property
-declare global {
-  interface Window {
-    FB?: {
-      login: (callback: (response: { authResponse?: { accessToken: string } }) => void, options: { scope: string }) => void;
-      api: (path: string, method: string, params: any, callback: (response: any) => void) => void;
-    };
-  }
-}
-
 const FacebookReviews = () => {
   const [reviews, setReviews] = useState<FacebookReview[]>([]);
   const [loading, setLoading] = useState(false);
@@ -192,7 +182,7 @@ const FacebookReviews = () => {
       if (window.FB) {
         console.log('Facebook SDK loaded');
         // Check if the user is already logged in
-        window.FB.api('/me', (response: any) => {
+        window.FB.api('/me', 'GET', {}, (response: any) => {
           if (response && !response.error) {
             setIsConnected(true);
             // You might want to fetch reviews here if the user is already connected
