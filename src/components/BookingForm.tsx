@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -204,7 +205,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
         </div>
         <h3 className="text-xl font-semibold mb-2">Booking Request Received!</h3>
         <p className="text-muted-foreground mb-4">
-          Thank you for your booking request. We've sent a confirmation email to your inbox. 
+          Thank you for your booking enquiry. We've sent a confirmation email to your inbox. 
           Our team will review your request and get back to you within 24 hours.
         </p>
         <div className="text-sm text-muted-foreground mb-6">
@@ -412,12 +413,12 @@ const BookingForm: React.FC<BookingFormProps> = ({
             className="w-full" 
             disabled={isSubmitting || !menuSelection}
           >
-            {isSubmitting ? "Submitting..." : "Submit Booking Request"}
+            {isSubmitting ? "Submitting..." : "Submit Booking Enquiry"}
           </Button>
           
           {!menuSelection && (
             <p className="text-sm text-muted-foreground text-center">
-              Please select a menu package before submitting your booking request.
+              Please select a menu package before submitting your booking enquiry.
             </p>
           )}
         </form>

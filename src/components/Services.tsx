@@ -1,3 +1,4 @@
+
 import { Check, Users, Building, Cake } from 'lucide-react';
 
 const Services = () => {
@@ -86,7 +87,7 @@ const Services = () => {
                   href="#contact" 
                   className="block w-full mt-8 py-3 px-6 text-center rounded-md border border-primary text-primary font-medium transition-all duration-300 hover:bg-primary hover:text-white transform hover:scale-105"
                 >
-                  Inquire Now
+                  Enquire Now
                 </a>
               </div>
               
