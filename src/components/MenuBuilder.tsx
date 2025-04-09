@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -71,6 +72,16 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions }: {
     });
   };
   
+  const handleNextStep = () => {
+    // Change to the 'book' tab
+    localStorage.setItem('activeTab', 'book');
+    // Trigger tab change
+    const bookTabElement = document.querySelector('[data-value="book"]');
+    if (bookTabElement) {
+      (bookTabElement as HTMLElement).click();
+    }
+  };
+  
   return (
     <div className="animate-fade-in">
       <div className="mb-6 flex justify-end">
@@ -94,7 +105,7 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions }: {
         </>
       )}
 
-      <MenuSummary menuOptions={menuOptions} />
+      <MenuSummary menuOptions={menuOptions} onNextStep={handleNextStep} />
     </div>
   );
 };

@@ -1,12 +1,16 @@
+
 import React from 'react';
 import { useMenu } from '@/contexts/MenuContext';
 import { MenuOption } from '@/types/menu';
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
 
 interface MenuSummaryProps {
   menuOptions: MenuOption[];
+  onNextStep?: () => void;
 }
 
-export const MenuSummary = ({ menuOptions }: MenuSummaryProps) => {
+export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
   const {
     selectedMenu,
     numGuests,
@@ -136,6 +140,19 @@ export const MenuSummary = ({ menuOptions }: MenuSummaryProps) => {
           </div>
         )}
       </div>
+      
+      {/* Next button */}
+      {selectedMenu && (
+        <div className="mt-6 flex justify-end">
+          <Button 
+            onClick={onNextStep}
+            className="gap-2"
+          >
+            Continue to Booking Enquiry
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
