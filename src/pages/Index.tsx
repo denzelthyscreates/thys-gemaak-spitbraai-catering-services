@@ -8,6 +8,7 @@ import Testimonials from '../components/Testimonials';
 import Contact from '../components/Contact';
 import Footer from '../components/Footer';
 import UploadGallery from '../components/gallery/UploadGallery';
+import FacebookReviews from '../components/gallery/FacebookReviews';
 import ScrollToTop from '../components/ScrollToTop';
 
 const Index = () => {
@@ -100,7 +101,11 @@ const Index = () => {
                 Browse through photos from our recent catering events and spitbraai experiences.
               </p>
             </div>
-            <UploadGallery />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <UploadGallery />
+              <FacebookReviews />
+            </div>
           </div>
         </section>
         
