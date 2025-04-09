@@ -20,16 +20,6 @@ interface FacebookPhoto {
   created_time: string;
 }
 
-// Extend Window interface to include FB property
-declare global {
-  interface Window {
-    FB?: {
-      login: (callback: (response: { authResponse?: { accessToken: string } }) => void, options: { scope: string }) => void;
-      api: (path: string, method: string, params: any, callback: (response: any) => void) => void;
-    };
-  }
-}
-
 const FacebookGallery = () => {
   const [photos, setPhotos] = useState<FacebookPhoto[]>([]);
   const [loading, setLoading] = useState(false);
@@ -78,7 +68,6 @@ const FacebookGallery = () => {
       return;
     }
 
-    // First, get the pages the user has access to
     window.FB.api(
       '/me/accounts',
       'GET',
@@ -96,7 +85,6 @@ const FacebookGallery = () => {
           return;
         }
 
-        // Use the first page ID to fetch photos
         const pageId = response.data[0].id;
         
         window.FB.api(
@@ -111,12 +99,10 @@ const FacebookGallery = () => {
             }
 
             if (!photosResponse.data || photosResponse.data.length === 0) {
-              // If no actual photos are found, we'll use the mock data for demonstration
               useMockPhotos();
               return;
             }
 
-            // Format the response to match our interface
             const formattedPhotos: FacebookPhoto[] = photosResponse.data.map((item: any) => ({
               id: item.id,
               source: item.source,
@@ -133,7 +119,6 @@ const FacebookGallery = () => {
   };
 
   const useMockPhotos = () => {
-    // Fallback to mock data if no photos are found or for demo purposes
     const mockPhotos: FacebookPhoto[] = [
       {
         id: '1',
@@ -170,19 +155,15 @@ const FacebookGallery = () => {
   };
 
   useEffect(() => {
-    // Check if the Facebook SDK is loaded
     const checkFBSDK = () => {
       if (window.FB) {
         console.log('Facebook SDK loaded');
-        // Check if the user is already logged in
         window.FB.api('/me', 'GET', {}, (response: any) => {
           if (response && !response.error) {
             setIsConnected(true);
-            // You might want to fetch photos here if the user is already connected
           }
         });
       } else {
-        // If the SDK isn't loaded yet, wait a bit and try again
         setTimeout(checkFBSDK, 1000);
       }
     };

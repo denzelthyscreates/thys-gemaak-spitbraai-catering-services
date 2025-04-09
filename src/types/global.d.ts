@@ -9,7 +9,7 @@ interface Window {
     };
     init?: (options: {
       appId: string;
-      cookie: boolean;
+      autoLogAppEvents: boolean;
       xfbml: boolean;
       version: string;
     }) => void;
