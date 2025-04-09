@@ -1,21 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Star, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useToast } from '@/hooks/use-toast';
-
-interface FacebookReview {
-  id: string;
-  reviewer: {
-    name: string;
-    picture?: string;
-  };
-  rating: number;
-  review_text: string;
-  created_time: string;
-}
+import { FacebookReview, fetchFacebookReviews } from '@/utils/facebookApi';
 
 // Facebook page ID for Thys Gemaak Spitbraai
 const FACEBOOK_PAGE_ID = '61559838444726';
@@ -27,21 +16,17 @@ const FacebookReviews = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchReviews();
+    fetchReviewData();
   }, []);
 
-  const fetchReviews = async () => {
+  const fetchReviewData = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      // In a production app, you would make a server-side request to Facebook Graph API
-      // using a long-lived access token stored securely on your server
-      
-      // For now, we'll use mock data since client-side API access requires user authentication
-      // which is not what we want for automatic reviews
-      const mockReviews = getMockReviews();
-      setReviews(mockReviews);
+      // Fetch reviews from our server-side API
+      const fetchedReviews = await fetchFacebookReviews();
+      setReviews(fetchedReviews);
     } catch (err) {
       console.error('Error fetching Facebook reviews:', err);
       setError('Failed to load reviews. Please try again later.');
@@ -50,6 +35,9 @@ const FacebookReviews = () => {
         description: "Failed to load Facebook reviews",
         variant: "destructive"
       });
+      // Fall back to mock data if the API request fails
+      const mockReviews = getMockReviews();
+      setReviews(mockReviews);
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ImageIcon, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,13 +11,7 @@ import {
 } from '@/components/ui/carousel';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useToast } from '@/hooks/use-toast';
-
-interface FacebookPhoto {
-  id: string;
-  source: string;
-  name?: string;
-  created_time: string;
-}
+import { FacebookPhoto, fetchFacebookPhotos } from '@/utils/facebookApi';
 
 // Facebook page ID for Thys Gemaak Spitbraai
 const FACEBOOK_PAGE_ID = '61559838444726';
@@ -38,13 +31,9 @@ const FacebookGallery = () => {
     setError(null);
 
     try {
-      // In a production app, you would make a server-side request to Facebook Graph API
-      // using a long-lived access token stored securely on your server
-      
-      // For now, we'll use mock data since client-side API access requires user authentication
-      // which is not what we want for an automatic gallery
-      const mockPhotos = getMockPhotos();
-      setPhotos(mockPhotos);
+      // Fetch photos from our server-side API
+      const fetchedPhotos = await fetchFacebookPhotos();
+      setPhotos(fetchedPhotos);
     } catch (err) {
       console.error('Error fetching Facebook photos:', err);
       setError('Failed to load photos. Please try again later.');
@@ -53,6 +42,9 @@ const FacebookGallery = () => {
         description: "Failed to load Facebook photos",
         variant: "destructive"
       });
+      // Fall back to mock data if the API request fails
+      const mockPhotos = getMockPhotos();
+      setPhotos(mockPhotos);
     } finally {
       setLoading(false);
     }
