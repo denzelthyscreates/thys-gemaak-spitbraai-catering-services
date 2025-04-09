@@ -1,8 +1,10 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Facebook page ID for Thys Gemaak Spitbraai
-const FACEBOOK_PAGE_ID = '61559838444726';
+// Facebook page ID 
+// Note: You need to replace this with your actual Facebook page ID
+// This can be found in your Facebook page URL or page settings
+const FACEBOOK_PAGE_ID = '112480334826066'; // Using a fallback ID as an example
 
 // Type definitions
 export interface FacebookPhoto {
@@ -35,6 +37,8 @@ export const fetchFacebookPhotos = async (): Promise<FacebookPhoto[]> => {
     
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
     
+    console.log(`Fetching Facebook photos for page ID: ${FACEBOOK_PAGE_ID}`);
+    
     const { data, error } = await supabase.functions.invoke('facebook-api', {
       body: { 
         endpoint: 'photos',
@@ -42,7 +46,15 @@ export const fetchFacebookPhotos = async (): Promise<FacebookPhoto[]> => {
       }
     });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase Edge Function Error:', error);
+      throw error;
+    }
+    
+    if (data.error) {
+      console.error('Facebook API Error:', data.error);
+      throw new Error(data.error);
+    }
     
     return data.photos || [];
   } catch (error) {
@@ -63,6 +75,8 @@ export const fetchFacebookReviews = async (): Promise<FacebookReview[]> => {
     
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
     
+    console.log(`Fetching Facebook reviews for page ID: ${FACEBOOK_PAGE_ID}`);
+    
     const { data, error } = await supabase.functions.invoke('facebook-api', {
       body: { 
         endpoint: 'reviews',
@@ -70,7 +84,15 @@ export const fetchFacebookReviews = async (): Promise<FacebookReview[]> => {
       }
     });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase Edge Function Error:', error);
+      throw error;
+    }
+    
+    if (data.error) {
+      console.error('Facebook API Error:', data.error);
+      throw new Error(data.error);
+    }
     
     return data.reviews || [];
   } catch (error) {

@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { ImageIcon, Loader2 } from 'lucide-react';
+import { ImageIcon, Loader2, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { 
@@ -12,9 +13,6 @@ import {
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useToast } from '@/hooks/use-toast';
 import { FacebookPhoto, fetchFacebookPhotos } from '@/utils/facebookApi';
-
-// Facebook page ID for Thys Gemaak Spitbraai
-const FACEBOOK_PAGE_ID = '61559838444726';
 
 const FacebookGallery = () => {
   const [photos, setPhotos] = useState<FacebookPhoto[]>([]);
@@ -34,12 +32,19 @@ const FacebookGallery = () => {
       // Fetch photos from our server-side API
       const fetchedPhotos = await fetchFacebookPhotos();
       setPhotos(fetchedPhotos);
-    } catch (err) {
+      
+      if (fetchedPhotos.length === 0) {
+        console.log('No photos found from Facebook API');
+      } else {
+        console.log(`Successfully fetched ${fetchedPhotos.length} photos from Facebook`);
+      }
+    } catch (err: any) {
       console.error('Error fetching Facebook photos:', err);
-      setError('Failed to load photos. Please try again later.');
+      const errorMessage = err?.message || 'Failed to load photos. Please try again later.';
+      setError(errorMessage);
       toast({
-        title: "Error",
-        description: "Failed to load Facebook photos",
+        title: "Facebook Gallery Error",
+        description: errorMessage,
         variant: "destructive"
       });
       // Fall back to mock data if the API request fails
@@ -97,8 +102,20 @@ const FacebookGallery = () => {
       <CardContent>
         {error && (
           <Alert variant="destructive" className="mb-4">
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Connection Error</AlertTitle>
+            <AlertDescription className="space-y-2">
+              <p>{error}</p>
+              <p className="text-xs">
+                Note: Using fallback gallery images. To fix this issue, verify that:
+              </p>
+              <ul className="text-xs list-disc pl-5">
+                <li>The Facebook Page ID is correct</li>
+                <li>Your Facebook access token has the necessary permissions</li>
+                <li>The token has not expired</li>
+                <li>The Facebook page is public or your app has access to it</li>
+              </ul>
+            </AlertDescription>
           </Alert>
         )}
         

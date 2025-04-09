@@ -1,13 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Star, Loader2 } from 'lucide-react';
+import { MessageSquare, Star, Loader2, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useToast } from '@/hooks/use-toast';
 import { FacebookReview, fetchFacebookReviews } from '@/utils/facebookApi';
-
-// Facebook page ID for Thys Gemaak Spitbraai
-const FACEBOOK_PAGE_ID = '61559838444726';
 
 const FacebookReviews = () => {
   const [reviews, setReviews] = useState<FacebookReview[]>([]);
@@ -27,12 +25,19 @@ const FacebookReviews = () => {
       // Fetch reviews from our server-side API
       const fetchedReviews = await fetchFacebookReviews();
       setReviews(fetchedReviews);
-    } catch (err) {
+      
+      if (fetchedReviews.length === 0) {
+        console.log('No reviews found from Facebook API');
+      } else {
+        console.log(`Successfully fetched ${fetchedReviews.length} reviews from Facebook`);
+      }
+    } catch (err: any) {
       console.error('Error fetching Facebook reviews:', err);
-      setError('Failed to load reviews. Please try again later.');
+      const errorMessage = err?.message || 'Failed to load reviews. Please try again later.';
+      setError(errorMessage);
       toast({
-        title: "Error",
-        description: "Failed to load Facebook reviews",
+        title: "Facebook Reviews Error",
+        description: errorMessage,
         variant: "destructive"
       });
       // Fall back to mock data if the API request fails
@@ -106,8 +111,20 @@ const FacebookReviews = () => {
       <CardContent>
         {error && (
           <Alert variant="destructive" className="mb-4">
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Connection Error</AlertTitle>
+            <AlertDescription className="space-y-2">
+              <p>{error}</p>
+              <p className="text-xs">
+                Note: Using fallback review data. To fix this issue, verify that:
+              </p>
+              <ul className="text-xs list-disc pl-5">
+                <li>The Facebook Page ID is correct</li>
+                <li>Your Facebook access token has the necessary permissions</li>
+                <li>The token has not expired</li>
+                <li>The Facebook page is public or your app has access to it</li>
+              </ul>
+            </AlertDescription>
           </Alert>
         )}
         
