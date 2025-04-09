@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { toast } from 'sonner';
 
-const HubSpotForm = ({ menuSelection, savedFormData, onFormDataChange }) => {
+const HubSpotForm = ({ menuSelection, savedFormData, onFormDataChange, onFormSubmitted }) => {
   const [formInitialized, setFormInitialized] = useState(false);
   const [lastUpdateData, setLastUpdateData] = useState(null);
   const summaryRef = useRef(null);
@@ -90,6 +90,11 @@ const HubSpotForm = ({ menuSelection, savedFormData, onFormDataChange }) => {
             if (onFormDataChange) {
               onFormDataChange(null);
               localStorage.removeItem('bookingFormData');
+            }
+            
+            // Notify parent component that the form was submitted
+            if (onFormSubmitted) {
+              onFormSubmitted();
             }
           },
           onFormSubmitted: function() {

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
@@ -43,10 +44,18 @@ const Index = () => {
         const element = document.getElementById(elementId);
         
         if (element) {
+          // Check if we're navigating to the contact section
+          const isContactSection = elementId === 'contact';
+          
           window.scrollTo({
             top: element.offsetTop - 80,
             behavior: 'smooth'
           });
+          
+          // If we're navigating to contact section, ensure we're on the menu tab
+          if (isContactSection) {
+            localStorage.setItem('activeTab', 'menu');
+          }
         }
       }
     };

@@ -9,13 +9,15 @@ const Contact = () => {
   const [menuSelection, setMenuSelection] = useState(null);
   const [activeTab, setActiveTab] = useState("menu");
   const [bookingFormData, setBookingFormData] = useState(null);
+  const [bookingSubmitted, setBookingSubmitted] = useState(false);
   
   useEffect(() => {
     const savedActiveTab = localStorage.getItem('activeTab');
     const savedMenuSelection = localStorage.getItem('menuSelection');
     const savedBookingFormData = localStorage.getItem('bookingFormData');
+    const savedBookingSubmitted = localStorage.getItem('bookingSubmitted');
     
-    if (savedActiveTab) {
+    if (savedActiveTab && savedMenuSelection) {
       setActiveTab(savedActiveTab);
     }
     
@@ -26,23 +28,49 @@ const Contact = () => {
     if (savedBookingFormData) {
       setBookingFormData(JSON.parse(savedBookingFormData));
     }
+    
+    if (savedBookingSubmitted === 'true') {
+      setBookingSubmitted(true);
+      setActiveTab('payment');
+    }
   }, []);
   
   useEffect(() => {
     localStorage.setItem('activeTab', activeTab);
   }, [activeTab]);
   
+  useEffect(() => {
+    if (bookingSubmitted) {
+      localStorage.setItem('bookingSubmitted', 'true');
+      setActiveTab('payment');
+    }
+  }, [bookingSubmitted]);
+
   const handleMenuSelectionChange = (selection: any) => {
     setMenuSelection(selection);
+    if (selection) {
+      localStorage.setItem('menuSelection', JSON.stringify(selection));
+    } else {
+      localStorage.removeItem('menuSelection');
+    }
   };
 
   const handleTabChange = (value: string) => {
+    if (value === 'book' && !menuSelection) {
+      return;
+    }
     setActiveTab(value);
   };
 
   const handleBookingFormDataChange = (data: any) => {
     setBookingFormData(data);
     localStorage.setItem('bookingFormData', JSON.stringify(data));
+  };
+  
+  const handleBookingSubmitted = () => {
+    setBookingSubmitted(true);
+    setBookingFormData(null);
+    localStorage.removeItem('bookingFormData');
   };
 
   const defaultNumGuests = 50;
@@ -67,7 +95,7 @@ const Contact = () => {
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="menu">Build Your Menu</TabsTrigger>
-            <TabsTrigger value="book">Booking Enquiry</TabsTrigger>
+            <TabsTrigger value="book" disabled={!menuSelection}>Booking Enquiry</TabsTrigger>
             <TabsTrigger value="payment">Payment Options</TabsTrigger>
           </TabsList>
           
@@ -83,6 +111,7 @@ const Contact = () => {
               menuSelection={menuSelection}
               savedFormData={bookingFormData}
               onFormDataChange={handleBookingFormDataChange}
+              onFormSubmitted={handleBookingSubmitted}
             />
           </TabsContent>
           
