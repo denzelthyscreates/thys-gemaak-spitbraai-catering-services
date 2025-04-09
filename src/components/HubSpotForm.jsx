@@ -1,10 +1,12 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { toast } from 'sonner';
+import { Button } from "@/components/ui/button";
+import { CreditCard } from "lucide-react";
 
-const HubSpotForm = ({ menuSelection, savedFormData, onFormDataChange, onFormSubmitted }) => {
+const HubSpotForm = ({ menuSelection, savedFormData, onFormDataChange, onFormSubmitted, onNavigateTab }) => {
   const [formInitialized, setFormInitialized] = useState(false);
   const [lastUpdateData, setLastUpdateData] = useState(null);
+  const [submissionComplete, setSubmissionComplete] = useState(false);
   const summaryRef = useRef(null);
   const formRef = useRef(null);
 
@@ -91,6 +93,9 @@ const HubSpotForm = ({ menuSelection, savedFormData, onFormDataChange, onFormSub
               onFormDataChange(null);
               localStorage.removeItem('bookingFormData');
             }
+            
+            // Set the submission complete state to true to show the "Continue to Payment" button
+            setSubmissionComplete(true);
             
             // Notify parent component that the form was submitted
             if (onFormSubmitted) {
@@ -308,18 +313,61 @@ const HubSpotForm = ({ menuSelection, savedFormData, onFormDataChange, onFormSub
     console.log("Form data updated with complete menu selection");
   };
 
+  const handleNavigateToPayment = () => {
+    if (onNavigateTab) {
+      onNavigateTab('payment');
+    }
+  };
+
   return (
     <div className="hubspot-form-wrapper">
-      <div id="hubspot-form-container" style={{ minHeight: "600px" }} />
-      
-      {/* Add a container for the menu selection summary that will be updated */}
-      {menuSelection && (
-        <div className="menu-selection-summary mt-4 p-4 bg-primary/5 rounded-lg">
-          <h4 className="font-semibold mb-2">Your Menu Selection</h4>
-          <p className="text-sm text-muted-foreground mb-3">
-            Your menu selection will be included with your enquiry.
+      {!submissionComplete ? (
+        <>
+          <div id="hubspot-form-container" style={{ minHeight: "600px" }} />
+          
+          {/* Add a container for the menu selection summary that will be updated */}
+          {menuSelection && (
+            <div className="menu-selection-summary mt-4 p-4 bg-primary/5 rounded-lg">
+              <h4 className="font-semibold mb-2">Your Menu Selection</h4>
+              <p className="text-sm text-muted-foreground mb-3">
+                Your menu selection will be included with your enquiry.
+              </p>
+              <div ref={summaryRef}></div>
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-8 text-center">
+          <div className="flex justify-center mb-4">
+            <div className="bg-green-100 p-3 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-green-600">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+          </div>
+          <h3 className="text-xl font-semibold mb-2">Booking Request Received!</h3>
+          <p className="text-muted-foreground mb-4">
+            Thank you for your booking request. We've sent a confirmation email to your inbox. 
+            Our team will review your request and get back to you within 24 hours.
           </p>
-          <div ref={summaryRef}></div>
+          <div className="text-sm text-muted-foreground mb-6">
+            <p className="font-medium">What happens next?</p>
+            <ol className="list-decimal list-inside mt-2 text-left space-y-1">
+              <li>You'll receive an automated confirmation email</li>
+              <li>Our team will review your booking details</li>
+              <li>You'll receive a follow-up email within 24-48 hours</li>
+              <li>Once confirmed, you'll receive payment instructions</li>
+            </ol>
+          </div>
+          
+          <Button 
+            onClick={handleNavigateToPayment}
+            className="w-full sm:w-auto"
+            size="lg"
+          >
+            <CreditCard className="mr-2 h-4 w-4" />
+            Continue to Payment Options
+          </Button>
         </div>
       )}
     </div>

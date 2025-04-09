@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -14,7 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Calendar, Mail, Phone, User, MapPin, CalendarClock, Check } from 'lucide-react';
+import { Calendar, Mail, Phone, User, MapPin, CalendarClock, Check, CreditCard } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
@@ -36,12 +37,16 @@ interface BookingFormProps {
   menuSelection: any;
   savedFormData?: BookingFormValues | null;
   onFormDataChange?: (data: BookingFormValues) => void;
+  onFormSubmitted?: () => void;
+  onNavigateTab?: (tab: string) => void;
 }
 
 const BookingForm: React.FC<BookingFormProps> = ({ 
   menuSelection, 
   savedFormData, 
-  onFormDataChange 
+  onFormDataChange,
+  onFormSubmitted,
+  onNavigateTab
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionComplete, setSubmissionComplete] = useState(false);
@@ -156,6 +161,10 @@ const BookingForm: React.FC<BookingFormProps> = ({
         if (onFormDataChange) {
           onFormDataChange(null);
         }
+        
+        if (onFormSubmitted) {
+          onFormSubmitted();
+        }
       } else {
         throw new Error("Failed to submit booking");
       }
@@ -179,6 +188,12 @@ const BookingForm: React.FC<BookingFormProps> = ({
     "Family Gathering",
     "Other"
   ];
+  
+  const handleNavigateToPayment = () => {
+    if (onNavigateTab) {
+      onNavigateTab('payment');
+    }
+  };
 
   if (submissionComplete) {
     return (
@@ -193,7 +208,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
           Thank you for your booking request. We've sent a confirmation email to your inbox. 
           Our team will review your request and get back to you within 24 hours.
         </p>
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground mb-6">
           <p className="font-medium">What happens next?</p>
           <ol className="list-decimal list-inside mt-2 text-left space-y-1">
             <li>You'll receive an automated confirmation email</li>
@@ -202,6 +217,15 @@ const BookingForm: React.FC<BookingFormProps> = ({
             <li>Once confirmed, you'll get payment instructions for the deposit</li>
           </ol>
         </div>
+        
+        <Button 
+          onClick={handleNavigateToPayment}
+          className="w-full sm:w-auto"
+          size="lg"
+        >
+          <CreditCard className="mr-2 h-4 w-4" />
+          Continue to Payment Options
+        </Button>
       </div>
     );
   }

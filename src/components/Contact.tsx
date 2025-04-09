@@ -139,6 +139,7 @@ const Contact = () => {
               savedFormData={bookingFormData}
               onFormDataChange={handleBookingFormDataChange}
               onFormSubmitted={handleBookingSubmitted}
+              onNavigateTab={handleNavigateTab}
             />
           </TabsContent>
           
