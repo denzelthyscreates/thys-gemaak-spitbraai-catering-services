@@ -101,7 +101,7 @@ const FacebookReviews = () => {
               picture: 'https://randomuser.me/api/portraits/women/4.jpg'
             },
             rating: 5,
-            review_text: 'Best spitbraai in the Western Cape! We've used them for multiple family gatherings and they never disappoint.',
+            review_text: "Best spitbraai in the Western Cape! We've used them for multiple family gatherings and they never disappoint.",
             created_time: '2025-02-10T11:00:00Z'
           },
         ];
