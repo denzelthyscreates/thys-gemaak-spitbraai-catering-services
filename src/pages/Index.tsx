@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
@@ -8,8 +7,6 @@ import Testimonials from '../components/Testimonials';
 import Contact from '../components/Contact';
 import Footer from '../components/Footer';
 import UploadGallery from '../components/gallery/UploadGallery';
-import FacebookReviews from '../components/gallery/FacebookReviews';
-import FacebookGallery from '../components/gallery/FacebookGallery';
 import ScrollToTop from '../components/ScrollToTop';
 import { Toaster } from '../components/ui/toaster';
 
@@ -101,11 +98,6 @@ const Index = () => {
               <p className="text-lg text-muted-foreground">
                 Browse through photos from our recent catering events and spitbraai experiences.
               </p>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <FacebookGallery />
-              <FacebookReviews />
             </div>
             
             <div className="mt-12">
