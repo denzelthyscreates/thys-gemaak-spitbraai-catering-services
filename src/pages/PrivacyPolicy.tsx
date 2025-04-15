@@ -102,7 +102,7 @@ const PrivacyPolicy = () => {
             <h3 className="text-xl font-semibold mt-6 mb-4">7.5 Your Rights</h3>
             <p>
               You may request to access, update, or delete your information 
-              by contacting us at denzel@thysgemaak.com.
+              by contacting us at info@thysgemaak.com.
             </p>
             
             <h3 className="text-xl font-semibold mt-6 mb-4">7.6 Facebook-Specific Terms</h3>
