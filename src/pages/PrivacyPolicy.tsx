@@ -1,4 +1,3 @@
-
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
@@ -74,6 +73,43 @@ const PrivacyPolicy = () => {
               <strong>Email:</strong> info@thysgemaak.com<br />
               <strong>Phone:</strong> +27 60 461 3766<br />
               <strong>Address:</strong> 75 School Street, Kylemore, Stellenbosch, 7600
+            </p>
+            
+            <h2 className="text-2xl font-semibold mt-8 mb-4">7. Facebook Login Privacy</h2>
+            <h3 className="text-xl font-semibold mt-6 mb-4">7.1 Information We Collect</h3>
+            <p>
+              When you use our app and log in with Facebook, we may collect your name, 
+              email address, profile picture, and other information you permit Facebook to share with us.
+            </p>
+            
+            <h3 className="text-xl font-semibold mt-6 mb-4">7.2 How We Use Your Information</h3>
+            <p>
+              We use this information to provide and improve our services, 
+              personalize your experience, and communicate with you.
+            </p>
+            
+            <h3 className="text-xl font-semibold mt-6 mb-4">7.3 Sharing of Information</h3>
+            <p>
+              We do not sell or share your personal information with third parties 
+              except as required by law or to provide our services.
+            </p>
+            
+            <h3 className="text-xl font-semibold mt-6 mb-4">7.4 Data Security</h3>
+            <p>
+              We take reasonable measures to protect your information from unauthorized access.
+            </p>
+            
+            <h3 className="text-xl font-semibold mt-6 mb-4">7.5 Your Rights</h3>
+            <p>
+              You may request to access, update, or delete your information 
+              by contacting us at denzel@thysgemaak.com.
+            </p>
+            
+            <h3 className="text-xl font-semibold mt-6 mb-4">7.6 Facebook-Specific Terms</h3>
+            <p>
+              By using Facebook Login, you acknowledge and agree to our use of 
+              your information as described in this section and in accordance 
+              with Facebook's own data policy.
             </p>
           </div>
         </div>
