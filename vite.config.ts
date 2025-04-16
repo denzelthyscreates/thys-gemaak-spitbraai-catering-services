@@ -1,12 +1,10 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: '/',  // Ensure base path is set to root
+  base: './', // Changed from '/' to './' for better path resolution
   server: {
     host: "::",
     port: 8080,
@@ -19,17 +17,28 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
         },
-        // Use hash in filenames to prevent caching issues
+        // Fixed asset file naming pattern
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
-        assetFileNames: 'assets/[name].[hash].js'
+        assetFileNames: ({name}) => {
+          if (/\.(gif|jpe?g|png|svg)$/.test(name ?? '')) {
+            return 'assets/images/[name].[hash][extname]';
+          }
+          if (/\.css$/.test(name ?? '')) {
+            return 'assets/css/[name].[hash][extname]';
+          }
+          return 'assets/[name].[hash][extname]';
+        }
       },
     },
+    // Add sourcemap for better debugging
+    sourcemap: true,
+    // Ensure clean URLs work
+    copyPublicDir: true,
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
