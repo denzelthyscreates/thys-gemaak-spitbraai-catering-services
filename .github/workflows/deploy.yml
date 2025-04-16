@@ -35,6 +35,13 @@ jobs:
       - name: Create CNAME file
         run: echo "www.thysgemaak.com" > dist/CNAME
 
+      - name: Debug output
+        run: |
+          echo "Contents of dist directory:"
+          ls -la dist/
+          echo "Contents of CNAME file:"
+          cat dist/CNAME
+
       - name: Setup Pages
         uses: actions/configure-pages@v3
 
