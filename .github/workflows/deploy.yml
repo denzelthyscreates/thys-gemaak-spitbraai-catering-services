@@ -32,11 +32,35 @@ jobs:
       - name: Copy index.html to 404.html
         run: cp dist/index.html dist/404.html
 
+      - name: Update script paths in index.html if necessary
+        run: |
+          # Check if the built JavaScript is in assets directory
+          if [ -d "dist/assets" ]; then
+            # Find the main JavaScript file
+            MAIN_JS=$(find dist/assets -name "index*.js" | head -n 1)
+            if [ -n "$MAIN_JS" ]; then
+              # Get the relative path
+              RELATIVE_PATH=$(echo $MAIN_JS | sed 's|dist/||')
+              echo "Found main JS at: $RELATIVE_PATH"
+              # Update the index.html to point to the correct file
+              sed -i "s|src=\"./assets/index.js\"|src=\"./$RELATIVE_PATH\"|g" dist/index.html
+              sed -i "s|src=\"./assets/index.js\"|src=\"./$RELATIVE_PATH\"|g" dist/404.html
+              echo "Updated script paths in HTML files"
+            fi
+          fi
+
       - name: List JavaScript files
         run: find dist -name "*.js" | sort
 
       - name: Create CNAME file
         run: echo "www.thysgemaak.com" > dist/CNAME
+
+      - name: Verify MIME types
+        run: |
+          echo "Checking content types in build directory:"
+          for file in $(find dist -type f -name "*.js"); do
+            echo "$file: $(file --mime-type $file)"
+          done
 
       - name: Debug build output
         run: |
