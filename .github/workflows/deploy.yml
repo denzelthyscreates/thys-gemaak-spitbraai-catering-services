@@ -30,7 +30,9 @@ jobs:
         run: npm run build
 
       - name: Copy CNAME to dist
-        run: cp CNAME dist/
+        run: |
+          echo "www.thysgemaak.com" > CNAME
+          cp CNAME dist/
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
