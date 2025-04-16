@@ -29,7 +29,7 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Copy CNAME to dist
+      - name: Create and copy CNAME to dist
         run: |
           echo "www.thysgemaak.com" > CNAME
           cp CNAME dist/
