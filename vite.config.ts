@@ -1,10 +1,11 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
-  base: './', // Changed from '/' to './' for better path resolution
+  base: '/', // Use root base path for proper asset references
   server: {
     host: "::",
     port: 8080,
@@ -33,8 +34,6 @@ export default defineConfig(({ mode }) => ({
     },
     // Add sourcemap for better debugging
     sourcemap: true,
-    // Ensure clean URLs work
-    copyPublicDir: true,
   },
   plugins: [
     react(),

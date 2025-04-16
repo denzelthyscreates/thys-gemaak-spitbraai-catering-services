@@ -1,3 +1,4 @@
+
 name: Deploy to GitHub Pages
 
 on:
@@ -26,6 +27,13 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Debug Build Output
+        run: |
+          echo "Listing dist directory contents:"
+          ls -la dist/
+          echo "Checking index.html script tags:"
+          grep -r "<script" dist/index.html
 
       - name: Add CNAME file
         run: echo "www.thysgemaak.com" > dist/CNAME
