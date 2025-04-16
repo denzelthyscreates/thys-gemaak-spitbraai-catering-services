@@ -6,14 +6,14 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: '/',  // Ensure base path is set to root
+  base: '',  // Change to empty string for relative paths that work in both local and GitHub Pages
   server: {
     host: "::",
     port: 8080,
   },
   build: {
-    outDir: 'dist',  // Explicitly set output directory
-    emptyOutDir: true, // Clean the output directory before build
+    outDir: 'dist',
+    emptyOutDir: true,
     rollupOptions: {
       output: {
         manualChunks: {

@@ -32,15 +32,20 @@ jobs:
       - name: Copy index.html to 404.html
         run: cp dist/index.html dist/404.html
 
+      - name: List JavaScript files
+        run: find dist -name "*.js" | sort
+
       - name: Create CNAME file
         run: echo "www.thysgemaak.com" > dist/CNAME
 
-      - name: Debug output
+      - name: Debug build output
         run: |
           echo "Contents of dist directory:"
           ls -la dist/
-          echo "Contents of CNAME file:"
-          cat dist/CNAME
+          echo "Contents of dist/assets directory:"
+          ls -la dist/assets/ || echo "Assets directory not found"
+          echo "Contents of index.html:"
+          cat dist/index.html | grep -A 10 script
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
