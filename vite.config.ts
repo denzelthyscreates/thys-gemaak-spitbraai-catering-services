@@ -6,7 +6,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: './',  // Using relative paths for all assets
+  base: '/',  // Changed to root path instead of relative
   server: {
     host: "::",
     port: 8080,
@@ -19,8 +19,8 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
         },
-        // Ensure we get a predictable filename for the main entry point
-        entryFileNames: 'assets/[name].js',
+        // Use hash in filenames to prevent caching issues
+        entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
         assetFileNames: 'assets/[name].[ext]'
       },

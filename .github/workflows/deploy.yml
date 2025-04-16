@@ -32,44 +32,40 @@ jobs:
       - name: Copy index.html to 404.html
         run: cp dist/index.html dist/404.html
 
-      - name: Update script paths in index.html if necessary
+      - name: Create correct index.html for GitHub Pages
         run: |
-          # Check if the built JavaScript is in assets directory
-          if [ -d "dist/assets" ]; then
-            # Find the main JavaScript file
-            MAIN_JS=$(find dist/assets -name "index*.js" | head -n 1)
-            if [ -n "$MAIN_JS" ]; then
-              # Get the relative path
-              RELATIVE_PATH=$(echo $MAIN_JS | sed 's|dist/||')
-              echo "Found main JS at: $RELATIVE_PATH"
-              # Update the index.html to point to the correct file
-              sed -i "s|src=\"./assets/index.js\"|src=\"./$RELATIVE_PATH\"|g" dist/index.html
-              sed -i "s|src=\"./assets/index.js\"|src=\"./$RELATIVE_PATH\"|g" dist/404.html
-              echo "Updated script paths in HTML files"
-            fi
+          # Find all JavaScript files in the dist/assets directory
+          JS_FILES=$(find dist/assets -name "*.js" | grep -v "vendor" | sort)
+          
+          # Get the main entry JavaScript file (usually has "index" in the name)
+          MAIN_JS=$(echo "$JS_FILES" | grep "index" | head -n 1 || echo "$JS_FILES" | head -n 1)
+          
+          if [ -n "$MAIN_JS" ]; then
+            # Get just the filename part
+            MAIN_JS_NAME=$(basename "$MAIN_JS")
+            echo "Found main JS file: $MAIN_JS_NAME"
+            
+            # Update the script tags in both index.html and 404.html
+            sed -i "s|src=\"/src/main.tsx\"|src=\"/assets/$MAIN_JS_NAME\"|g" dist/index.html
+            sed -i "s|src=\"/src/main.tsx\"|src=\"/assets/$MAIN_JS_NAME\"|g" dist/404.html
+            
+            echo "Updated script paths in HTML files"
+          else
+            echo "Could not find main JS file!"
+            exit 1
           fi
 
-      - name: List JavaScript files
-        run: find dist -name "*.js" | sort
-
-      - name: Create CNAME file
-        run: echo "www.thysgemaak.com" > dist/CNAME
-
-      - name: Verify MIME types
-        run: |
-          echo "Checking content types in build directory:"
-          for file in $(find dist -type f -name "*.js"); do
-            echo "$file: $(file --mime-type $file)"
-          done
-
-      - name: Debug build output
+      - name: List build directory contents for debugging
         run: |
           echo "Contents of dist directory:"
           ls -la dist/
           echo "Contents of dist/assets directory:"
           ls -la dist/assets/ || echo "Assets directory not found"
           echo "Contents of index.html:"
-          cat dist/index.html | grep -A 10 script
+          cat dist/index.html
+
+      - name: Create CNAME file
+        run: echo "www.thysgemaak.com" > dist/CNAME
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
