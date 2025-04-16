@@ -29,33 +29,18 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Fix script paths in HTML files
+        run: |
+          # Make script paths relative
+          sed -i 's|src="/|src="./|g' dist/index.html
+          sed -i 's|src="/|src="./|g' dist/404.html || true
+          sed -i 's|href="/|href="./|g' dist/index.html
+          sed -i 's|href="/|href="./|g' dist/404.html || true
+
       - name: Copy index.html to 404.html
         run: cp dist/index.html dist/404.html
 
-      - name: Create correct index.html for GitHub Pages
-        run: |
-          # Find all JavaScript files in the dist/assets directory
-          JS_FILES=$(find dist/assets -name "*.js" | grep -v "vendor" | sort)
-          
-          # Get the main entry JavaScript file (usually has "index" in the name)
-          MAIN_JS=$(echo "$JS_FILES" | grep "index" | head -n 1 || echo "$JS_FILES" | head -n 1)
-          
-          if [ -n "$MAIN_JS" ]; then
-            # Get just the filename part
-            MAIN_JS_NAME=$(basename "$MAIN_JS")
-            echo "Found main JS file: $MAIN_JS_NAME"
-            
-            # Update the script tags in both index.html and 404.html
-            sed -i "s|src=\"/src/main.tsx\"|src=\"/assets/$MAIN_JS_NAME\"|g" dist/index.html
-            sed -i "s|src=\"/src/main.tsx\"|src=\"/assets/$MAIN_JS_NAME\"|g" dist/404.html
-            
-            echo "Updated script paths in HTML files"
-          else
-            echo "Could not find main JS file!"
-            exit 1
-          fi
-
-      - name: List build directory contents for debugging
+      - name: Verify built files
         run: |
           echo "Contents of dist directory:"
           ls -la dist/
