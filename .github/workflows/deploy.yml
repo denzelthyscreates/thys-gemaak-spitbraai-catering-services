@@ -1,49 +1,23 @@
 
-name: Deploy to GitHub Pages
+name: Build and Deploy
 
 on:
   push:
     branches:
-      - main  # or master, depending on your default branch name
-
-permissions:
-  contents: write
+      - main  # or your default branch
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Debug Build Output
-        run: |
-          echo "Listing dist directory contents:"
-          ls -la dist/
-          echo "Checking index.html script tags:"
-          grep -r "<script" dist/index.html
-
-      - name: Add CNAME file
-        run: echo "www.thysgemaak.com" > dist/CNAME
-
-      - name: Add .nojekyll
-        run: touch dist/.nojekyll
-
+      - run: npm install
+      - run: npm run build
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: dist
           branch: gh-pages
-          clean: true
+          folder: dist
