@@ -3,13 +3,8 @@ import { ArrowRight } from 'lucide-react';
 import React, { useEffect } from 'react';
 import HeroCarousel from "./HeroCarousel";
 
-// Tailwind utility: hide-on-mobile and show-on-mobile
-// .hidden md:block (hide for mobile, show for md+)
-// .block md:hidden (show for mobile, hide for md+)
-
 const Hero = () => {
   useEffect(() => {
-    // Add intersection observer for scroll animations
     const sections = document.querySelectorAll('section[id]');
     const observer = new IntersectionObserver(
       (entries) => {
@@ -34,22 +29,38 @@ const Hero = () => {
   return (
     <section
       id="home"
-      className="relative min-h-[35vh] md:min-h-screen pt-4 pb-6 md:pt-40 md:pb-32 overflow-hidden scroll-mt-20 transition-all duration-700 transform flex items-center"
+      className="relative min-h-[40vh] md:min-h-screen pt-6 pb-8 md:pt-40 md:pb-32 overflow-hidden scroll-mt-20 transition-all duration-700 transform flex items-center"
     >
       {/* Carousel replaces static background */}
       <HeroCarousel />
-      {/* Background Pattern (reduced opacity) */}
+
+      {/* Background Pattern */}
       <div className="absolute inset-0 -z-10 opacity-5 pointer-events-none">
         <div className="absolute right-0 top-0 h-[600px] w-[600px] rounded-full bg-earth-200 blur-[100px]" />
         <div className="absolute left-1/3 top-1/3 h-[500px] w-[500px] rounded-full bg-spice-200 blur-[100px]" />
       </div>
 
-      {/* Mobile content - very minimal */}
+      {/* Mobile & Desktop headline/buttons content */}
       <div className="container-width relative z-10 px-2 sm:px-4 block md:hidden">
-        <div className="mx-auto max-w-8xl text-center">
-          <a href="#contact" className="button-primary transform transition-transform hover:scale-105 mt-4">
-            Book Now
-          </a>
+        <div className="mx-auto max-w-8xl text-center flex flex-col items-center">
+          <span className="inline-block px-4 py-1.5 mb-4 text-base font-medium rounded-full bg-primary/20 text-white">
+            Enhanced Spitbraai Experience
+          </span>
+          <h1 className="text-2xl font-serif font-semibold tracking-tight text-white mb-5">
+            Premium South African Spitbraai for Every Occasion
+          </h1>
+          <div className="flex flex-col gap-3 w-full items-center mb-2">
+            <a href="#contact" className="button-primary w-full sm:w-auto transform transition-transform hover:scale-105">
+              Book Your Experience
+            </a>
+            <a 
+              href="#services" 
+              className="bg-white/20 backdrop-blur-sm text-white font-medium px-6 py-3 rounded-md flex items-center justify-center gap-2 group transition-all hover:bg-white/30 w-full sm:w-auto transform hover:scale-105"
+            >
+              Explore Services
+              <ArrowRight className="h-4 w-4 transform transition-transform group-hover:translate-x-1" />
+            </a>
+          </div>
         </div>
       </div>
 
