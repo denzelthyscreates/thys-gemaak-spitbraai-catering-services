@@ -1,6 +1,6 @@
-
 import { ArrowRight } from 'lucide-react';
 import React, { useEffect } from 'react';
+import HeroCarousel from "./HeroCarousel";
 
 const Hero = () => {
   useEffect(() => {
@@ -30,22 +30,14 @@ const Hero = () => {
   }, []);
   
   return (
-    <section 
-      id="home" 
+    <section
+      id="home"
       className="relative min-h-screen pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden scroll-mt-20 transition-all duration-700 transform flex items-center"
     >
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 -z-10">
-        <img 
-          src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1740791600/IMG-20240826-WA0043_zlnaci.jpg" 
-          alt="Traditional South African Spitbraai" 
-          className="w-full h-full object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-black/60"></div>
-      </div>
-
+      {/* Carousel replaces static background */}
+      <HeroCarousel />
       {/* Background Pattern (reduced opacity) */}
-      <div className="absolute inset-0 -z-10 opacity-5">
+      <div className="absolute inset-0 -z-10 opacity-5 pointer-events-none">
         <div className="absolute right-0 top-0 h-[600px] w-[600px] rounded-full bg-earth-200 blur-[100px]" />
         <div className="absolute left-1/3 top-1/3 h-[500px] w-[500px] rounded-full bg-spice-200 blur-[100px]" />
       </div>
@@ -79,7 +71,6 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* Services Preview Cards (with slightly transparent background) */}
         <div className="mt-16 lg:mt-24">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-scale-in">
             <div className="p-6 rounded-xl bg-black/40 backdrop-blur-sm border border-white/10 hover:bg-black/50 transition-colors duration-300">
