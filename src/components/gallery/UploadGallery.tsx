@@ -12,12 +12,8 @@ import {
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Button } from '@/components/ui/button';
 
-// Gallery images with the provided URLs
+// Gallery images with the provided URLs, excluding ID 1
 const galleryImages = [
-  {
-    id: '1',
-    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788469/IMG-20241110-WA0010_umlczd.jpg'
-  },
   {
     id: '2',
     url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788468/IMG-20241110-WA0014_wfywk3.jpg'
@@ -108,3 +104,4 @@ const UploadGallery = () => {
 };
 
 export default UploadGallery;
+
