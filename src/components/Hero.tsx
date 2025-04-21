@@ -1,12 +1,16 @@
+
 import { ArrowRight } from 'lucide-react';
 import React, { useEffect } from 'react';
 import HeroCarousel from "./HeroCarousel";
+
+// Tailwind utility: hide-on-mobile and show-on-mobile
+// .hidden md:block (hide for mobile, show for md+)
+// .block md:hidden (show for mobile, hide for md+)
 
 const Hero = () => {
   useEffect(() => {
     // Add intersection observer for scroll animations
     const sections = document.querySelectorAll('section[id]');
-    
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -17,22 +21,20 @@ const Hero = () => {
       },
       { threshold: 0.1 }
     );
-    
     sections.forEach((section) => {
       observer.observe(section);
     });
-    
     return () => {
       sections.forEach((section) => {
         observer.unobserve(section);
       });
     };
   }, []);
-  
+
   return (
     <section
       id="home"
-      className="relative min-h-[65vh] md:min-h-screen pt-20 pb-10 md:pt-40 md:pb-32 overflow-hidden scroll-mt-20 transition-all duration-700 transform flex items-center"
+      className="relative min-h-[45vh] md:min-h-screen pt-4 pb-6 md:pt-40 md:pb-32 overflow-hidden scroll-mt-20 transition-all duration-700 transform flex items-center"
     >
       {/* Carousel replaces static background */}
       <HeroCarousel />
@@ -42,21 +44,19 @@ const Hero = () => {
         <div className="absolute left-1/3 top-1/3 h-[500px] w-[500px] rounded-full bg-spice-200 blur-[100px]" />
       </div>
 
-      <div className="container-width relative z-10 px-2 sm:px-4">
+      {/* Show text content only on md+ screens */}
+      <div className="container-width relative z-10 px-2 sm:px-4 hidden md:block">
         <div className="mx-auto max-w-8xl text-center">
           <span className="inline-block px-4 py-1.5 mb-6 text-xl font-medium rounded-full bg-primary/20 text-white animate-fade-in">
             Enhanced Spitbraai Experience
           </span>
-          
           <h1 className="text-4xl md:text-5xl font-serif font-semibold tracking-tight text-white mb-6 animate-slide-down">
             Premium South African Spitbraai for Every Occasion
           </h1>
-          
           <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto animate-slide-down delay-100">
             Providing expertly prepared spitbraai with effective methods to deliver exceptional 
             catering experiences for private, business, and large-scale events.
           </p>
-          
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-down delay-200">
             <a href="#contact" className="button-primary transform transition-transform hover:scale-105">
               Book Your Experience
@@ -70,7 +70,6 @@ const Hero = () => {
             </a>
           </div>
         </div>
-
         <div className="mt-16 lg:mt-24">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-scale-in">
             <div className="p-6 rounded-xl bg-black/40 backdrop-blur-sm border border-white/10 hover:bg-black/50 transition-colors duration-300">
@@ -93,3 +92,4 @@ const Hero = () => {
 };
 
 export default Hero;
+
