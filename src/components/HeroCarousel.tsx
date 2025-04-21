@@ -1,11 +1,7 @@
 
-import React, { useEffect, useRef } from "react";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
+import React, { useState, useEffect } from "react";
 
+// Import gallery images from the UploadGallery component
 const heroImages = [
   {
     id: "1",
@@ -52,23 +48,38 @@ const heroImages = [
 const AUTOPLAY_INTERVAL = 3500; // ms
 
 const HeroCarousel = () => {
-  const [current, setCurrent] = React.useState(0);
-  const autoplayRef = useRef<NodeJS.Timeout | null>(null);
+  const [current, setCurrent] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
+  // Autoplay functionality
   useEffect(() => {
-    autoplayRef.current = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % heroImages.length);
+    const timer = setTimeout(() => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrent((prev) => (prev + 1) % heroImages.length);
+        setIsTransitioning(false);
+      }, 500); // Fade transition time
     }, AUTOPLAY_INTERVAL);
 
-    return () => {
-      if (autoplayRef.current) clearInterval(autoplayRef.current);
-    };
-  }, []);
+    return () => clearTimeout(timer);
+  }, [current]);
 
   // Keyboard accessibility
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "ArrowLeft") setCurrent((old) => (old - 1 + heroImages.length) % heroImages.length);
-    if (e.key === "ArrowRight") setCurrent((old) => (old + 1) % heroImages.length);
+    if (e.key === "ArrowLeft") {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrent((old) => (old - 1 + heroImages.length) % heroImages.length);
+        setIsTransitioning(false);
+      }, 500);
+    }
+    if (e.key === "ArrowRight") {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrent((old) => (old + 1) % heroImages.length);
+        setIsTransitioning(false);
+      }, 500);
+    }
   };
 
   return (
@@ -79,48 +90,54 @@ const HeroCarousel = () => {
       onKeyDown={handleKeyDown}
       role="region"
     >
-      <Carousel
-        opts={{ loop: true }}
-        className="w-full h-full"
-      >
-        <CarouselContent className="h-full">
-          {heroImages.map((img, idx) => (
-            <CarouselItem
-              key={img.id}
-              className={`h-full transition-opacity duration-1000 ease-in-out absolute w-full inset-0 ${
-                idx === current ? "opacity-100 z-10" : "opacity-0 z-0"
-              }`}
-            >
-              <img
-                src={img.url}
-                alt="Event photo"
-                className="object-cover w-full h-full transition-transform duration-1000"
-                draggable={false}
-                style={{
-                  filter: "brightness(0.6)",
-                  pointerEvents: "none",
-                  userSelect: "none",
-                  minHeight: "400px",
-                }}
-              />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black/60 pointer-events-none" />
-        {/* Slide indicators */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-          {heroImages.map((_, idx) => (
-            <span
-              key={idx}
-              className={`inline-block w-3 h-3 rounded-full ${idx === current ? "bg-primary" : "bg-white/40"}`}
+      <div className="w-full h-full">
+        {heroImages.map((img, idx) => (
+          <div
+            key={img.id}
+            className={`h-full transition-opacity duration-1000 ease-in-out absolute w-full inset-0 ${
+              idx === current ? "opacity-100 z-10" : "opacity-0 z-0"
+            }`}
+          >
+            <img
+              src={img.url}
+              alt={`Event photo ${idx + 1}`}
+              className="object-cover w-full h-full transition-transform duration-1000"
+              draggable={false}
+              style={{
+                filter: "brightness(0.6)",
+                pointerEvents: "none",
+                userSelect: "none",
+                minHeight: "400px",
+              }}
             />
-          ))}
-        </div>
-      </Carousel>
+          </div>
+        ))}
+      </div>
+      
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/60 pointer-events-none" />
+      
+      {/* Slide indicators */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+        {heroImages.map((_, idx) => (
+          <button
+            key={idx}
+            className={`w-3 h-3 rounded-full transition-colors ${
+              idx === current ? "bg-primary" : "bg-white/40"
+            }`}
+            onClick={() => {
+              setIsTransitioning(true);
+              setTimeout(() => {
+                setCurrent(idx);
+                setIsTransitioning(false);
+              }, 500);
+            }}
+            aria-label={`Go to slide ${idx + 1}`}
+          />
+        ))}
+      </div>
     </div>
   );
 };
 
 export default HeroCarousel;
-
