@@ -49,13 +49,13 @@ const Hero = () => {
           <h1 className="text-2xl font-serif font-semibold tracking-tight text-white mb-5">
             Premium South African Spitbraai for Every Occasion
           </h1>
-          <div className="flex flex-col gap-3 w-full items-center mb-2">
-            <a href="#contact" className="button-primary w-full sm:w-auto transform transition-transform hover:scale-105">
+          <div className="flex flex-col gap-3 w-auto items-center mb-2">
+            <a href="#contact" className="button-primary px-6 transform transition-transform hover:scale-105">
               Book Your Experience
             </a>
             <a 
               href="#services" 
-              className="bg-white/20 backdrop-blur-sm text-white font-medium px-6 py-3 rounded-md flex items-center justify-center gap-2 group transition-all hover:bg-white/30 w-full sm:w-auto transform hover:scale-105"
+              className="bg-white/20 backdrop-blur-sm text-white font-medium px-6 py-3 rounded-md flex items-center justify-center gap-2 group transition-all hover:bg-white/30 transform hover:scale-105"
             >
               Explore Services
               <ArrowRight className="h-4 w-4 transform transition-transform group-hover:translate-x-1" />
@@ -112,3 +112,4 @@ const Hero = () => {
 };
 
 export default Hero;
+
