@@ -94,11 +94,11 @@ const HeroCarousel = () => {
               src={img.url}
               alt={`Event photo ${idx + 1}`}
               className="object-cover w-full h-full transition-transform duration-1000 
-                min-h-[300px] md:min-h-[400px] 
-                object-[center_60%] md:object-center"
+                min-h-[250px] md:min-h-[400px] 
+                object-[center_25%] md:object-center"
               draggable={false}
               style={{
-                filter: "brightness(0.6)",
+                filter: "brightness(0.5)",
                 pointerEvents: "none",
                 userSelect: "none",
               }}
@@ -108,10 +108,10 @@ const HeroCarousel = () => {
       </div>
       
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/60 pointer-events-none" />
+      <div className="absolute inset-0 bg-black/50 md:bg-black/60 pointer-events-none" />
       
-      {/* Slide indicators */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+      {/* Slide indicators - show only on larger screens */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20 hidden md:flex">
         {heroImages.map((_, idx) => (
           <button
             key={idx}

@@ -34,7 +34,7 @@ const Hero = () => {
   return (
     <section
       id="home"
-      className="relative min-h-[45vh] md:min-h-screen pt-4 pb-6 md:pt-40 md:pb-32 overflow-hidden scroll-mt-20 transition-all duration-700 transform flex items-center"
+      className="relative min-h-[35vh] md:min-h-screen pt-4 pb-6 md:pt-40 md:pb-32 overflow-hidden scroll-mt-20 transition-all duration-700 transform flex items-center"
     >
       {/* Carousel replaces static background */}
       <HeroCarousel />
@@ -44,7 +44,16 @@ const Hero = () => {
         <div className="absolute left-1/3 top-1/3 h-[500px] w-[500px] rounded-full bg-spice-200 blur-[100px]" />
       </div>
 
-      {/* Show text content only on md+ screens */}
+      {/* Mobile content - very minimal */}
+      <div className="container-width relative z-10 px-2 sm:px-4 block md:hidden">
+        <div className="mx-auto max-w-8xl text-center">
+          <a href="#contact" className="button-primary transform transition-transform hover:scale-105 mt-4">
+            Book Now
+          </a>
+        </div>
+      </div>
+
+      {/* Desktop content - hide on mobile */}
       <div className="container-width relative z-10 px-2 sm:px-4 hidden md:block">
         <div className="mx-auto max-w-8xl text-center">
           <span className="inline-block px-4 py-1.5 mb-6 text-xl font-medium rounded-full bg-primary/20 text-white animate-fade-in">
@@ -92,4 +101,3 @@ const Hero = () => {
 };
 
 export default Hero;
-
