@@ -93,13 +93,14 @@ const HeroCarousel = () => {
             <img
               src={img.url}
               alt={`Event photo ${idx + 1}`}
-              className="object-cover w-full h-full transition-transform duration-1000"
+              className="object-cover w-full h-full transition-transform duration-1000 
+                min-h-[300px] md:min-h-[400px] 
+                object-[center_60%] md:object-center"
               draggable={false}
               style={{
                 filter: "brightness(0.6)",
                 pointerEvents: "none",
                 userSelect: "none",
-                minHeight: "400px",
               }}
             />
           </div>
@@ -133,4 +134,3 @@ const HeroCarousel = () => {
 };
 
 export default HeroCarousel;
-
