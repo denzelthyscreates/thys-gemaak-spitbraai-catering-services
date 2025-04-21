@@ -29,7 +29,7 @@ const Hero = () => {
   return (
     <section
       id="home"
-      className="relative min-h-[40vh] md:min-h-screen pt-6 pb-8 md:pt-40 md:pb-32 overflow-hidden scroll-mt-20 transition-all duration-700 transform flex items-center"
+      className="relative min-h-[45vh] md:min-h-screen pt-6 pb-8 md:pt-40 md:pb-32 overflow-hidden scroll-mt-20 transition-all duration-700 transform flex items-center"
     >
       {/* Carousel replaces static background */}
       <HeroCarousel />
@@ -43,7 +43,7 @@ const Hero = () => {
       {/* Mobile & Desktop headline/buttons content */}
       <div className="container-width relative z-10 px-2 sm:px-4 block md:hidden">
         <div className="mx-auto max-w-8xl text-center flex flex-col items-center">
-          <span className="inline-block px-4 py-1.5 mb-4 text-base font-medium rounded-full bg-primary/20 text-white">
+          <span className="inline-block px-4 py-1.5 mb-4 text-base font-medium rounded-full bg-primary/20 text-white hidden md:inline-block">
             Enhanced Spitbraai Experience
           </span>
           <h1 className="text-2xl font-serif font-semibold tracking-tight text-white mb-5">
