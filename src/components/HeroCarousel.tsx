@@ -1,16 +1,8 @@
 
 import React, { useState, useEffect } from "react";
 
-// Curated gallery images used for the carousel
+// Curated gallery images used for the carousel with ID 1 and 2 removed
 const heroImages = [
-  {
-    id: '1',
-    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788469/IMG-20241110-WA0010_umlczd.jpg'
-  },
-  {
-    id: '2',
-    url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788468/IMG-20241110-WA0014_wfywk3.jpg'
-  },
   {
     id: '3',
     url: 'https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788467/IMG-20241110-WA0015_xrads9.jpg'
@@ -141,3 +133,4 @@ const HeroCarousel = () => {
 };
 
 export default HeroCarousel;
+
