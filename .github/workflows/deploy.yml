@@ -1,3 +1,4 @@
+
 name: Deploy to GitHub Pages
 
 on:
@@ -28,7 +29,7 @@ jobs:
         run: npm run build
 
       - name: Add CNAME file
-        run: echo "www.thysgemaak.com" > dist/CNAME
+        run: echo "spitbraai.thysgemaak.com" > dist/CNAME
 
       - name: Add .nojekyll
         run: touch dist/.nojekyll
