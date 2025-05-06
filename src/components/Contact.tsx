@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -199,11 +200,12 @@ const Contact = () => {
               Our simple booking process ensures your event catering is confirmed with minimal hassle.
             </p>
             <ol className="space-y-2 list-decimal list-inside">
+              <li>Build your Menu</li>
               <li>Submit your enquiry through our booking form</li>
               <li>Receive confirmation of availability</li>
-              <li>Pay booking fee to secure your date</li>
+              <li>Pay the booking fee to secure your date</li>
               <li>Finalize menu details</li>
-              <li>Pay remaining balance before event</li>
+              <li>Pay the remaining balance before the event</li>
               <li>Enjoy premium spitbraai catering at your event</li>
             </ol>
           </div>
