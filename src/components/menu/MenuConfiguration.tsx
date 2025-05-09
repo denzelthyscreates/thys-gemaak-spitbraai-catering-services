@@ -1,8 +1,14 @@
+
 import React from 'react';
-import { Check, Users } from 'lucide-react';
+import { Check, Users, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MenuOption } from '@/types/menu';
 import { useMenu } from '@/contexts/MenuContext';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Card, CardContent } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 interface MenuConfigurationProps {
   menuOptions: MenuOption[];
@@ -18,17 +24,24 @@ export const MenuConfiguration = ({ menuOptions }: MenuConfigurationProps) => {
     selectedDesserts,
     selectedExtras,
     extraSaladType,
+    includeCutlery,
     setNumGuests,
     setSelectedSeason,
     setSelectedStarters,
     setSelectedSides,
     setSelectedDesserts,
     setSelectedExtras,
-    setExtraSaladType
+    setExtraSaladType,
+    setIncludeCutlery
   } = useMenu();
+  
+  const { toast } = useToast();
 
   if (!selectedMenu) return null;
 
+  const selectedMenuOption = menuOptions.find(opt => opt.id === selectedMenu);
+  const minGuests = selectedMenuOption?.minGuests || 30;
+  
   const toggleOption = (id: string, category: 'starter' | 'side' | 'dessert' | 'extra') => {
     let updatedSelection: string[] = [];
     
@@ -92,47 +105,86 @@ export const MenuConfiguration = ({ menuOptions }: MenuConfigurationProps) => {
         return 0;
     }
   };
+  
+  const handleNumGuestsChange = (value: number) => {
+    const newValue = Math.max(minGuests, value);
+    if (value < minGuests) {
+      toast({
+        title: `Minimum ${minGuests} guests required`,
+        description: `This package requires a minimum of ${minGuests} guests.`,
+        duration: 3000
+      });
+    }
+    setNumGuests(newValue);
+  };
 
   return (
     <div className="mb-6">
       <div className="space-y-4">
         <div className="p-4 rounded-lg bg-card border">
           <h4 className="text-lg font-medium mb-4">Number of Guests</h4>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center">
-              <Users className="mr-2 h-5 w-5 text-primary" />
-              <span>Guests:</span>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center">
+                <Users className="mr-2 h-5 w-5 text-primary" />
+                <span>Guests:</span>
+              </div>
+              <input
+                type="number"
+                min={minGuests}
+                value={numGuests}
+                onChange={(e) => handleNumGuestsChange(Number(e.target.value))}
+                className="w-20 p-2 border rounded"
+              />
+              {numGuests >= 100 && (
+                <span className="text-sm font-medium text-green-600">10% Volume Discount Applied!</span>
+              )}
             </div>
-            <input
-              type="number"
-              min="10"
-              value={numGuests}
-              onChange={(e) => setNumGuests(Number(e.target.value))}
-              className="w-20 p-2 border rounded"
-            />
-            {numGuests >= 100 && (
-              <span className="text-sm font-medium text-green-600">10% Volume Discount Applied!</span>
+            
+            {minGuests > 30 && (
+              <div className="flex items-center text-sm text-amber-600">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                <span>This package requires a minimum of {minGuests} guests.</span>
+              </div>
             )}
           </div>
         </div>
 
-        {selectedMenu === 'wedding1' && (
+        <div className="p-4 rounded-lg bg-card border">
+          <h4 className="text-lg font-medium mb-4">Cutlery & Crockery Options</h4>
+          <div className="flex items-center space-x-3">
+            <Switch 
+              id="cutlery-switch" 
+              checked={includeCutlery}
+              onCheckedChange={setIncludeCutlery}
+            />
+            <Label htmlFor="cutlery-switch">Include cutlery & crockery</Label>
+            <div className={`text-sm font-medium ${includeCutlery ? 'text-green-600' : 'text-amber-600'}`}>
+              {includeCutlery 
+                ? `+ R${selectedMenuOption?.withoutCutlery ? selectedMenuOption.price - selectedMenuOption.withoutCutlery : 20} pp` 
+                : '- R20 pp'
+              }
+            </div>
+          </div>
+        </div>
+
+        {(selectedMenu === 'wedding1' || (selectedMenu === 'matric_premium' && selectedMenuOption?.seasonOptions)) && (
           <div className="p-4 rounded-lg bg-card border">
             <h4 className="text-lg font-medium mb-4">Season Selection</h4>
-            <div className="flex flex-wrap gap-4">
-              <Button
-                variant={selectedSeason === 'summer' ? 'default' : 'outline'}
-                onClick={() => setSelectedSeason('summer')}
-              >
-                Summer Menu
-              </Button>
-              <Button
-                variant={selectedSeason === 'winter' ? 'default' : 'outline'}
-                onClick={() => setSelectedSeason('winter')}
-              >
-                Winter Menu
-              </Button>
-            </div>
+            <RadioGroup 
+              value={selectedSeason || undefined} 
+              onValueChange={(value) => setSelectedSeason(value as 'summer' | 'winter')}
+              className="flex flex-col space-y-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="summer" id="summer" />
+                <Label htmlFor="summer">Summer Menu</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="winter" id="winter" />
+                <Label htmlFor="winter">Winter Menu</Label>
+              </div>
+            </RadioGroup>
           </div>
         )}
 

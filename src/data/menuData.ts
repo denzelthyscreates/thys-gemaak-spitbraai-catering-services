@@ -19,7 +19,9 @@ export const menuOptions: MenuOption[] = [
     description: 'Lamb Spit Main, Garlic Bread, 2 Salads', 
     category: 'menu',
     eventType: 'birthday',
-    icon: createPartyPopperIcon()
+    icon: createPartyPopperIcon(),
+    minGuests: 30,
+    withoutCutlery: 149
   },
   { 
     id: 'menu2', 
@@ -28,7 +30,9 @@ export const menuOptions: MenuOption[] = [
     description: 'Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads', 
     category: 'menu',
     eventType: 'birthday',
-    icon: createPartyPopperIcon()
+    icon: createPartyPopperIcon(),
+    minGuests: 30,
+    withoutCutlery: 165
   },
   { 
     id: 'menu3', 
@@ -37,7 +41,9 @@ export const menuOptions: MenuOption[] = [
     description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads, Dessert', 
     category: 'menu',
     eventType: 'birthday',
-    icon: createPartyPopperIcon()
+    icon: createPartyPopperIcon(),
+    minGuests: 30,
+    withoutCutlery: 175
   },
   
   { 
@@ -47,7 +53,9 @@ export const menuOptions: MenuOption[] = [
     description: 'Starter, Lamb Spit Main, Chicken Drumstick, Garlic Bread, Water & Juice, 3 Sides, Dessert', 
     category: 'menu',
     eventType: 'business',
-    icon: createBuildingIcon()
+    icon: createBuildingIcon(),
+    minGuests: 30,
+    withoutCutlery: 270
   },
   
   { 
@@ -57,16 +65,20 @@ export const menuOptions: MenuOption[] = [
     description: 'Lamb Spit, Garlic Bread, and 2 sides', 
     category: 'menu',
     eventType: 'wedding',
-    icon: createCalendarCheckIcon()
+    icon: createCalendarCheckIcon(),
+    minGuests: 50,
+    withoutCutlery: 149
   },
   { 
     id: 'wedding1', 
     name: 'Luxury Wedding Experience', 
     price: 195, 
-    description: '3 Course Meal (Start, Main & Dessert)', 
+    description: '3 Course Meal (Starter, Main & Dessert)', 
     category: 'menu',
     eventType: 'wedding',
-    icon: createCalendarCheckIcon()
+    icon: createCalendarCheckIcon(),
+    minGuests: 50,
+    withoutCutlery: 175
   },
   
   { 
@@ -76,7 +88,9 @@ export const menuOptions: MenuOption[] = [
     description: 'Lamb Spit, Garlic Bread, and 2 sides', 
     category: 'menu',
     eventType: 'standard',
-    icon: createCalendarIcon("text-gray-500")
+    icon: createCalendarIcon("text-gray-500"),
+    minGuests: 30,
+    withoutCutlery: 149
   },
   
   { 
@@ -87,7 +101,9 @@ export const menuOptions: MenuOption[] = [
     category: 'menu',
     eventType: 'yearend',
     availabilityInfo: 'Available only for year-end business events (November-December)',
-    icon: createCalendarIcon("text-orange-500")
+    icon: createCalendarIcon("text-orange-500"),
+    minGuests: 30,
+    withoutCutlery: 140
   },
   
   { 
@@ -99,7 +115,9 @@ export const menuOptions: MenuOption[] = [
     subtitle: 'Standard Matric Farewell Package',
     eventType: 'matric',
     availabilityInfo: 'Available exclusively for school Matric Farewell events',
-    icon: createGraduationCapIcon()
+    icon: createGraduationCapIcon(),
+    minGuests: 50,
+    withoutCutlery: 149
   },
   { 
     id: 'matric_premium', 
@@ -110,7 +128,10 @@ export const menuOptions: MenuOption[] = [
     subtitle: 'Exclusive Matric Farewell Experience',
     eventType: 'matric',
     availabilityInfo: 'Available exclusively for school Matric Farewell events',
-    icon: createGraduationCapIcon()
+    icon: createGraduationCapIcon(),
+    minGuests: 50,
+    withoutCutlery: 175,
+    seasonOptions: true
   },
   
   { id: 'cocktail_burger', name: 'Cocktail Burger', price: 0, description: 'Mini burger appetizer', category: 'starter', eventType: 'standard' },
@@ -132,3 +153,4 @@ export const menuOptions: MenuOption[] = [
   { id: 'chicken_thigh', name: 'Chicken Thigh', price: 25, description: 'Per person', category: 'extra', eventType: 'standard' },
   { id: 'extra_salad', name: 'Extra Salad', price: 25, description: 'Per person', category: 'extra', eventType: 'standard' },
 ];
+

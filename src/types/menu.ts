@@ -9,9 +9,13 @@ export interface MenuOption {
   subtitle?: string;
   availabilityInfo?: string;
   icon?: JSX.Element;
+  minGuests?: number;
+  withoutCutlery?: number;
+  seasonOptions?: boolean;
 }
 
 export interface MenuBuilderProps {
   onSelectionChange: (selection: any) => void;
   initialSelection?: any;
+  onNavigateTab?: (tab: string) => void;
 }

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { MenuOption } from '@/types/menu';
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +15,7 @@ interface MenuContextType {
   totalPrice: number;
   extraSaladType: string;
   discountApplied: boolean;
+  includeCutlery: boolean;
   setSelectedMenu: (menuId: string | null) => void;
   setSelectedStarters: (starters: string[]) => void;
   setSelectedSides: (sides: string[]) => void;
@@ -22,6 +24,7 @@ interface MenuContextType {
   setSelectedSeason: (season: 'summer' | 'winter' | null) => void;
   setNumGuests: (num: number) => void;
   setExtraSaladType: (type: string) => void;
+  setIncludeCutlery: (include: boolean) => void;
   calculateTotalPrice: () => number;
   handleReset: () => void;
 }
@@ -71,6 +74,11 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : '';
   });
   
+  const [includeCutlery, setIncludeCutlery] = useState<boolean>(() => {
+    const saved = localStorage.getItem('includeCutlery');
+    return saved ? JSON.parse(saved) : true;
+  });
+  
   const [discountApplied, setDiscountApplied] = useState<boolean>(false);
   const { toast } = useToast();
 
@@ -105,11 +113,19 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem('extraSaladType', JSON.stringify(extraSaladType));
   }, [extraSaladType]);
+  
+  useEffect(() => {
+    localStorage.setItem('includeCutlery', JSON.stringify(includeCutlery));
+  }, [includeCutlery]);
 
   const calculateTotalPrice = (): number => {
     if (!selectedMenu) return 0;
     
-    const menuPrice = menuOptions.find(opt => opt.id === selectedMenu)?.price || 0;
+    const menuOption = menuOptions.find(opt => opt.id === selectedMenu);
+    if (!menuOption) return 0;
+    
+    // Base price based on whether cutlery is included or not
+    let basePrice = includeCutlery ? menuOption.price : (menuOption.withoutCutlery || menuOption.price - 20);
     
     const extrasPrice = selectedExtras.reduce((total, extraId) => {
       const extra = menuOptions.find(opt => opt.id === extraId);
@@ -121,7 +137,7 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }, 0);
     
-    let finalPrice = menuPrice + extrasPrice;
+    let finalPrice = basePrice + extrasPrice;
     
     if (numGuests >= 100) {
       finalPrice = Math.round(finalPrice * 0.9);
@@ -139,6 +155,7 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSelectedSeason(null);
     setNumGuests(50);
     setExtraSaladType('');
+    setIncludeCutlery(true);
     
     localStorage.removeItem('selectedMenu');
     localStorage.removeItem('selectedStarters');
@@ -148,6 +165,7 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('selectedSeason');
     localStorage.removeItem('numGuests');
     localStorage.removeItem('extraSaladType');
+    localStorage.removeItem('includeCutlery');
     localStorage.removeItem('menuSelection');
     
     toast({
@@ -163,7 +181,8 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setDiscountApplied(numGuests >= 100);
     
     if (selectedMenu) {
-      const menuPackage = menuOptions.find(opt => opt.id === selectedMenu)?.name || '';
+      const menuOption = menuOptions.find(opt => opt.id === selectedMenu);
+      const menuPackage = menuOption?.name || '';
       
       const starterNames = selectedStarters.map(id => 
         menuOptions.find(opt => opt.id === id)?.name || '').join(', ');
@@ -186,14 +205,16 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
         desserts: dessertNames,
         extras: extraNames,
         extraSaladType,
-        totalPrice
+        includeCutlery,
+        totalPrice,
+        discountApplied: numGuests >= 100
       };
       
       localStorage.setItem('menuSelection', JSON.stringify(completeSelection));
     } else {
       localStorage.removeItem('menuSelection');
     }
-  }, [selectedMenu, selectedStarters, selectedSides, selectedDesserts, selectedExtras, selectedSeason, numGuests, extraSaladType]);
+  }, [selectedMenu, selectedStarters, selectedSides, selectedDesserts, selectedExtras, selectedSeason, numGuests, extraSaladType, includeCutlery]);
 
   return (
     <MenuContext.Provider value={{
@@ -207,6 +228,7 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
       totalPrice,
       extraSaladType,
       discountApplied,
+      includeCutlery,
       setSelectedMenu,
       setSelectedStarters,
       setSelectedSides,
@@ -215,6 +237,7 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSelectedSeason,
       setNumGuests,
       setExtraSaladType,
+      setIncludeCutlery,
       calculateTotalPrice,
       handleReset
     }}>

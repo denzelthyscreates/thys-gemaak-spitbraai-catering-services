@@ -3,7 +3,7 @@ import React from 'react';
 import { useMenu } from '@/contexts/MenuContext';
 import { MenuOption } from '@/types/menu';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Check, X } from 'lucide-react';
 
 interface MenuSummaryProps {
   menuOptions: MenuOption[];
@@ -20,6 +20,7 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
     selectedDesserts,
     selectedExtras,
     extraSaladType,
+    includeCutlery,
     totalPrice,
     discountApplied
   } = useMenu();
@@ -28,26 +29,33 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
     if (!selectedMenu) return [];
     const inclusions: string[] = [];
     
+    if (includeCutlery) {
+      inclusions.push('Cutlery & Crockery');
+    }
+    
     if (selectedMenu === 'menu1') {
-      inclusions.push('Menu', 'Cutlery & Crockery', 'All Equipment');
+      inclusions.push('All Equipment');
     } else if (selectedMenu === 'menu2' || selectedMenu === 'menu3') {
-      inclusions.push('Menu', 'Cutlery & Crockery', 'All Equipment', 'Friendly Staff', 'Jugs & Glasses', 'Setup & Serving');
+      inclusions.push('All Equipment', 'Friendly Staff', 'Jugs & Glasses', 'Setup & Serving');
     } else if (selectedMenu === 'business') {
-      inclusions.push('Starter, Main & Dessert', 'Cutlery & Crockery', 'All Equipment', 'Friendly Staff', 'Jugs & Glasses', 'Setup & Serving', 'Clearing');
+      inclusions.push('All Equipment', 'Friendly Staff', 'Jugs & Glasses', 'Setup & Serving', 'Clearing');
     } else if (selectedMenu === 'wedding1') {
-      inclusions.push('Menu', 'Cutlery & Crockery', 'Jugs & Glasses', 'Juice + 1 Refill', 'All Equipment + Setup of Serving Table');
+      inclusions.push('Jugs & Glasses', 'Juice + 1 Refill', 'All Equipment + Setup of Serving Table');
     } else if (selectedMenu === 'wedding2' || selectedMenu === 'standard' || selectedMenu === 'yearend') {
-      inclusions.push('Menu', 'Cutlery & Crockery', 'All Equipment');
+      inclusions.push('All Equipment');
     } else if (selectedMenu === 'matric_standard') {
-      inclusions.push('Menu', 'Cutlery & Crockery', 'All Equipment', 'Serving Staff');
+      inclusions.push('All Equipment', 'Serving Staff');
     } else if (selectedMenu === 'matric_premium') {
-      inclusions.push('Complete Menu Experience', 'Cutlery & Crockery', 'All Equipment', 'Professional Serving Staff', 'Jugs & Glasses', 'Setup & Clearing');
+      inclusions.push('All Equipment', 'Professional Serving Staff', 'Jugs & Glasses', 'Setup & Clearing');
     }
     
     return inclusions;
   };
 
   if (!selectedMenu) return null;
+
+  const selectedMenuOption = menuOptions.find(opt => opt.id === selectedMenu);
+  const minGuests = selectedMenuOption?.minGuests || 30;
 
   return (
     <div className="rounded-lg border p-4 bg-muted/50">
@@ -64,15 +72,33 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
         {/* Guests */}
         <div className="grid grid-cols-3 gap-2">
           <span className="font-medium">Guests:</span>
-          <span className="col-span-2">{numGuests}</span>
+          <span className="col-span-2">{numGuests} <span className="text-sm text-muted-foreground">(Minimum: {minGuests})</span></span>
+        </div>
+
+        {/* Cutlery & Crockery */}
+        <div className="grid grid-cols-3 gap-2">
+          <span className="font-medium">Cutlery & Crockery:</span>
+          <span className="col-span-2 flex items-center">
+            {includeCutlery ? (
+              <>
+                <Check className="h-4 w-4 text-green-600 mr-1" />
+                <span>Included</span>
+              </>
+            ) : (
+              <>
+                <X className="h-4 w-4 text-amber-600 mr-1" />
+                <span>Not included</span>
+              </>
+            )}
+          </span>
         </div>
 
         {/* Season */}
-        {selectedMenu === 'wedding1' && selectedSeason && (
+        {(selectedMenu === 'wedding1' || (selectedMenu === 'matric_premium' && selectedMenuOption?.seasonOptions)) && selectedSeason && (
           <div className="grid grid-cols-3 gap-2">
             <span className="font-medium">Season:</span>
             <span className="col-span-2">
-              {selectedSeason.charAt(0).toUpperCase() + selectedSeason.slice(1)}
+              {selectedSeason.charAt(0).toUpperCase() + selectedSeason.slice(1)} Menu
             </span>
           </div>
         )}
@@ -122,6 +148,14 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
             </span>
           </div>
         )}
+
+        {/* Menu Inclusions */}
+        <div className="grid grid-cols-3 gap-2">
+          <span className="font-medium">Inclusions:</span>
+          <span className="col-span-2">
+            {getMenuInclusions().join(', ')}
+          </span>
+        </div>
 
         {/* Pricing */}
         <div className="grid grid-cols-3 gap-2 pt-2 border-t">
