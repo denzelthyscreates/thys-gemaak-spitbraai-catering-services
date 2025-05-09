@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { MenuProvider, useMenu } from '@/contexts/MenuContext';
+import { MenuProvider, useMenu } from '@/contexts/menu';
 import { MenuPackages } from './menu/MenuPackages';
 import { MenuConfiguration } from './menu/MenuConfiguration';
 import { MenuSummary } from './menu/MenuSummary';

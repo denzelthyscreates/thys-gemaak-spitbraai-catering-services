@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Check, Building, Calendar, CalendarCheck, GraduationCap, PartyPopper } from 'lucide-react';
 import { MenuOption } from '@/types/menu';
-import { useMenu } from '@/contexts/MenuContext';
+import { useMenu } from '@/contexts/menu';
 import { useToast } from '@/hooks/use-toast';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';

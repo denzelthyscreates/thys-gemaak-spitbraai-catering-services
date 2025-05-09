@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useMenu } from '@/contexts/MenuContext';
+import { useMenu } from '@/contexts/menu';
 import { MenuOption } from '@/types/menu';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Check, X } from 'lucide-react';
