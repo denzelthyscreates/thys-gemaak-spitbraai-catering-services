@@ -1,312 +1,417 @@
 
-import React from 'react';
-import { Check, Users, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { MenuOption } from '@/types/menu';
+import React, { useState } from 'react';
 import { useMenu } from '@/contexts/menu';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { MenuOption } from '@/types/menu';
 import { Card, CardContent } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import { ChevronUp, ChevronDown, Info } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface MenuConfigurationProps {
   menuOptions: MenuOption[];
 }
 
-export const MenuConfiguration = ({ menuOptions }: MenuConfigurationProps) => {
-  const {
-    selectedMenu,
-    numGuests,
-    selectedSeason,
+export const MenuConfiguration: React.FC<MenuConfigurationProps> = ({ menuOptions }) => {
+  const { 
+    selectedMenu, 
     selectedStarters,
     selectedSides,
     selectedDesserts,
     selectedExtras,
+    selectedSeason,
+    numGuests,
     extraSaladType,
     includeCutlery,
-    setNumGuests,
-    setSelectedSeason,
     setSelectedStarters,
     setSelectedSides,
     setSelectedDesserts,
     setSelectedExtras,
+    setSelectedSeason,
+    setNumGuests,
     setExtraSaladType,
     setIncludeCutlery
   } = useMenu();
   
-  const { toast } = useToast();
-
+  const [accordionValue, setAccordionValue] = useState<string[]>(['guest-count']);
+  
   if (!selectedMenu) return null;
-
+  
   const selectedMenuOption = menuOptions.find(opt => opt.id === selectedMenu);
   const minGuests = selectedMenuOption?.minGuests || 30;
   
-  const toggleOption = (id: string, category: 'starter' | 'side' | 'dessert' | 'extra') => {
-    let updatedSelection: string[] = [];
-    
-    switch (category) {
-      case 'starter':
-        updatedSelection = selectedStarters.includes(id) ? [] : [id];
-        setSelectedStarters(updatedSelection);
-        break;
-      case 'side':
-        updatedSelection = [...selectedSides];
-        if (updatedSelection.includes(id)) {
-          updatedSelection = updatedSelection.filter(item => item !== id);
-        } else {
-          let maxSides = 2;
-          if (selectedMenu === 'business') {
-            maxSides = 3;
-          } else if (selectedMenu === 'menu3' || selectedMenu === 'matric_premium') {
-            maxSides = 3;
-          }
-          if (selectedMenu === 'wedding1') return;
-          
-          if (updatedSelection.length < maxSides) {
-            updatedSelection.push(id);
-          } else {
-            updatedSelection.shift();
-            updatedSelection.push(id);
-          }
-        }
-        setSelectedSides(updatedSelection);
-        break;
-      case 'dessert':
-        updatedSelection = selectedDesserts.includes(id) ? [] : [id];
-        setSelectedDesserts(updatedSelection);
-        break;
-      case 'extra':
-        updatedSelection = [...selectedExtras];
-        if (updatedSelection.includes(id)) {
-          updatedSelection = updatedSelection.filter(item => item !== id);
-        } else {
-          updatedSelection.push(id);
-        }
-        setSelectedExtras(updatedSelection);
-        break;
-    }
+  const needsSeason = (selectedMenu === 'wedding1' || (selectedMenu === 'matric_premium' && selectedMenuOption?.seasonOptions));
+  const needsStarters = selectedMenu === 'menu3' || selectedMenu === 'business' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium';
+  const needsDesserts = selectedMenu === 'menu3' || selectedMenu === 'business' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium';
+  
+  const handleSelectStarter = (id: string) => {
+    // Starters are typically a single choice, so replace current selection
+    setSelectedStarters([id]);
   };
-
-  const getMaxSelections = (category: 'starter' | 'side' | 'dessert') => {
-    if (!selectedMenu) return 0;
-    switch (category) {
-      case 'starter':
-        if (selectedMenu === 'menu3' || selectedMenu === 'business' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium') return 1;
-        return 0;
-      case 'side':
-        if (selectedMenu === 'business' || selectedMenu === 'menu3' || selectedMenu === 'matric_premium') return 3;
-        if (selectedMenu === 'menu1' || selectedMenu === 'menu2' || selectedMenu === 'wedding2' || selectedMenu === 'standard' || selectedMenu === 'yearend' || selectedMenu === 'matric_standard') return 2;
-        return selectedMenu === 'wedding1' ? 0 : 0;
-      case 'dessert':
-        if (selectedMenu === 'menu3' || selectedMenu === 'business' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium') return 1;
-        return 0;
-      default:
-        return 0;
+  
+  const handleSelectSide = (id: string) => {
+    const isSelected = selectedSides.includes(id);
+    
+    if (isSelected) {
+      // If already selected, remove it
+      setSelectedSides(selectedSides.filter(sideId => sideId !== id));
+    } else {
+      // If not selected and we have less than 2 sides, add it
+      if (selectedSides.length < 2) {
+        setSelectedSides([...selectedSides, id]);
+      }
     }
   };
   
-  const handleNumGuestsChange = (value: number) => {
-    const newValue = Math.max(minGuests, value);
-    if (value < minGuests) {
-      toast({
-        title: `Minimum ${minGuests} guests required`,
-        description: `This package requires a minimum of ${minGuests} guests.`,
-        duration: 3000
-      });
-    }
-    setNumGuests(newValue);
+  const handleSelectDessert = (id: string) => {
+    // Desserts are typically a single choice, so replace current selection
+    setSelectedDesserts([id]);
   };
+  
+  const handleSelectExtra = (id: string) => {
+    const isSelected = selectedExtras.includes(id);
+    
+    if (isSelected) {
+      // If already selected, remove it
+      setSelectedExtras(selectedExtras.filter(extraId => extraId !== id));
+      
+      // If removing extra_salad, also clear the salad type
+      if (id === 'extra_salad') {
+        setExtraSaladType('');
+      }
+    } else {
+      // If not selected, add it
+      setSelectedExtras([...selectedExtras, id]);
+    }
+  };
+  
+  const starterOptions = menuOptions
+    .filter(option => option.category === 'starter')
+    .sort((a, b) => a.name.localeCompare(b.name));
+  
+  const sideOptions = menuOptions
+    .filter(option => option.category === 'side')
+    .sort((a, b) => a.name.localeCompare(b.name));
+  
+  const dessertOptions = menuOptions
+    .filter(option => option.category === 'dessert')
+    .sort((a, b) => a.name.localeCompare(b.name));
+  
+  const extraOptions = menuOptions
+    .filter(option => option.category === 'extra')
+    .sort((a, b) => a.name.localeCompare(b.name));
+  
+  const saladOptions = menuOptions
+    .filter(option => option.category === 'side' && option.name.toLowerCase().includes('salad'))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <div className="mb-6">
-      <div className="space-y-4">
-        <div className="p-4 rounded-lg bg-card border">
-          <h4 className="text-lg font-medium mb-4">Number of Guests</h4>
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center">
-                <Users className="mr-2 h-5 w-5 text-primary" />
-                <span>Guests:</span>
-              </div>
-              <input
-                type="number"
-                min={minGuests}
-                value={numGuests}
-                onChange={(e) => handleNumGuestsChange(Number(e.target.value))}
-                className="w-20 p-2 border rounded"
-              />
-              {numGuests >= 100 && (
-                <span className="text-sm font-medium text-green-600">10% Volume Discount Applied!</span>
-              )}
+    <div className="space-y-6">
+      <Accordion 
+        type="multiple" 
+        value={accordionValue} 
+        onValueChange={setAccordionValue}
+        className="space-y-4"
+      >
+        {/* Guest Count Section */}
+        <AccordionItem value="guest-count" className="border rounded-lg overflow-hidden">
+          <AccordionTrigger className="px-4 py-3 hover:no-underline">
+            <div className="flex items-center gap-2">
+              <span className="text-base font-medium">Number of Guests</span>
+              <span className="text-xs text-red-500">*</span>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Required: Minimum {minGuests} guests</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
-            
-            {minGuests > 30 && (
-              <div className="flex items-center text-sm text-amber-600">
-                <AlertCircle className="h-4 w-4 mr-1" />
-                <span>This package requires a minimum of {minGuests} guests.</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="p-4 rounded-lg bg-card border">
-          <h4 className="text-lg font-medium mb-4">Cutlery & Crockery Options</h4>
-          <div className="flex items-center space-x-3">
-            <Switch 
-              id="cutlery-switch" 
-              checked={includeCutlery}
-              onCheckedChange={setIncludeCutlery}
-            />
-            <Label htmlFor="cutlery-switch">Include cutlery & crockery</Label>
-            <div className={`text-sm font-medium ${includeCutlery ? 'text-green-600' : 'text-amber-600'}`}>
-              {includeCutlery 
-                ? `+ R${selectedMenuOption?.withoutCutlery ? selectedMenuOption.price - selectedMenuOption.withoutCutlery : 20} pp` 
-                : '- R20 pp'
-              }
-            </div>
-          </div>
-        </div>
-
-        {(selectedMenu === 'wedding1' || (selectedMenu === 'matric_premium' && selectedMenuOption?.seasonOptions)) && (
-          <div className="p-4 rounded-lg bg-card border">
-            <h4 className="text-lg font-medium mb-4">Season Selection</h4>
-            <RadioGroup 
-              value={selectedSeason || undefined} 
-              onValueChange={(value) => setSelectedSeason(value as 'summer' | 'winter')}
-              className="flex flex-col space-y-2"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="summer" id="summer" />
-                <Label htmlFor="summer">Summer Menu</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="winter" id="winter" />
-                <Label htmlFor="winter">Winter Menu</Label>
-              </div>
-            </RadioGroup>
-          </div>
-        )}
-
-        {getMaxSelections('starter') > 0 && (
-          <div className="p-4 rounded-lg bg-card border">
-            <h4 className="text-lg font-medium mb-4">Choose Starter</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {menuOptions
-                .filter((option) => option.category === 'starter')
-                .map((starter) => (
-                  <div
-                    key={starter.id}
-                    className={`p-3 rounded border cursor-pointer ${
-                      selectedStarters.includes(starter.id)
-                        ? 'bg-primary/10 border-primary'
-                        : 'hover:bg-muted/50'
-                    }`}
-                    onClick={() => toggleOption(starter.id, 'starter')}
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pt-2 pb-4">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="guest-slider" className="mb-1 block">
+                  Number of guests: <span className="font-semibold">{numGuests}</span>
+                  <span className="text-sm text-muted-foreground ml-2">
+                    (Minimum: {minGuests})
+                  </span>
+                </Label>
+                <div className="flex items-center gap-4">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => numGuests > minGuests ? setNumGuests(numGuests - 1) : null}
+                    disabled={numGuests <= minGuests}
                   >
-                    <div className="flex justify-between items-start">
-                      <span>{starter.name}</span>
-                      {selectedStarters.includes(starter.id) && (
-                        <Check className="h-4 w-4 text-primary" />
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">{starter.description}</p>
-                  </div>
-                ))}
-            </div>
-          </div>
-        )}
-
-        {getMaxSelections('side') > 0 && selectedMenu !== 'wedding1' && (
-          <div className="p-4 rounded-lg bg-card border">
-            <h4 className="text-lg font-medium mb-4">Choose Sides</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {menuOptions
-                .filter((option) => option.category === 'side')
-                .map((side) => (
-                  <div
-                    key={side.id}
-                    className={`p-3 rounded border cursor-pointer ${
-                      selectedSides.includes(side.id)
-                        ? 'bg-primary/10 border-primary'
-                        : 'hover:bg-muted/50'
-                    }`}
-                    onClick={() => toggleOption(side.id, 'side')}
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                  
+                  <Slider
+                    id="guest-slider"
+                    value={[numGuests]}
+                    min={minGuests}
+                    max={300}
+                    step={1}
+                    onValueChange={(values) => setNumGuests(values[0])}
+                    className="flex-1"
+                  />
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setNumGuests(numGuests + 1)}
                   >
-                    <div className="flex justify-between items-start">
-                      <span>{side.name}</span>
-                      {selectedSides.includes(side.id) && (
-                        <Check className="h-4 w-4 text-primary" />
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">{side.description}</p>
-                  </div>
-                ))}
-            </div>
-          </div>
-        )}
-
-        {getMaxSelections('dessert') > 0 && (
-          <div className="p-4 rounded-lg bg-card border">
-            <h4 className="text-lg font-medium mb-4">Choose Dessert</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {menuOptions
-                .filter((option) => option.category === 'dessert')
-                .map((dessert) => (
-                  <div
-                    key={dessert.id}
-                    className={`p-3 rounded border cursor-pointer ${
-                      selectedDesserts.includes(dessert.id)
-                        ? 'bg-primary/10 border-primary'
-                        : 'hover:bg-muted/50'
-                    }`}
-                    onClick={() => toggleOption(dessert.id, 'dessert')}
-                  >
-                    <div className="flex justify-between items-start">
-                      <span>{dessert.name}</span>
-                      {selectedDesserts.includes(dessert.id) && (
-                        <Check className="h-4 w-4 text-primary" />
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">{dessert.description}</p>
-                  </div>
-                ))}
-            </div>
-          </div>
-        )}
-
-        <div className="p-4 rounded-lg bg-card border">
-          <h4 className="text-lg font-medium mb-4">Optional Extras</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {menuOptions
-              .filter((option) => option.category === 'extra')
-              .map((extra) => (
-                <div
-                  key={extra.id}
-                  className={`p-4 rounded-lg border cursor-pointer ${
-                    selectedExtras.includes(extra.id)
-                      ? 'bg-primary/10 border-primary'
-                      : 'hover:bg-muted/50'
-                  }`}
-                  onClick={() => toggleOption(extra.id, 'extra')}
-                >
-                  <div className="flex justify-between items-start">
-                    <span className="font-medium">{extra.name}</span>
-                    {selectedExtras.includes(extra.id) && (
-                      <Check className="h-4 w-4 text-primary" />
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">{extra.description}</p>
-                  <p className="text-sm font-medium mt-2">
-                    {extra.id === 'cheese_table' || extra.id === 'fruit_table' 
-                      ? `R${extra.price} (table)` 
-                      : `R${extra.price} per person`}
-                  </p>
+                    <ChevronUp className="h-4 w-4" />
+                  </Button>
                 </div>
-              ))}
-          </div>
-        </div>
-      </div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="cutlery" 
+                  checked={includeCutlery}
+                  onCheckedChange={setIncludeCutlery} 
+                />
+                <Label htmlFor="cutlery">Include Cutlery & Crockery</Label>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+        
+        {/* Season Selection - Only for specific menus */}
+        {needsSeason && (
+          <AccordionItem value="season" className="border rounded-lg overflow-hidden">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <div className="flex items-center gap-2">
+                <span className="text-base font-medium">Season Selection</span>
+                <span className="text-xs text-red-500">*</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pt-2 pb-4">
+              <div className="grid gap-4">
+                <div>
+                  <Label htmlFor="season-select" className="mb-2 block">
+                    Select the seasonal menu:
+                  </Label>
+                  <Select 
+                    value={selectedSeason || ""} 
+                    onValueChange={(value) => setSelectedSeason(value as 'summer' | 'winter' | null)}
+                  >
+                    <SelectTrigger id="season-select" className="w-full max-w-xs">
+                      <SelectValue placeholder="Select a season" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="summer">Summer Menu</SelectItem>
+                      <SelectItem value="winter">Winter Menu</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+        
+        {/* Starters - Only for specific menus */}
+        {needsStarters && starterOptions.length > 0 && (
+          <AccordionItem value="starters" className="border rounded-lg overflow-hidden">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <div className="flex items-center gap-2">
+                <span className="text-base font-medium">Select Your Starter</span>
+                <span className="text-xs text-red-500">*</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pt-2 pb-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                {starterOptions.map((starter) => (
+                  <Card 
+                    key={starter.id}
+                    className={`cursor-pointer transition ${
+                      selectedStarters.includes(starter.id) 
+                        ? 'border-primary bg-primary/5' 
+                        : 'hover:border-primary/50'
+                    }`}
+                    onClick={() => handleSelectStarter(starter.id)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="font-medium">{starter.name}</div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        {starter.description}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+        
+        {/* Sides */}
+        {sideOptions.length > 0 && (
+          <AccordionItem value="sides" className="border rounded-lg overflow-hidden">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <div className="flex items-center gap-2">
+                <span className="text-base font-medium">Select Your Sides</span>
+                <span className="text-xs text-red-500">*</span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Please select 2 sides</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pt-2 pb-4">
+              <p className="text-sm text-muted-foreground mb-4">Please select 2 sides</p>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {sideOptions.map((side) => (
+                  <Card 
+                    key={side.id}
+                    className={`cursor-pointer transition ${
+                      selectedSides.includes(side.id) 
+                        ? 'border-primary bg-primary/5' 
+                        : selectedSides.length >= 2 
+                          ? 'opacity-50 cursor-not-allowed' 
+                          : 'hover:border-primary/50'
+                    }`}
+                    onClick={() => selectedSides.length < 2 || selectedSides.includes(side.id) 
+                      ? handleSelectSide(side.id) 
+                      : null}
+                  >
+                    <CardContent className="p-4">
+                      <div className="font-medium">{side.name}</div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        {side.description}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+        
+        {/* Desserts - Only for specific menus */}
+        {needsDesserts && dessertOptions.length > 0 && (
+          <AccordionItem value="desserts" className="border rounded-lg overflow-hidden">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <div className="flex items-center gap-2">
+                <span className="text-base font-medium">Select Your Dessert</span>
+                <span className="text-xs text-red-500">*</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pt-2 pb-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                {dessertOptions.map((dessert) => (
+                  <Card 
+                    key={dessert.id}
+                    className={`cursor-pointer transition ${
+                      selectedDesserts.includes(dessert.id) 
+                        ? 'border-primary bg-primary/5' 
+                        : 'hover:border-primary/50'
+                    }`}
+                    onClick={() => handleSelectDessert(dessert.id)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="font-medium">{dessert.name}</div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        {dessert.description}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+        
+        {/* Extras */}
+        {extraOptions.length > 0 && (
+          <AccordionItem value="extras" className="border rounded-lg overflow-hidden">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <span className="text-base font-medium">Optional Extras</span>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pt-2 pb-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                {extraOptions.map((extra) => (
+                  <Card 
+                    key={extra.id}
+                    className={`cursor-pointer transition ${
+                      selectedExtras.includes(extra.id) 
+                        ? 'border-primary bg-primary/5' 
+                        : 'hover:border-primary/50'
+                    }`}
+                    onClick={() => handleSelectExtra(extra.id)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="font-medium">{extra.name}</div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        {extra.description}
+                      </div>
+                      <div className="text-sm font-medium mt-2">
+                        {extra.id === 'cheese_table' || extra.id === 'fruit_table' 
+                          ? `R${extra.price}` 
+                          : `R${extra.price} per person`}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              
+              {/* Extra Salad Type Selection */}
+              {selectedExtras.includes('extra_salad') && (
+                <div className="mt-6">
+                  <Label htmlFor="extra-salad-type" className="mb-2 block">
+                    Select your extra salad type:
+                  </Label>
+                  <Select 
+                    value={extraSaladType || ""} 
+                    onValueChange={setExtraSaladType}
+                  >
+                    <SelectTrigger id="extra-salad-type" className="w-full max-w-xs">
+                      <SelectValue placeholder="Select a salad type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {saladOptions.map((salad) => (
+                        <SelectItem key={salad.id} value={salad.id}>
+                          {salad.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        )}
+      </Accordion>
     </div>
   );
 };

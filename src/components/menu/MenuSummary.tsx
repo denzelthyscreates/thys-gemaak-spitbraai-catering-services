@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useMenu } from '@/contexts/menu';
 import { MenuOption } from '@/types/menu';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Check, X, MapPin } from 'lucide-react';
+import { ArrowRight, Check, X, MapPin, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { getAreaNameByPostalCode } from '@/data/travelData';
+import { useToast } from '@/hooks/use-toast';
 
 interface MenuSummaryProps {
   menuOptions: MenuOption[];
@@ -29,6 +30,10 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
     travelFee,
     setPostalCode
   } = useMenu();
+  
+  const { toast } = useToast();
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [showValidation, setShowValidation] = useState(false);
 
   const getMenuInclusions = () => {
     if (!selectedMenu) return [];
@@ -57,6 +62,86 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
     return inclusions;
   };
 
+  const validateMenuSelection = () => {
+    const errors: Record<string, string> = {};
+    
+    if (!selectedMenu) {
+      errors.menu = "Please select a menu package";
+    }
+    
+    const selectedMenuOption = menuOptions.find(opt => opt.id === selectedMenu);
+    
+    if (selectedMenuOption) {
+      const minGuests = selectedMenuOption.minGuests || 30;
+      
+      if (numGuests < minGuests) {
+        errors.guests = `Minimum ${minGuests} guests required for this menu`;
+      }
+      
+      // Check if season selection is required
+      if ((selectedMenu === 'wedding1' || (selectedMenu === 'matric_premium' && selectedMenuOption?.seasonOptions)) && !selectedSeason) {
+        errors.season = "Please select a season";
+      }
+      
+      // Check if starters are required and selected
+      if ((selectedMenu === 'menu3' || selectedMenu === 'business' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium') && selectedStarters.length === 0) {
+        errors.starters = "Please select a starter";
+      }
+      
+      // Sides are always required if available for selection
+      if (selectedSides.length === 0) {
+        errors.sides = "Please select required sides";
+      }
+      
+      // Check if desserts are required and selected
+      if ((selectedMenu === 'menu3' || selectedMenu === 'business' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium') && selectedDesserts.length === 0) {
+        errors.desserts = "Please select a dessert";
+      }
+    }
+    
+    // Check if postal code is provided
+    if (!postalCode) {
+      errors.postalCode = "Please enter your postal code";
+    } else {
+      // Validate postal code format (basic validation)
+      if (!/^\d{4}$/.test(postalCode)) {
+        errors.postalCode = "Please enter a valid 4-digit South African postal code";
+      } else if (!getAreaNameByPostalCode(postalCode) || getAreaNameByPostalCode(postalCode) === "Unknown area") {
+        errors.postalCode = "We don't recognize this postal code. Please check it or contact us";
+      }
+    }
+    
+    return errors;
+  };
+
+  const handleNextStep = () => {
+    const errors = validateMenuSelection();
+    setValidationErrors(errors);
+    setShowValidation(true);
+    
+    if (Object.keys(errors).length === 0) {
+      // No errors, proceed to next step
+      if (onNextStep) {
+        onNextStep();
+      }
+    } else {
+      // Show toast with error message
+      toast({
+        variant: "destructive",
+        title: "Please complete required fields",
+        description: "Some required information is missing or incorrect.",
+        duration: 4000
+      });
+      
+      // Scroll to the first error
+      const firstErrorKey = Object.keys(errors)[0];
+      const element = document.getElementById(firstErrorKey);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  };
+
   if (!selectedMenu) return null;
 
   const selectedMenuOption = menuOptions.find(opt => opt.id === selectedMenu);
@@ -64,23 +149,43 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
   const areaName = postalCode ? getAreaNameByPostalCode(postalCode) : '';
   const finalTotalPrice = travelFee ? totalPrice * numGuests + travelFee : totalPrice * numGuests;
 
+  const renderValidationError = (field: string) => {
+    if (showValidation && validationErrors[field]) {
+      return (
+        <div className="text-destructive text-sm flex items-center gap-1 mt-1">
+          <AlertCircle className="h-4 w-4" />
+          <span>{validationErrors[field]}</span>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <div className="rounded-lg border p-4 bg-muted/50">
+    <div className="rounded-lg border p-4 bg-muted/50 mt-8">
       <h3 className="text-lg font-medium mb-3">Your Menu Selection Summary</h3>
       <div className="space-y-2">
         {/* Menu Package */}
-        <div className="grid grid-cols-3 gap-2">
-          <span className="font-medium">Package:</span>
+        <div id="menu" className="grid grid-cols-3 gap-2">
+          <span className="font-medium flex items-center gap-1">
+            Package:
+            <span className="text-xs text-red-500 ml-1">*</span>
+          </span>
           <span className="col-span-2">
             {menuOptions.find(opt => opt.id === selectedMenu)?.name}
           </span>
         </div>
+        {renderValidationError('menu')}
 
         {/* Guests */}
-        <div className="grid grid-cols-3 gap-2">
-          <span className="font-medium">Guests:</span>
+        <div id="guests" className="grid grid-cols-3 gap-2">
+          <span className="font-medium flex items-center gap-1">
+            Guests:
+            <span className="text-xs text-red-500 ml-1">*</span>
+          </span>
           <span className="col-span-2">{numGuests} <span className="text-sm text-muted-foreground">(Minimum: {minGuests})</span></span>
         </div>
+        {renderValidationError('guests')}
 
         {/* Cutlery & Crockery */}
         <div className="grid grid-cols-3 gap-2">
@@ -101,44 +206,64 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
         </div>
 
         {/* Season */}
-        {(selectedMenu === 'wedding1' || (selectedMenu === 'matric_premium' && selectedMenuOption?.seasonOptions)) && selectedSeason && (
-          <div className="grid grid-cols-3 gap-2">
-            <span className="font-medium">Season:</span>
+        {(selectedMenu === 'wedding1' || (selectedMenu === 'matric_premium' && selectedMenuOption?.seasonOptions)) && (
+          <div id="season" className="grid grid-cols-3 gap-2">
+            <span className="font-medium flex items-center gap-1">
+              Season:
+              <span className="text-xs text-red-500 ml-1">*</span>
+            </span>
             <span className="col-span-2">
-              {selectedSeason.charAt(0).toUpperCase() + selectedSeason.slice(1)} Menu
+              {selectedSeason ? (selectedSeason.charAt(0).toUpperCase() + selectedSeason.slice(1) + ' Menu') : 'Not selected'}
             </span>
           </div>
         )}
+        {renderValidationError('season')}
 
         {/* Starters */}
-        {selectedStarters.length > 0 && (
-          <div className="grid grid-cols-3 gap-2">
-            <span className="font-medium">Starter:</span>
+        {(selectedMenu === 'menu3' || selectedMenu === 'business' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium') && (
+          <div id="starters" className="grid grid-cols-3 gap-2">
+            <span className="font-medium flex items-center gap-1">
+              Starter:
+              <span className="text-xs text-red-500 ml-1">*</span>
+            </span>
             <span className="col-span-2">
-              {selectedStarters.map(id => menuOptions.find(opt => opt.id === id)?.name).join(', ')}
+              {selectedStarters.length > 0 
+                ? selectedStarters.map(id => menuOptions.find(opt => opt.id === id)?.name).join(', ')
+                : 'Not selected'}
             </span>
           </div>
         )}
+        {renderValidationError('starters')}
 
         {/* Sides */}
-        {selectedSides.length > 0 && (
-          <div className="grid grid-cols-3 gap-2">
-            <span className="font-medium">Sides:</span>
-            <span className="col-span-2">
-              {selectedSides.map(id => menuOptions.find(opt => opt.id === id)?.name).join(', ')}
-            </span>
-          </div>
-        )}
+        <div id="sides" className="grid grid-cols-3 gap-2">
+          <span className="font-medium flex items-center gap-1">
+            Sides:
+            <span className="text-xs text-red-500 ml-1">*</span>
+          </span>
+          <span className="col-span-2">
+            {selectedSides.length > 0 
+              ? selectedSides.map(id => menuOptions.find(opt => opt.id === id)?.name).join(', ')
+              : 'Not selected'}
+          </span>
+        </div>
+        {renderValidationError('sides')}
 
         {/* Desserts */}
-        {selectedDesserts.length > 0 && (
-          <div className="grid grid-cols-3 gap-2">
-            <span className="font-medium">Dessert:</span>
+        {(selectedMenu === 'menu3' || selectedMenu === 'business' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium') && (
+          <div id="desserts" className="grid grid-cols-3 gap-2">
+            <span className="font-medium flex items-center gap-1">
+              Dessert:
+              <span className="text-xs text-red-500 ml-1">*</span>
+            </span>
             <span className="col-span-2">
-              {selectedDesserts.map(id => menuOptions.find(opt => opt.id === id)?.name).join(', ')}
+              {selectedDesserts.length > 0 
+                ? selectedDesserts.map(id => menuOptions.find(opt => opt.id === id)?.name).join(', ')
+                : 'Not selected'}
             </span>
           </div>
         )}
+        {renderValidationError('desserts')}
 
         {/* Extras */}
         {selectedExtras.length > 0 && (
@@ -165,9 +290,12 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
         </div>
 
         {/* Travel Fee Section */}
-        <div className="mt-4 pt-4 border-t border-border">
+        <div id="postalCode" className="mt-4 pt-4 border-t border-border">
           <div className="grid grid-cols-3 gap-2 mb-2">
-            <span className="font-medium">Postal Code:</span>
+            <span className="font-medium flex items-center gap-1">
+              Postal Code:
+              <span className="text-xs text-red-500 ml-1">*</span>
+            </span>
             <div className="col-span-2">
               <div className="relative">
                 <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -175,7 +303,7 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
                   placeholder="Enter postal code"
                   value={postalCode}
                   onChange={(e) => setPostalCode(e.target.value)}
-                  className="pl-9 h-9 max-w-[12rem]"
+                  className={`pl-9 h-9 max-w-[12rem] ${showValidation && validationErrors.postalCode ? 'border-destructive focus:ring-destructive' : ''}`}
                 />
               </div>
               {postalCode && areaName && (
@@ -183,6 +311,7 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
               )}
             </div>
           </div>
+          {renderValidationError('postalCode')}
         </div>
 
         {/* Pricing */}
@@ -217,14 +346,20 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
       
       {/* Next button */}
       {selectedMenu && (
-        <div className="mt-6 flex justify-end">
-          <Button 
-            onClick={onNextStep}
-            className="gap-2"
-          >
-            Continue to Booking Enquiry
-            <ArrowRight className="h-4 w-4" />
-          </Button>
+        <div className="mt-6">
+          <div className="text-sm text-muted-foreground mb-2">
+            <span className="text-xs text-red-500 mr-1">*</span>
+            Required fields
+          </div>
+          <div className="flex justify-end">
+            <Button 
+              onClick={handleNextStep}
+              className="gap-2"
+            >
+              Continue to Booking Enquiry
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
     </div>
