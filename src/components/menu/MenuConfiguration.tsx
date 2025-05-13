@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useMenu } from '@/contexts/menu';
 import { MenuOption } from '@/types/menu';
@@ -18,9 +17,9 @@ import {
 } from '@/components/ui/accordion';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { ChevronUp, ChevronDown, Info } from 'lucide-react';
+import { Info } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -105,6 +104,16 @@ export const MenuConfiguration: React.FC<MenuConfigurationProps> = ({ menuOption
     }
   };
   
+  const handleGuestNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    if (!isNaN(value) && value >= minGuests) {
+      setNumGuests(value);
+    } else if (!e.target.value) {
+      // Allow empty field while typing
+      setNumGuests(minGuests);
+    }
+  };
+  
   const starterOptions = menuOptions
     .filter(option => option.category === 'starter')
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -154,40 +163,21 @@ export const MenuConfiguration: React.FC<MenuConfigurationProps> = ({ menuOption
           <AccordionContent className="px-4 pt-2 pb-4">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="guest-slider" className="mb-1 block">
-                  Number of guests: <span className="font-semibold">{numGuests}</span>
+                <Label htmlFor="guest-number" className="mb-2 block">
+                  Number of guests:
                   <span className="text-sm text-muted-foreground ml-2">
                     (Minimum: {minGuests})
                   </span>
                 </Label>
-                <div className="flex items-center gap-4">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => numGuests > minGuests ? setNumGuests(numGuests - 1) : null}
-                    disabled={numGuests <= minGuests}
-                  >
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                  
-                  <Slider
-                    id="guest-slider"
-                    value={[numGuests]}
-                    min={minGuests}
-                    max={300}
-                    step={1}
-                    onValueChange={(values) => setNumGuests(values[0])}
-                    className="flex-1"
-                  />
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setNumGuests(numGuests + 1)}
-                  >
-                    <ChevronUp className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Input
+                  id="guest-number"
+                  type="number"
+                  min={minGuests}
+                  max={1000}
+                  value={numGuests}
+                  onChange={handleGuestNumberChange}
+                  className="max-w-[200px]"
+                />
               </div>
               
               <div className="flex items-center space-x-2">
@@ -196,7 +186,10 @@ export const MenuConfiguration: React.FC<MenuConfigurationProps> = ({ menuOption
                   checked={includeCutlery}
                   onCheckedChange={setIncludeCutlery} 
                 />
-                <Label htmlFor="cutlery">Include Cutlery & Crockery</Label>
+                <div>
+                  <Label htmlFor="cutlery">Include Cutlery & Crockery</Label>
+                  <p className="text-sm text-muted-foreground">R20 per person</p>
+                </div>
               </div>
             </div>
           </AccordionContent>

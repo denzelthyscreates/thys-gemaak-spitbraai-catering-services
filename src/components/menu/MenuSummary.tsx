@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useMenu } from '@/contexts/menu';
 import { MenuOption } from '@/types/menu';
@@ -40,7 +39,7 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
     const inclusions: string[] = [];
     
     if (includeCutlery) {
-      inclusions.push('Cutlery & Crockery');
+      inclusions.push('Cutlery & Crockery (R20/person)');
     }
     
     if (selectedMenu === 'menu1') {
@@ -194,7 +193,7 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
             {includeCutlery ? (
               <>
                 <Check className="h-4 w-4 text-green-600 mr-1" />
-                <span>Included</span>
+                <span>Included (R20 per person)</span>
               </>
             ) : (
               <>
