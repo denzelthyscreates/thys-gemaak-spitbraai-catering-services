@@ -3,7 +3,9 @@ import React from 'react';
 import { useMenu } from '@/contexts/menu';
 import { MenuOption } from '@/types/menu';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Check, X } from 'lucide-react';
+import { ArrowRight, Check, X, MapPin } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { getAreaNameByPostalCode } from '@/data/travelData';
 
 interface MenuSummaryProps {
   menuOptions: MenuOption[];
@@ -22,7 +24,10 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
     extraSaladType,
     includeCutlery,
     totalPrice,
-    discountApplied
+    discountApplied,
+    postalCode,
+    travelFee,
+    setPostalCode
   } = useMenu();
 
   const getMenuInclusions = () => {
@@ -56,6 +61,8 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
 
   const selectedMenuOption = menuOptions.find(opt => opt.id === selectedMenu);
   const minGuests = selectedMenuOption?.minGuests || 30;
+  const areaName = postalCode ? getAreaNameByPostalCode(postalCode) : '';
+  const finalTotalPrice = travelFee ? totalPrice * numGuests + travelFee : totalPrice * numGuests;
 
   return (
     <div className="rounded-lg border p-4 bg-muted/50">
@@ -157,6 +164,27 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
           </span>
         </div>
 
+        {/* Travel Fee Section */}
+        <div className="mt-4 pt-4 border-t border-border">
+          <div className="grid grid-cols-3 gap-2 mb-2">
+            <span className="font-medium">Postal Code:</span>
+            <div className="col-span-2">
+              <div className="relative">
+                <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Enter postal code"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                  className="pl-9 h-9 max-w-[12rem]"
+                />
+              </div>
+              {postalCode && areaName && (
+                <p className="text-sm mt-1 text-muted-foreground">Area: {areaName}</p>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Pricing */}
         <div className="grid grid-cols-3 gap-2 pt-2 border-t">
           <span className="font-medium">Price per person:</span>
@@ -164,8 +192,20 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
         </div>
 
         <div className="grid grid-cols-3 gap-2">
+          <span className="font-medium">Menu subtotal:</span>
+          <span className="col-span-2">R{totalPrice * numGuests}</span>
+        </div>
+
+        {travelFee !== null && (
+          <div className="grid grid-cols-3 gap-2">
+            <span className="font-medium">Travel fee:</span>
+            <span className="col-span-2">R{travelFee} <span className="text-sm text-muted-foreground">({areaName})</span></span>
+          </div>
+        )}
+
+        <div className="grid grid-cols-3 gap-2 pt-2 border-t">
           <span className="font-medium">Total price:</span>
-          <span className="col-span-2 font-semibold">R{totalPrice * numGuests}</span>
+          <span className="col-span-2 font-semibold">R{finalTotalPrice}</span>
         </div>
 
         {discountApplied && (

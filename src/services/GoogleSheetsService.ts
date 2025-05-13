@@ -1,3 +1,4 @@
+
 /**
  * This service handles integration with Make (formerly Integromat) to:
  * 1. Submit booking data to Google Sheets via Make
@@ -26,6 +27,9 @@ export interface BookingData {
   discountApplied: boolean;
   submittedAt: string;
   user_id?: string;
+  postalCode?: string;
+  travelFee?: number | null;
+  areaName?: string;
 }
 
 // Make webhook URL for the integration

@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { MenuContextState } from './types';
 import { calculateTotalPrice } from './menuUtils';
+import { getTravelFee } from '@/data/travelData';
 
 export const useMenuState = () => {
   const [selectedMenu, setSelectedMenu] = useState<string | null>(() => {
@@ -52,6 +52,13 @@ export const useMenuState = () => {
   });
   
   const [discountApplied, setDiscountApplied] = useState<boolean>(false);
+  
+  const [postalCode, setPostalCode] = useState<string>(() => {
+    const saved = localStorage.getItem('postalCode');
+    return saved ? JSON.parse(saved) : '';
+  });
+  
+  const [travelFee, setTravelFee] = useState<number | null>(null);
 
   // Sync state with localStorage
   useEffect(() => {
@@ -89,6 +96,12 @@ export const useMenuState = () => {
   useEffect(() => {
     localStorage.setItem('includeCutlery', JSON.stringify(includeCutlery));
   }, [includeCutlery]);
+  
+  useEffect(() => {
+    localStorage.setItem('postalCode', JSON.stringify(postalCode));
+    // Update travel fee when postal code changes
+    setTravelFee(getTravelFee(postalCode));
+  }, [postalCode]);
 
   // Calculate prices and update state
   useEffect(() => {
@@ -103,13 +116,15 @@ export const useMenuState = () => {
       totalPrice,
       extraSaladType,
       discountApplied,
-      includeCutlery
+      includeCutlery,
+      postalCode,
+      travelFee
     };
     
     const calculatedPrice = calculateTotalPrice(state);
     setTotalPrice(calculatedPrice);
     setDiscountApplied(numGuests >= 100);
-  }, [selectedMenu, selectedStarters, selectedSides, selectedDesserts, selectedExtras, numGuests, includeCutlery]);
+  }, [selectedMenu, selectedStarters, selectedSides, selectedDesserts, selectedExtras, numGuests, includeCutlery, postalCode]);
 
   return {
     selectedMenu,
@@ -123,6 +138,8 @@ export const useMenuState = () => {
     extraSaladType,
     discountApplied,
     includeCutlery,
+    postalCode,
+    travelFee,
     setSelectedMenu,
     setSelectedStarters,
     setSelectedSides,
@@ -131,6 +148,7 @@ export const useMenuState = () => {
     setSelectedSeason,
     setNumGuests,
     setExtraSaladType,
-    setIncludeCutlery
+    setIncludeCutlery,
+    setPostalCode
   };
 };

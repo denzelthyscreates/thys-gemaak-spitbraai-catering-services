@@ -110,6 +110,7 @@ const Contact = () => {
 
   const defaultNumGuests = 50;
   const defaultTotalPrice = 0;
+  const travelFee = menuSelection ? menuSelection.travelFee : null;
 
   return (
     <section id="contact" className="section scroll-mt-20" ref={contactSectionRef}>
@@ -155,7 +156,8 @@ const Contact = () => {
           <TabsContent value="payment">
             <PaymentOptions 
               totalPrice={menuSelection ? menuSelection.totalPrice : defaultTotalPrice} 
-              numGuests={menuSelection ? menuSelection.numberOfGuests : defaultNumGuests} 
+              numGuests={menuSelection ? menuSelection.numberOfGuests : defaultNumGuests}
+              travelFee={travelFee} 
             />
           </TabsContent>
         </Tabs>

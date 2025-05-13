@@ -6,17 +6,25 @@ import { useToast } from "@/hooks/use-toast";
 interface PaymentOptionProps {
   totalPrice: number;
   numGuests: number;
+  travelFee?: number | null;
   onClose?: () => void;
 }
 
-const PaymentOptions: React.FC<PaymentOptionProps> = ({ totalPrice, numGuests, onClose }) => {
+const PaymentOptions: React.FC<PaymentOptionProps> = ({ 
+  totalPrice, 
+  numGuests, 
+  travelFee = null,
+  onClose 
+}) => {
   const [showBankDetails, setShowBankDetails] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const { toast } = useToast();
   
   // Calculate the amounts based on Terms and Conditions
   const bookingFee = 500; // Fixed R500 booking fee
-  const totalEventCost = totalPrice * numGuests;
+  const menuSubtotal = totalPrice * numGuests;
+  const travelAmount = travelFee || 0;
+  const totalEventCost = menuSubtotal + travelAmount;
   const depositAmount = Math.round(totalEventCost * 0.5); // 50% deposit
   const finalPayment = totalEventCost - depositAmount;
   
@@ -90,6 +98,16 @@ const PaymentOptions: React.FC<PaymentOptionProps> = ({ totalPrice, numGuests, o
             <span>Number of Guests:</span>
             <span>{numGuests}</span>
           </div>
+          <div className="flex justify-between">
+            <span>Menu Subtotal:</span>
+            <span>R{menuSubtotal}</span>
+          </div>
+          {travelFee && (
+            <div className="flex justify-between">
+              <span>Travel Fee:</span>
+              <span>R{travelFee}</span>
+            </div>
+          )}
           <div className="flex justify-between font-semibold border-t border-border pt-2 mt-2">
             <span>Total Event Cost:</span>
             <span>R{totalEventCost}</span>
