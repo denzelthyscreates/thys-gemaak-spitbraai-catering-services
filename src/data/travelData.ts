@@ -33,7 +33,7 @@ export const travelAreas: TravelArea[] = [
   {
     name: 'Klapmuts',
     postalCodes: ['7625'],
-    fee: 500
+    fee: 0
   },
   {
     name: 'Kuils River',
