@@ -7,7 +7,7 @@ export interface TravelArea {
 export const travelAreas: TravelArea[] = [
   {
     name: 'Stellenbosch',
-    postalCodes: ['7600'],
+    postalCodes: ['7600', '7601', '7602', '7603', '7604', '7605', '7607', '7608', '7611', '7612', '7613', '7614', '7615'],
     fee: 0
   },
   {
