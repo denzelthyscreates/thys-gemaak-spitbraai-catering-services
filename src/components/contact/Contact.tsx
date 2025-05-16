@@ -7,11 +7,13 @@ import ContactInfo from './ContactInfo';
 const Contact = () => {
   const [menuSelection, setMenuSelection] = useState(null);
   const [activeTab, setActiveTab] = useState("menu");
+  const [bookingFormData, setBookingFormData] = useState(null);
   const contactSectionRef = useRef<HTMLElement>(null);
   
   useEffect(() => {
     const savedActiveTab = localStorage.getItem('activeTab');
     const savedMenuSelection = localStorage.getItem('menuSelection');
+    const savedBookingFormData = localStorage.getItem('bookingFormData');
     
     if (savedActiveTab && savedMenuSelection) {
       setActiveTab(savedActiveTab);
@@ -19,6 +21,10 @@ const Contact = () => {
     
     if (savedMenuSelection) {
       setMenuSelection(JSON.parse(savedMenuSelection));
+    }
+    
+    if (savedBookingFormData) {
+      setBookingFormData(JSON.parse(savedBookingFormData));
     }
   }, []);
   
@@ -33,6 +39,21 @@ const Contact = () => {
     } else {
       localStorage.removeItem('menuSelection');
     }
+  };
+
+  const handleBookingFormDataChange = (data: any) => {
+    setBookingFormData(data);
+    if (data) {
+      localStorage.setItem('bookingFormData', JSON.stringify(data));
+    } else {
+      localStorage.removeItem('bookingFormData');
+    }
+  };
+
+  const handleBookingSubmitted = () => {
+    // Clear booking form data from local storage after successful submission
+    setBookingFormData(null);
+    localStorage.removeItem('bookingFormData');
   };
 
   const handleTabChange = (value: string) => {
@@ -73,7 +94,10 @@ const Contact = () => {
         <ContactTabs
           activeTab={activeTab}
           menuSelection={menuSelection}
+          bookingFormData={bookingFormData}
           onMenuSelectionChange={handleMenuSelectionChange}
+          onBookingFormDataChange={handleBookingFormDataChange}
+          onBookingSubmitted={handleBookingSubmitted}
           onTabChange={handleTabChange}
           onNavigateTab={handleNavigateTab}
         />
