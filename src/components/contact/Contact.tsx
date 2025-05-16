@@ -7,15 +7,11 @@ import ContactInfo from './ContactInfo';
 const Contact = () => {
   const [menuSelection, setMenuSelection] = useState(null);
   const [activeTab, setActiveTab] = useState("menu");
-  const [bookingFormData, setBookingFormData] = useState(null);
-  const [bookingSubmitted, setBookingSubmitted] = useState(false);
   const contactSectionRef = useRef<HTMLElement>(null);
   
   useEffect(() => {
     const savedActiveTab = localStorage.getItem('activeTab');
     const savedMenuSelection = localStorage.getItem('menuSelection');
-    const savedBookingFormData = localStorage.getItem('bookingFormData');
-    const savedBookingSubmitted = localStorage.getItem('bookingSubmitted');
     
     if (savedActiveTab && savedMenuSelection) {
       setActiveTab(savedActiveTab);
@@ -24,32 +20,11 @@ const Contact = () => {
     if (savedMenuSelection) {
       setMenuSelection(JSON.parse(savedMenuSelection));
     }
-    
-    if (savedBookingFormData) {
-      setBookingFormData(JSON.parse(savedBookingFormData));
-    }
-    
-    if (savedBookingSubmitted === 'true') {
-      setBookingSubmitted(true);
-      setActiveTab('payment');
-    }
   }, []);
   
   useEffect(() => {
     localStorage.setItem('activeTab', activeTab);
   }, [activeTab]);
-  
-  useEffect(() => {
-    if (bookingSubmitted) {
-      localStorage.setItem('bookingSubmitted', 'true');
-      setActiveTab('payment');
-      
-      // Scroll to the top of the contact section after form submission
-      setTimeout(() => {
-        scrollToSectionTop();
-      }, 100);
-    }
-  }, [bookingSubmitted]);
 
   const handleMenuSelectionChange = (selection: any) => {
     setMenuSelection(selection);
@@ -90,22 +65,6 @@ const Contact = () => {
     scrollToSectionTop();
   };
 
-  const handleBookingFormDataChange = (data: any) => {
-    setBookingFormData(data);
-    localStorage.setItem('bookingFormData', JSON.stringify(data));
-  };
-  
-  const handleBookingSubmitted = () => {
-    setBookingSubmitted(true);
-    setBookingFormData(null);
-    localStorage.removeItem('bookingFormData');
-    
-    // Ensure we scroll to the top after submission
-    setTimeout(() => {
-      scrollToSectionTop();
-    }, 100);
-  };
-
   return (
     <section id="contact" className="section scroll-mt-20" ref={contactSectionRef}>
       <div className="container-width py-16">
@@ -114,12 +73,9 @@ const Contact = () => {
         <ContactTabs
           activeTab={activeTab}
           menuSelection={menuSelection}
-          bookingFormData={bookingFormData}
           onMenuSelectionChange={handleMenuSelectionChange}
           onTabChange={handleTabChange}
           onNavigateTab={handleNavigateTab}
-          onBookingFormDataChange={handleBookingFormDataChange}
-          onBookingSubmitted={handleBookingSubmitted}
         />
         
         <ContactInfo />
