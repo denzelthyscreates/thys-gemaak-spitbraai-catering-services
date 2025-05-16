@@ -2,7 +2,7 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MenuBuilder from '../MenuBuilder';
-import HubSpotForm from '../HubSpotForm';
+import SystemeRedirect from './SystemeRedirect';
 import PaymentOptions from '../PaymentOptions';
 
 interface ContactTabsProps {
@@ -47,11 +47,8 @@ const ContactTabs: React.FC<ContactTabsProps> = ({
       </TabsContent>
       
       <TabsContent value="book">
-        <HubSpotForm 
+        <SystemeRedirect 
           menuSelection={menuSelection}
-          savedFormData={bookingFormData}
-          onFormDataChange={onBookingFormDataChange}
-          onFormSubmitted={onBookingSubmitted}
           onNavigateTab={onNavigateTab}
         />
       </TabsContent>
