@@ -68,5 +68,5 @@ export const constructRedirectUrl = (
   if (data.travelFee) params.append('travel_fee', data.travelFee.toString());
   
   // Create the final URL with parameters
-  return `${baseUrl}&${params.toString()}`;
+  return `${baseUrl}?${params.toString()}`;
 };

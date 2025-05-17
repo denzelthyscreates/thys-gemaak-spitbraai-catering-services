@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { ExternalLink, ArrowRight } from "lucide-react";
@@ -15,7 +14,7 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
 }) => {
   const [isRedirecting, setIsRedirecting] = useState(false);
   // Updated with the correct Systeme.io form URL
-  const systemeBaseUrl = "https://systeme.io/dashboard/share?hash=5600969fb15ec54e919229bae54186976caf880&type=funnel";
+  const systemeBaseUrl = "https://spitbraai-thysgemaak.systeme.io/bookingform";
   
   // Sample HTML for the Systeme.io form - this will be inserted into their form editor
   const systemeFormHtml = `<!DOCTYPE html>

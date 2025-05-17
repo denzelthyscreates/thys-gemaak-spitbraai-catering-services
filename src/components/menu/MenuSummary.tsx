@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useMenu } from '@/contexts/menu';
 import { MenuOption } from '@/types/menu';
@@ -44,8 +43,8 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
   const [showValidation, setShowValidation] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   
-  // Systeme.io form URL
-  const systemeBaseUrl = "https://systeme.io/dashboard/share?hash=5600969fb15ec54e919229bae54186976caf880&type=funnel";
+  // Updated Systeme.io form URL
+  const systemeBaseUrl = "https://spitbraai-thysgemaak.systeme.io/bookingform";
 
   const renderValidationError = (field: string) => {
     if (showValidation && validationErrors[field]) {
