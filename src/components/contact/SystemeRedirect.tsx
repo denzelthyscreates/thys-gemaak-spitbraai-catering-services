@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { ExternalLink, ArrowRight } from "lucide-react";
@@ -259,28 +260,6 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
                     </div>
                     
                     <div class="form-group">
-                        <label for="eventType" class="required">Event Type</label>
-                        <select id="eventType" name="eventType" required>
-                            <option value="">-- Select Event Type --</option>
-                            <option value="Birthday Party">Birthday Party</option>
-                            <option value="Wedding">Wedding</option>
-                            <option value="Corporate Event">Corporate Event</option>
-                            <option value="Year-End Function">Year-End Function</option>
-                            <option value="Matric Farewell">Matric Farewell</option>
-                            <option value="Family Gathering">Family Gathering</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="cutleryRequired">Cutlery & Crockery Required</label>
-                        <div class="radio-group">
-                            <label class="radio-option"><input type="radio" name="cutleryRequired" value="Yes"> Yes</label>
-                            <label class="radio-option"><input type="radio" name="cutleryRequired" value="No"> No</label>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
                         <label for="hearAbout">How did you hear about us?</label>
                         <select id="hearAbout" name="hearAbout">
                             <option value="">-- Please Select --</option>
@@ -323,6 +302,8 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
             <input type="hidden" id="travelFee" name="travelFee">
             <input type="hidden" id="postalCode" name="postalCode">
             <input type="hidden" id="areaName" name="areaName">
+            <input type="hidden" id="eventType" name="eventType">
+            <input type="hidden" id="includeCutlery" name="includeCutlery">
             
             <!-- Submit Button -->
             <div class="form-group">
@@ -353,7 +334,9 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
                     'totalPrice', 
                     'travelFee', 
                     'postalCode', 
-                    'areaName'
+                    'areaName',
+                    'eventType',
+                    'includeCutlery'
                 ];
                 
                 // Populate hidden fields and create menu summary
@@ -375,6 +358,8 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
                         if (value && field !== 'postalCode' && field !== 'areaName') {
                             if (field === 'totalPrice') {
                                 summaryHTML += '<div><strong>' + displayName + ':</strong> R' + value + '</div>';
+                            } else if (field === 'includeCutlery') {
+                                summaryHTML += '<div><strong>Cutlery & Crockery:</strong> ' + (value === 'true' ? 'Yes' : 'No') + '</div>';
                             } else {
                                 summaryHTML += '<div><strong>' + displayName + ':</strong> ' + value + '</div>';
                             }
@@ -454,6 +439,16 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
       params.append('travelFee', String(menuSelection.travelFee));
     }
 
+    // Add event type parameter
+    if (menuSelection.eventType) {
+      params.append('eventType', menuSelection.eventType);
+    }
+
+    // Add includeCutlery parameter
+    if (menuSelection.includeCutlery !== undefined) {
+      params.append('includeCutlery', String(menuSelection.includeCutlery));
+    }
+
     // Format and join all parameters
     return `${systemeBaseUrl}?${params.toString()}`;
   };
@@ -488,6 +483,7 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
           <div className="menu-selection-summary mb-6 bg-card p-4 rounded-md border">
             <h4 className="font-semibold mb-2">Your Menu Selection</h4>
             <div className="grid gap-1 text-sm">
+              <div><strong>Event Type:</strong> {menuSelection.eventType}</div>
               <div><strong>Menu Package:</strong> {menuSelection.menuPackage}</div>
               <div><strong>Number of Guests:</strong> {menuSelection.numberOfGuests}</div>
               {menuSelection.season && <div><strong>Season:</strong> {menuSelection.season}</div>}
@@ -495,6 +491,7 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
               {menuSelection.sides && <div><strong>Sides:</strong> {menuSelection.sides}</div>}
               {menuSelection.desserts && <div><strong>Desserts:</strong> {menuSelection.desserts}</div>}
               {menuSelection.extras && <div><strong>Extras:</strong> {menuSelection.extras}</div>}
+              <div><strong>Cutlery & Crockery:</strong> {menuSelection.includeCutlery ? 'Yes' : 'No'}</div>
               <div className="mt-1"><strong>Price per person:</strong> R{menuSelection.totalPrice}</div>
               <div><strong>Total price:</strong> R{menuSelection.totalPrice * menuSelection.numberOfGuests} 
                 {menuSelection.travelFee ? ` + R${menuSelection.travelFee} travel fee` : ''}
@@ -507,7 +504,7 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
           <div className="bg-amber-50 border border-amber-200 p-4 rounded-md text-sm">
             <p className="font-medium text-amber-800">What happens next?</p>
             <ol className="list-decimal list-inside mt-2 ml-2 space-y-1 text-amber-700">
-              <li>You'll be redirected to our Systeme.io booking form</li>
+              <li>You'll be redirected to our booking form</li>
               <li>Complete the required contact and event details</li>
               <li>Submit your booking request</li>
               <li>We'll confirm your booking via email within 24-48 hours</li>

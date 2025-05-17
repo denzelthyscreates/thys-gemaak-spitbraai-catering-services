@@ -51,7 +51,8 @@ export const getCompleteMenuSelection = (state: MenuContextState, totalPrice: nu
     extraSaladType,
     includeCutlery,
     postalCode,
-    travelFee
+    travelFee,
+    eventType
   } = state;
 
   if (!selectedMenu) return null;
@@ -86,6 +87,7 @@ export const getCompleteMenuSelection = (state: MenuContextState, totalPrice: nu
     discountApplied: numGuests >= 100,
     postalCode,
     travelFee,
-    areaName
+    areaName,
+    eventType
   };
 };

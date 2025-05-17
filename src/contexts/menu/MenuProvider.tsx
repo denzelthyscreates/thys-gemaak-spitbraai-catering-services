@@ -26,7 +26,8 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({ children }) => {
       discountApplied: menuState.discountApplied,
       includeCutlery: menuState.includeCutlery,
       postalCode: menuState.postalCode,
-      travelFee: menuState.travelFee
+      travelFee: menuState.travelFee,
+      eventType: menuState.eventType
     };
     
     return calculateTotalPrice(state);
@@ -43,6 +44,7 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({ children }) => {
     menuState.setExtraSaladType('');
     menuState.setIncludeCutlery(true);
     menuState.setPostalCode('');
+    menuState.setEventType(null);
     
     localStorage.removeItem('selectedMenu');
     localStorage.removeItem('selectedStarters');
@@ -55,6 +57,7 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({ children }) => {
     localStorage.removeItem('includeCutlery');
     localStorage.removeItem('menuSelection');
     localStorage.removeItem('postalCode');
+    localStorage.removeItem('eventType');
     
     toast({
       title: "Menu Builder Reset",
@@ -78,7 +81,8 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({ children }) => {
       discountApplied: menuState.discountApplied,
       includeCutlery: menuState.includeCutlery,
       postalCode: menuState.postalCode,
-      travelFee: menuState.travelFee
+      travelFee: menuState.travelFee,
+      eventType: menuState.eventType
     };
     
     const completeSelection = getCompleteMenuSelection(state, menuState.totalPrice);
@@ -100,7 +104,8 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({ children }) => {
     menuState.includeCutlery,
     menuState.totalPrice,
     menuState.postalCode,
-    menuState.travelFee
+    menuState.travelFee,
+    menuState.eventType
   ]);
 
   return (

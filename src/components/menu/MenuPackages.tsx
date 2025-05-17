@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Check, Building, Calendar, CalendarCheck, GraduationCap, PartyPopper } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { MenuOption } from '@/types/menu';
 import { useMenu } from '@/contexts/menu';
 import { useToast } from '@/hooks/use-toast';
@@ -12,51 +12,56 @@ interface MenuPackagesProps {
 }
 
 export const MenuPackages = ({ menuOptions }: MenuPackagesProps) => {
-  const { selectedMenu, setSelectedMenu } = useMenu();
+  const { selectedMenu, setSelectedMenu, eventType } = useMenu();
   const { toast } = useToast();
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   
+  // Filter menu options by the selected event type
+  const filteredMenuOptions = menuOptions.filter(
+    menu => menu.eventType === eventType && menu.category === 'menu'
+  );
+
   // Function to get menu options grouped by event type
   const getMenusByEventType = () => {
     const eventGroups = {
       birthday: {
         title: "Birthday Packages",
-        menus: menuOptions.filter(menu => menu.eventType === 'birthday' && menu.category === 'menu'),
+        menus: filteredMenuOptions.filter(menu => menu.eventType === 'birthday'),
         bgColor: "bg-pink-50",
         borderColor: "border-pink-200",
         key: "birthday"
       },
       business: {
         title: "Business Event Packages",
-        menus: menuOptions.filter(menu => menu.eventType === 'business' && menu.category === 'menu'),
+        menus: filteredMenuOptions.filter(menu => menu.eventType === 'business'),
         bgColor: "bg-blue-50",
         borderColor: "border-blue-200",
         key: "business"
       },
       wedding: {
         title: "Wedding Packages",
-        menus: menuOptions.filter(menu => menu.eventType === 'wedding' && menu.category === 'menu'),
+        menus: filteredMenuOptions.filter(menu => menu.eventType === 'wedding'),
         bgColor: "bg-purple-50",
         borderColor: "border-purple-200",
         key: "wedding"
       },
       yearend: {
         title: "Year-End Celebration Packages",
-        menus: menuOptions.filter(menu => menu.eventType === 'yearend' && menu.category === 'menu'),
+        menus: filteredMenuOptions.filter(menu => menu.eventType === 'yearend'),
         bgColor: "bg-orange-50",
         borderColor: "border-orange-200",
         key: "yearend"
       },
       matric: {
         title: "Matric Farewell 2025 Packages",
-        menus: menuOptions.filter(menu => menu.eventType === 'matric' && menu.category === 'menu'),
+        menus: filteredMenuOptions.filter(menu => menu.eventType === 'matric'),
         bgColor: "bg-green-50",
         borderColor: "border-green-200",
         key: "matric"
       },
       standard: {
         title: "Standard Packages",
-        menus: menuOptions.filter(menu => menu.eventType === 'standard' && menu.category === 'menu'),
+        menus: filteredMenuOptions.filter(menu => menu.eventType === 'standard'),
         bgColor: "bg-gray-50",
         borderColor: "border-gray-200",
         key: "standard"
@@ -106,6 +111,15 @@ export const MenuPackages = ({ menuOptions }: MenuPackagesProps) => {
     }
   }, [selectedMenu]);
 
+  // Initialize all groups as expanded on first render
+  useEffect(() => {
+    const allExpanded: Record<string, boolean> = {};
+    getMenusByEventType().forEach(group => {
+      allExpanded[group.key] = true;
+    });
+    setExpandedGroups(allExpanded);
+  }, [eventType]);
+
   const handleMenuSelect = (menuOption: MenuOption) => {
     setSelectedMenu(menuOption.id);
     if (menuOption.availabilityInfo) {
@@ -123,6 +137,14 @@ export const MenuPackages = ({ menuOptions }: MenuPackagesProps) => {
       [groupKey]: !prev[groupKey]
     }));
   };
+
+  if (getMenusByEventType().length === 0) {
+    return (
+      <div className="p-8 text-center border rounded-lg bg-muted/20">
+        <p className="text-muted-foreground">No menu packages available for the selected event type.</p>
+      </div>
+    );
+  }
 
   return (
     <div>

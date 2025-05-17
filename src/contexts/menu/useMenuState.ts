@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { MenuContextState } from './types';
 import { calculateTotalPrice } from './menuUtils';
@@ -50,6 +51,11 @@ export const useMenuState = () => {
     const saved = localStorage.getItem('includeCutlery');
     return saved ? JSON.parse(saved) : true;
   });
+
+  const [eventType, setEventType] = useState<string | null>(() => {
+    const saved = localStorage.getItem('eventType');
+    return saved ? JSON.parse(saved) : null;
+  });
   
   const [discountApplied, setDiscountApplied] = useState<boolean>(false);
   
@@ -96,6 +102,10 @@ export const useMenuState = () => {
   useEffect(() => {
     localStorage.setItem('includeCutlery', JSON.stringify(includeCutlery));
   }, [includeCutlery]);
+
+  useEffect(() => {
+    localStorage.setItem('eventType', JSON.stringify(eventType));
+  }, [eventType]);
   
   useEffect(() => {
     localStorage.setItem('postalCode', JSON.stringify(postalCode));
@@ -118,7 +128,8 @@ export const useMenuState = () => {
       discountApplied,
       includeCutlery,
       postalCode,
-      travelFee
+      travelFee,
+      eventType
     };
     
     const calculatedPrice = calculateTotalPrice(state);
@@ -140,6 +151,7 @@ export const useMenuState = () => {
     includeCutlery,
     postalCode,
     travelFee,
+    eventType,
     setSelectedMenu,
     setSelectedStarters,
     setSelectedSides,
@@ -149,6 +161,7 @@ export const useMenuState = () => {
     setNumGuests,
     setExtraSaladType,
     setIncludeCutlery,
-    setPostalCode
+    setPostalCode,
+    setEventType
   };
 };

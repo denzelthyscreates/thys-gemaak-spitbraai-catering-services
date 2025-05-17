@@ -6,6 +6,7 @@ import { MenuProvider, useMenu } from '@/contexts/menu';
 import { MenuPackages } from './menu/MenuPackages';
 import { MenuConfiguration } from './menu/MenuConfiguration';
 import { MenuSummary } from './menu/MenuSummary';
+import { EventTypeSelector } from './menu/EventTypeSelector';
 import { MenuOption, MenuBuilderProps } from '@/types/menu';
 import { useToast } from '@/hooks/use-toast';
 import { menuOptions } from '@/data/menuData';
@@ -25,6 +26,8 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions, onNavigateTab }: {
     numGuests,
     totalPrice,
     extraSaladType,
+    eventType,
+    includeCutlery,
     handleReset 
   } = useMenu();
   const { toast } = useToast();
@@ -54,6 +57,8 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions, onNavigateTab }: {
         desserts: dessertNames,
         extras: extraNames,
         extraSaladType,
+        eventType,
+        includeCutlery,
         totalPrice
       };
       
@@ -61,7 +66,8 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions, onNavigateTab }: {
     } else {
       onSelectionChange(null);
     }
-  }, [selectedMenu, selectedStarters, selectedSides, selectedDesserts, selectedExtras, selectedSeason, numGuests, extraSaladType, totalPrice]);
+  }, [selectedMenu, selectedStarters, selectedSides, selectedDesserts, selectedExtras, 
+     selectedSeason, numGuests, extraSaladType, totalPrice, eventType, includeCutlery]);
   
   const resetMenu = () => {
     handleReset();
@@ -93,17 +99,28 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions, onNavigateTab }: {
         </Button>
       </div>
 
-      <h3 className="text-xl font-semibold mb-4">Step 1: Choose Your Menu Package</h3>
-      <MenuPackages menuOptions={menuOptions} />
+      {/* Show the event type selector first */}
+      {!eventType && <EventTypeSelector />}
 
-      {selectedMenu && (
+      {/* Only show menu packages after event type is selected */}
+      {eventType && !selectedMenu && (
         <>
-          <h3 className="text-xl font-semibold mt-8 mb-4">Step 2: Configure Your Menu</h3>
+          <h3 className="text-xl font-semibold mb-4">Step 2: Choose Your Menu Package</h3>
+          <MenuPackages menuOptions={menuOptions} />
+        </>
+      )}
+
+      {/* Only show configuration after menu package is selected */}
+      {eventType && selectedMenu && (
+        <>
+          <h3 className="text-xl font-semibold mt-8 mb-4">Step 3: Configure Your Menu</h3>
           <MenuConfiguration menuOptions={menuOptions} />
         </>
       )}
 
-      <MenuSummary menuOptions={menuOptions} onNextStep={handleNextStep} />
+      {selectedMenu && (
+        <MenuSummary menuOptions={menuOptions} onNextStep={handleNextStep} />
+      )}
     </div>
   );
 };

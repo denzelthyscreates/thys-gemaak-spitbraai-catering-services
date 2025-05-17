@@ -13,6 +13,7 @@ export interface MenuContextState {
   includeCutlery: boolean;
   postalCode: string;
   travelFee: number | null;
+  eventType: string | null;
 }
 
 export interface MenuContextType extends MenuContextState {
@@ -26,6 +27,7 @@ export interface MenuContextType extends MenuContextState {
   setExtraSaladType: (type: string) => void;
   setIncludeCutlery: (include: boolean) => void;
   setPostalCode: (code: string) => void;
+  setEventType: (type: string | null) => void;
   calculateTotalPrice: () => number;
   handleReset: () => void;
 }
