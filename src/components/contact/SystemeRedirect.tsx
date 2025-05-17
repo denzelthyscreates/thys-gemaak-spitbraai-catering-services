@@ -14,8 +14,8 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
   onNavigateTab 
 }) => {
   const [isRedirecting, setIsRedirecting] = useState(false);
-  // Updated URL - replace with your actual Systeme.io form URL
-  const systemeBaseUrl = "https://your-systeme-io-form-url.systeme.io";
+  // Updated with the correct Systeme.io form URL
+  const systemeBaseUrl = "https://systeme.io/dashboard/share?hash=5600969fb15ec54e919229bae54186976caf880&type=funnel";
   
   // Sample HTML for the Systeme.io form - this will be inserted into their form editor
   const systemeFormHtml = `<!DOCTYPE html>
