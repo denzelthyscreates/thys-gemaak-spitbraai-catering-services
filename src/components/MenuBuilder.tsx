@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -79,8 +78,9 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions, onNavigateTab }: {
     });
   };
   
+  // This function now only serves to pass the navigation intent to MenuSummary
+  // The actual navigation is now handled directly in MenuSummary via external redirect
   const handleNextStep = () => {
-    // Use the callback from parent to change tabs
     if (onNavigateTab) {
       onNavigateTab('book');
     }

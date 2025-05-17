@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useMenu } from '@/contexts/menu';
 import { MenuOption } from '@/types/menu';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Check, X, MapPin, AlertCircle } from 'lucide-react';
+import { ArrowRight, Check, X, MapPin, AlertCircle, ExternalLink } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { getAreaNameByPostalCode } from '@/data/travelData';
 import { useToast } from '@/hooks/use-toast';
@@ -27,12 +27,17 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
     discountApplied,
     postalCode,
     travelFee,
+    eventType,
     setPostalCode
   } = useMenu();
   
   const { toast } = useToast();
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [showValidation, setShowValidation] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  
+  // Systeme.io form URL
+  const systemeBaseUrl = "https://systeme.io/dashboard/share?hash=5600969fb15ec54e919229bae54186976caf880&type=funnel";
 
   const getMenuInclusions = () => {
     if (!selectedMenu) return [];
@@ -113,16 +118,79 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
     return errors;
   };
 
+  const constructRedirectUrl = () => {
+    // Get the selected menu name
+    const menuName = menuOptions.find(opt => opt.id === selectedMenu)?.name || '';
+    
+    // Construct starters, sides, desserts, and extras
+    const starterNames = selectedStarters.map(id => 
+      menuOptions.find(opt => opt.id === id)?.name || '').join(', ');
+    
+    const sideNames = selectedSides.map(id => 
+      menuOptions.find(opt => opt.id === id)?.name || '').join(', ');
+    
+    const dessertNames = selectedDesserts.map(id => 
+      menuOptions.find(opt => opt.id === id)?.name || '').join(', ');
+    
+    const extraNames = selectedExtras.map(id => {
+      if (id === 'extra_salad' && extraSaladType) {
+        const saladName = menuOptions.find(opt => opt.id === extraSaladType)?.name;
+        return `Extra Salad: ${saladName || 'Not specified'}`;
+      }
+      return menuOptions.find(opt => opt.id === id)?.name;
+    }).join(', ');
+    
+    const areaName = getAreaNameByPostalCode(postalCode) || '';
+    const finalTotalPrice = travelFee ? totalPrice * numGuests + travelFee : totalPrice * numGuests;
+    
+    // Build the parameters
+    const params = new URLSearchParams({
+      'menu_package': menuName,
+      'guests': numGuests.toString(),
+      'price_per_person': totalPrice.toString(),
+      'total_price': finalTotalPrice.toString(),
+      'event_type': eventType || '',
+      'cutlery': includeCutlery ? 'Yes' : 'No'
+    });
+    
+    // Add conditional parameters
+    if (selectedSeason) params.append('season', selectedSeason);
+    if (starterNames) params.append('starters', starterNames);
+    if (sideNames) params.append('sides', sideNames);
+    if (dessertNames) params.append('desserts', dessertNames);
+    if (extraNames) params.append('extras', extraNames);
+    if (postalCode) params.append('postal_code', postalCode);
+    if (areaName) params.append('area', areaName);
+    if (travelFee) params.append('travel_fee', travelFee.toString());
+    
+    // Create the final URL with parameters
+    return `${systemeBaseUrl}&${params.toString()}`;
+  };
+
   const handleNextStep = () => {
     const errors = validateMenuSelection();
     setValidationErrors(errors);
     setShowValidation(true);
     
     if (Object.keys(errors).length === 0) {
-      // No errors, proceed to next step
+      // Direct redirect to Systeme.io with parameters
       if (onNextStep) {
+        // Still fire the next step callback for legacy support
         onNextStep();
       }
+      
+      // Show redirect toast and redirect
+      setIsRedirecting(true);
+      toast({
+        title: "Redirecting to booking form",
+        description: "You'll be redirected to our booking form in a moment...",
+        duration: 2000
+      });
+      
+      // Short delay before redirect to allow the toast to show
+      setTimeout(() => {
+        window.location.href = constructRedirectUrl();
+      }, 1500);
     } else {
       // Show toast with error message
       toast({
@@ -343,7 +411,7 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
         )}
       </div>
       
-      {/* Next button */}
+      {/* Book button - now redirects directly to Systeme */}
       {selectedMenu && (
         <div className="mt-6">
           <div className="text-sm text-muted-foreground mb-2">
@@ -353,10 +421,11 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
           <div className="flex justify-end">
             <Button 
               onClick={handleNextStep}
+              disabled={isRedirecting}
               className="gap-2"
             >
-              Continue to Booking Enquiry
-              <ArrowRight className="h-4 w-4" />
+              {isRedirecting ? "Redirecting..." : "Continue to Booking Form"}
+              {isRedirecting ? null : <ExternalLink className="h-4 w-4" />}
             </Button>
           </div>
         </div>
