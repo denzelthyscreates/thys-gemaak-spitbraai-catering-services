@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { ExternalLink, ArrowRight } from "lucide-react";
@@ -475,15 +474,6 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
     }, 1000);
   };
 
-  const handleViewFormHtml = () => {
-    // This is a helper function that would allow admin to see the HTML code
-    // You could remove this in production or make it only visible for admins
-    console.log(systemeFormHtml);
-    toast.info("Form HTML copied to console", {
-      description: "You can view and copy the HTML from your browser's developer console"
-    });
-  };
-
   return (
     <div className="systeme-redirect-wrapper">
       <div className="bg-primary/5 border border-primary/20 rounded-lg p-8">
@@ -552,17 +542,6 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
               <ArrowRight className="ml-2 h-3 w-3" />
             </Button>
           </div>
-          
-          {/* This button can be removed in production or only shown to admins */}
-          {process.env.NODE_ENV === 'development' && (
-            <Button 
-              variant="ghost" 
-              className="mt-8 text-xs opacity-50 hover:opacity-100" 
-              onClick={handleViewFormHtml}
-            >
-              View Form HTML
-            </Button>
-          )}
         </div>
       </div>
     </div>
