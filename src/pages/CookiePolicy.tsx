@@ -1,4 +1,3 @@
-
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
@@ -94,7 +93,7 @@ const CookiePolicy = () => {
               If you have any questions about our use of cookies or other technologies, please contact us at:
             </p>
             <p className="mt-4">
-              <strong>Email:</strong> info@thysgemaak.com<br />
+              <strong>Email:</strong> spitbookings@thysgemaak.com<br />
               <strong>Phone:</strong> +27 67 456 7784<br />
               <strong>Address:</strong> 75 School Street, Kylemore, Stellenbosch, 7600
             </p>

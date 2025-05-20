@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Separator } from "@/components/ui/separator";
 
@@ -20,7 +19,7 @@ const ContactInfo = () => {
             </div>
             <div>
               <div className="font-medium">Email</div>
-              <a href="mailto:info@thysgemaak.com" className="text-primary hover:underline">info@thysgemaak.com</a>
+              <a href="mailto:spitbookings@thysgemaak.com" className="text-primary hover:underline">spitbookings@thysgemaak.com</a>
             </div>
             <div>
               <div className="font-medium">Office Hours</div>
