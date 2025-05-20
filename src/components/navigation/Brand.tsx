@@ -19,7 +19,7 @@ const Brand = ({ isScrolled }: BrandProps) => {
         className="h-12 w-auto transition-transform duration-300 group-hover:scale-105"
         onError={(e) => console.error("Logo failed to load:", e)}
       />
-      <span className={`font-serif text-xl font-semibold tracking-tight transition-colors duration-300 ${
+      <span className={`font-montserrat text-xl font-bold tracking-tight transition-colors duration-300 ${
         isScrolled ? 'text-foreground' : 'text-foreground'
       }`}>
         Thys Gemaak Spitbraai Catering Services

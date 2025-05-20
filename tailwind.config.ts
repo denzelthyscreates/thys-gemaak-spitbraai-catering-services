@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -101,6 +102,7 @@ export default {
 			fontFamily: {
 				sans: ['Inter', 'sans-serif'],
 				serif: ['Playfair Display', 'serif'],
+				montserrat: ['Montserrat', 'sans-serif'],
 			},
 			keyframes: {
 				'accordion-down': {
