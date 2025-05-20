@@ -1,3 +1,7 @@
 
-<!-- Updated to use the new logo -->
-<!-- This is now using the URL: https://res.cloudinary.com/dlsjdyti8/image/upload/v1740788542/TGS_Icon_t4gc9n.png -->
+<!-- This file will use your uploaded logo -->
+<!-- Make sure to upload your logo with appropriate dimensions, ideally:
+     - For navbar: 180-200px wide, 48-60px height
+     - For footer: ~300px wide
+     - Square aspect ratio variant for favicon: 192x192px
+-->
