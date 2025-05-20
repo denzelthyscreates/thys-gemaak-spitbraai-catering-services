@@ -1,4 +1,3 @@
-
 import { Facebook } from 'lucide-react';
 
 const Footer = () => {
@@ -12,7 +11,7 @@ const Footer = () => {
           <div className="space-y-10">
             <div className="flex items-center gap-2">
               <img 
-                src="/logo.png" 
+                src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1747773661/2025-05-20_TGS_full_round_xtddvs.png" 
                 alt="Thys Gemaak Spitbraai Catering Services Logo" 
                 className="h-32 w-auto"
                 onError={(e) => console.error("Logo failed to load in footer:", e)}

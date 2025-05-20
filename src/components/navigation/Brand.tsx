@@ -14,7 +14,7 @@ const Brand = ({ isScrolled }: BrandProps) => {
       aria-label="Thys Gemaak Spitbraai Catering Services"
     >
       <img 
-        src="/logo.png" 
+        src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1747773654/TGS_icon_website_navbar_180x200px_a0epx3.png" 
         alt="Thys Gemaak Spitbraai Catering Services Logo" 
         className="h-12 w-auto transition-transform duration-300 group-hover:scale-105"
         onError={(e) => console.error("Logo failed to load:", e)}
