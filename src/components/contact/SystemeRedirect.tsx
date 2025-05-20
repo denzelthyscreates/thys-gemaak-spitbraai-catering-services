@@ -193,8 +193,7 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
     <div class="form-container">
         <div class="form-header">
             <img src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1747773661/2025-05-20_TGS_full_round_xtddvs.png" 
-                 alt="Thys Gemaak Spitbraai Catering Services Logo"
-                 onerror="this.onerror=null; this.src='https://spitbraai-thysgemaak.systeme.io/uploads/2025-05-20_TGS_full_round.png';">
+                 alt="Thys Gemaak Spitbraai Catering Services Logo">
             <h2>Thys Gemaak Spitbraai Booking</h2>
             <p>Complete the form below to confirm your catering request</p>
         </div>
@@ -483,13 +482,9 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
         
         <div className="flex justify-center mb-4">
           <img 
-            src="/logo.png" 
+            src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1747773661/2025-05-20_TGS_full_round_xtddvs.png" 
             alt="Thys Gemaak Spitbraai Catering Services Logo" 
             className="h-20 w-auto"
-            onError={(e) => {
-              console.error("Logo failed to load in SystemeRedirect:", e);
-              e.currentTarget.src = "https://res.cloudinary.com/dlsjdyti8/image/upload/v1747773661/2025-05-20_TGS_full_round_xtddvs.png";
-            }}
           />
         </div>
         

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -205,14 +204,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
         </div>
         <div className="flex justify-center mb-4">
           <img 
-            src="/logo.png" 
+            src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1747773661/2025-05-20_TGS_full_round_xtddvs.png" 
             alt="Thys Gemaak Spitbraai Catering Services Logo" 
             className="h-20 w-auto"
-            onError={(e) => {
-              console.error("Logo failed to load in booking form:", e);
-              // Fallback to Cloudinary URL if local path fails
-              e.currentTarget.src = "https://res.cloudinary.com/dlsjdyti8/image/upload/v1747773661/2025-05-20_TGS_full_round_xtddvs.png";
-            }}
           />
         </div>
         <h3 className="text-xl font-semibold mb-2">Booking Request Received!</h3>
