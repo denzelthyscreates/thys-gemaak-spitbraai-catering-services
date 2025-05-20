@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
@@ -345,6 +344,18 @@ const HubSpotForm = ({ menuSelection, savedFormData, onFormDataChange, onFormSub
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
             </div>
+          </div>
+          <div className="flex justify-center mb-4">
+            <img 
+              src="/logo.png" 
+              alt="Thys Gemaak Spitbraai Catering Services Logo" 
+              className="h-20 w-auto"
+              onError={(e) => {
+                console.error("Logo failed to load in HubSpot form:", e);
+                // Fallback to Cloudinary URL if local path fails
+                e.currentTarget.src = "https://res.cloudinary.com/dlsjdyti8/image/upload/v1747773661/2025-05-20_TGS_full_round_xtddvs.png";
+              }}
+            />
           </div>
           <h3 className="text-xl font-semibold mb-2">Booking Request Received!</h3>
           <p className="text-muted-foreground mb-4">

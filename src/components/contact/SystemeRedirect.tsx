@@ -42,6 +42,11 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
             text-align: center;
             margin-bottom: 30px;
         }
+        .form-header img {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 10px;
+        }
         .form-header h2 {
             font-family: 'Playfair Display', serif;
             font-weight: 600;
@@ -187,6 +192,9 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
 <body>
     <div class="form-container">
         <div class="form-header">
+            <img src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1747773661/2025-05-20_TGS_full_round_xtddvs.png" 
+                 alt="Thys Gemaak Spitbraai Catering Services Logo"
+                 onerror="this.onerror=null; this.src='https://spitbraai-thysgemaak.systeme.io/uploads/2025-05-20_TGS_full_round.png';">
             <h2>Thys Gemaak Spitbraai Booking</h2>
             <p>Complete the form below to confirm your catering request</p>
         </div>
@@ -472,6 +480,18 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
     <div className="systeme-redirect-wrapper">
       <div className="bg-primary/5 border border-primary/20 rounded-lg p-8">
         <h3 className="text-xl font-semibold mb-4">Complete Your Booking on Systeme.io</h3>
+        
+        <div className="flex justify-center mb-4">
+          <img 
+            src="/logo.png" 
+            alt="Thys Gemaak Spitbraai Catering Services Logo" 
+            className="h-20 w-auto"
+            onError={(e) => {
+              console.error("Logo failed to load in SystemeRedirect:", e);
+              e.currentTarget.src = "https://res.cloudinary.com/dlsjdyti8/image/upload/v1747773661/2025-05-20_TGS_full_round_xtddvs.png";
+            }}
+          />
+        </div>
         
         <p className="text-muted-foreground mb-6">
           You've successfully built your menu. The next step is to complete your booking on our Systeme.io form.
