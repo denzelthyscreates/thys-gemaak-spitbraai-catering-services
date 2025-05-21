@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { Check, CreditCard, BanknoteIcon, ArrowRight, Calendar, AlertCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import PaymentGateway from './payment/PaymentGateway';
+import { Button } from '@/components/ui/button';
 
 interface PaymentOptionProps {
   totalPrice: number;
@@ -18,6 +20,8 @@ const PaymentOptions: React.FC<PaymentOptionProps> = ({
 }) => {
   const [showBankDetails, setShowBankDetails] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'eft' | 'payfast' | null>(null);
+  const [paymentType, setPaymentType] = useState<'deposit' | 'balance' | 'full' | null>(null);
   const { toast } = useToast();
   
   // Calculate the amounts based on Terms and Conditions
@@ -27,6 +31,16 @@ const PaymentOptions: React.FC<PaymentOptionProps> = ({
   const totalEventCost = menuSubtotal + travelAmount;
   const depositAmount = Math.round(totalEventCost * 0.5); // 50% deposit
   const finalPayment = totalEventCost - depositAmount;
+  
+  // Mock booking data for demonstration
+  const mockBookingData = {
+    client_name: '',
+    client_email: '',
+    client_phone: '',
+    event_date: '',
+    total_amount: totalEventCost,
+    deposit_paid: 0
+  };
   
   const handleShowBankDetails = () => {
     if (!acceptTerms) {
@@ -39,11 +53,32 @@ const PaymentOptions: React.FC<PaymentOptionProps> = ({
     }
     
     setShowBankDetails(true);
+    setPaymentMethod('eft');
     toast({
       title: "Bank details displayed",
       description: "Please use these details to make your payment.",
       variant: "default"
     });
+  };
+  
+  const handlePayFastPayment = (type: 'deposit' | 'balance' | 'full') => {
+    if (!acceptTerms) {
+      toast({
+        title: "Please accept the terms",
+        description: "You must accept the terms and conditions before proceeding.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setPaymentType(type);
+    setPaymentMethod('payfast');
+  };
+  
+  const handleResetPayment = () => {
+    setPaymentMethod(null);
+    setPaymentType(null);
+    setShowBankDetails(false);
   };
   
   return (
@@ -132,19 +167,64 @@ const PaymentOptions: React.FC<PaymentOptionProps> = ({
       </div>
       
       {/* Payment Options */}
-      <div className="space-y-4">
-        <button
-          onClick={handleShowBankDetails}
-          className="w-full button-primary flex items-center justify-center gap-2"
-          disabled={!acceptTerms}
-        >
-          <BanknoteIcon className="h-5 w-5" />
-          Show Bank Details for EFT Payment
-        </button>
-      </div>
+      {!paymentMethod && (
+        <div className="space-y-4">
+          <div className="p-4 border rounded-lg bg-slate-50">
+            <h4 className="font-medium mb-3">Select Payment Method</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <Button
+                onClick={handleShowBankDetails}
+                className="w-full flex items-center justify-center gap-2"
+                disabled={!acceptTerms}
+                variant="outline"
+              >
+                <BanknoteIcon className="h-5 w-5" />
+                Pay via EFT
+              </Button>
+              
+              <Button
+                onClick={() => handlePayFastPayment('deposit')}
+                className="w-full flex items-center justify-center gap-2"
+                disabled={!acceptTerms}
+              >
+                <CreditCard className="h-5 w-5" />
+                Pay Deposit with PayFast
+              </Button>
+            </div>
+            
+            <div className="mt-3">
+              <Button
+                onClick={() => handlePayFastPayment('full')}
+                className="w-full flex items-center justify-center gap-2"
+                disabled={!acceptTerms}
+                variant="secondary"
+              >
+                <ArrowRight className="h-5 w-5" />
+                Pay Full Amount with PayFast
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* PayFast Payment Gateway */}
+      {paymentMethod === 'payfast' && paymentType && (
+        <div className="mt-6 border border-primary/30 rounded-lg p-4 bg-primary/5 animate-fade-in">
+          <h4 className="font-semibold mb-3 flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-primary" />
+            PayFast Online Payment
+          </h4>
+          
+          <PaymentGateway
+            bookingData={mockBookingData}
+            paymentType={paymentType}
+            onCancel={handleResetPayment}
+          />
+        </div>
+      )}
       
       {/* Bank Details Section - Shows only when user has accepted terms and clicked the button */}
-      {showBankDetails && (
+      {paymentMethod === 'eft' && showBankDetails && (
         <div className="mt-6 p-4 border border-primary/30 rounded-lg bg-primary/5 animate-fade-in">
           <h4 className="font-semibold mb-2 flex items-center gap-2">
             <BanknoteIcon className="h-5 w-5 text-primary" />
@@ -169,10 +249,10 @@ const PaymentOptions: React.FC<PaymentOptionProps> = ({
           
           <div className="mt-4 text-center">
             <button
-              onClick={onClose}
+              onClick={handleResetPayment}
               className="text-primary underline text-sm"
             >
-              Close Payment Details
+              Choose another payment method
             </button>
           </div>
         </div>
