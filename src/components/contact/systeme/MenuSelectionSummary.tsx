@@ -20,6 +20,15 @@ interface MenuSelectionProps {
 const MenuSelectionSummary: React.FC<MenuSelectionProps> = ({ menuSelection }) => {
   if (!menuSelection) return null;
 
+  // Calculate the grand total including travel fee
+  const subtotal = menuSelection.totalPrice && menuSelection.numberOfGuests 
+    ? menuSelection.totalPrice * menuSelection.numberOfGuests 
+    : 0;
+  
+  const grandTotal = menuSelection.travelFee
+    ? subtotal + menuSelection.travelFee
+    : subtotal;
+
   return (
     <div className="menu-selection-summary mb-6 bg-card p-4 rounded-md border">
       <h4 className="font-semibold mb-2">Your Menu Selection</h4>
@@ -37,9 +46,12 @@ const MenuSelectionSummary: React.FC<MenuSelectionProps> = ({ menuSelection }) =
         {menuSelection.totalPrice && (
           <>
             <div className="mt-1"><strong>Price per person:</strong> R{menuSelection.totalPrice}</div>
-            <div>
-              <strong>Total price:</strong> R{menuSelection.totalPrice * (menuSelection.numberOfGuests || 0)}
-              {menuSelection.travelFee ? ` + R${menuSelection.travelFee} travel fee` : ''}
+            <div><strong>Menu subtotal:</strong> R{subtotal}</div>
+            {menuSelection.travelFee ? (
+              <div><strong>Travel fee:</strong> R{menuSelection.travelFee}</div>
+            ) : null}
+            <div className="font-medium">
+              <strong>Grand total:</strong> R{grandTotal}
             </div>
           </>
         )}
