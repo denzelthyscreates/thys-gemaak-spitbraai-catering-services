@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import MenuSelectionSummary from './systeme/MenuSelectionSummary';
 import InfoBox from './systeme/InfoBox';
 import ActionButtons from './systeme/ActionButtons';
+import ThankYouPage from './systeme/ThankYouPage';
 import { generateRedirectUrl, MenuSelectionType } from './systeme/redirectUtils';
 import { getSystemeFormHtml } from './systeme/SystemeFormTemplate';
 
@@ -17,6 +18,7 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
   onNavigateTab 
 }) => {
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [showThankYou, setShowThankYou] = useState(false);
   
   // Updated with the correct Systeme.io form URL
   const systemeBaseUrl = "https://spitbraai-thysgemaak.systeme.io/bookingform";
@@ -39,6 +41,18 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
       setIsRedirecting(false);
     }, 1000);
   };
+
+  const handleShowThankYou = () => {
+    setShowThankYou(true);
+  };
+
+  const handleReturnFromThankYou = () => {
+    setShowThankYou(false);
+  };
+
+  if (showThankYou) {
+    return <ThankYouPage onReturnHome={handleReturnFromThankYou} />;
+  }
 
   return (
     <div className="systeme-redirect-wrapper">
@@ -67,6 +81,7 @@ const SystemeRedirect: React.FC<SystemeRedirectProps> = ({
             isRedirecting={isRedirecting}
             onRedirect={handleRedirect}
             onNavigateTab={onNavigateTab}
+            onShowThankYou={handleShowThankYou}
           />
         </div>
       </div>

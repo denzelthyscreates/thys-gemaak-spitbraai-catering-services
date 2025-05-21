@@ -7,12 +7,14 @@ interface ActionButtonsProps {
   isRedirecting: boolean;
   onRedirect: () => void;
   onNavigateTab?: (tabValue: string) => void;
+  onShowThankYou?: () => void;
 }
 
 const ActionButtons: React.FC<ActionButtonsProps> = ({
   isRedirecting,
   onRedirect,
-  onNavigateTab
+  onNavigateTab,
+  onShowThankYou
 }) => {
   return (
     <div className="space-y-4">
@@ -32,16 +34,28 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
         )}
       </Button>
       
-      <div>
+      <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0">
         <Button 
           variant="outline" 
-          className="w-full sm:w-auto mt-2"
+          className="w-full sm:w-auto"
           onClick={() => onNavigateTab && onNavigateTab('payment')}
           size="sm"
         >
           Skip to Payment Options
           <ArrowRight className="ml-2 h-3 w-3" />
         </Button>
+        
+        {onShowThankYou && (
+          <Button 
+            variant="outline" 
+            className="w-full sm:w-auto"
+            onClick={onShowThankYou}
+            size="sm"
+          >
+            View Thank You Page
+            <ArrowRight className="ml-2 h-3 w-3" />
+          </Button>
+        )}
       </div>
     </div>
   );
