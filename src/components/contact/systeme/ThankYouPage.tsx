@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Facebook, Instagram } from "lucide-react";
 
 interface ThankYouPageProps {
   onReturnHome?: () => void;
@@ -47,10 +47,31 @@ const ThankYouPage: React.FC<ThankYouPageProps> = ({ onReturnHome }) => {
           
           <p className="text-muted-foreground">
             If you have any questions in the meantime, please don't hesitate to contact us at{' '}
-            <a href="mailto:info@thysgemaakspitbraai.co.za" className="text-primary hover:underline">
-              info@thysgemaakspitbraai.co.za
+            <a href="mailto:spitbookings@thysgemaak.com" className="text-primary hover:underline">
+              spitbookings@thysgemaak.com
             </a>
           </p>
+          
+          <div className="flex justify-center gap-4 mt-6">
+            <a 
+              href="https://www.instagram.com/thys_gemaak_spitbraai?igsh=MXhqdDh2MmJjemZhNw==" 
+              className="p-2 rounded-full bg-primary hover:bg-secondary transition-colors text-white"
+              aria-label="Instagram"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Instagram className="h-5 w-5" />
+            </a>
+            <a 
+              href="https://www.facebook.com/share/15vy455DHt/" 
+              className="p-2 rounded-full bg-primary hover:bg-secondary transition-colors text-white"
+              aria-label="Facebook"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Facebook className="h-5 w-5" />
+            </a>
+          </div>
         </div>
         
         <Button onClick={handleReturnClick} className="mt-4">

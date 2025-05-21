@@ -1,4 +1,5 @@
-import { Facebook } from 'lucide-react';
+
+import { Facebook, Instagram } from 'lucide-react';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -11,7 +12,7 @@ const Footer = () => {
           <div className="space-y-10">
             <div className="flex items-center gap-2">
               <img 
-                src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1747773661/2025-05-20_TGS_full_round_xtddvs.png" 
+                src="https://res.cloudinary.com/dlsjdyti8/image/upload/t_Profile/v1747774078/2025-05-20_TGS_full_round_gswynv.png" 
                 alt="Thys Gemaak Spitbraai Catering Services Logo" 
                 className="h-32 w-auto"
                 onError={(e) => console.error("Logo failed to load in footer:", e)}
@@ -32,6 +33,15 @@ const Footer = () => {
                 rel="noopener noreferrer"
               >
                 <Facebook className="h-5 w-5" />
+              </a>
+              <a 
+                href="https://www.instagram.com/thys_gemaak_spitbraai?igsh=MXhqdDh2MmJjemZhNw==" 
+                className="p-2 rounded-full bg-blue-800 hover:bg-secondary transition-colors"
+                aria-label="Instagram"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Instagram className="h-5 w-5" />
               </a>
             </div>
           </div>
