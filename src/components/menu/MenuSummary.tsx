@@ -1,4 +1,6 @@
+
 import React, { useState } from 'react';
+import { Check, X } from 'lucide-react'; 
 import { useMenu } from '@/contexts/menu';
 import { MenuOption } from '@/types/menu';
 import { getAreaNameByPostalCode } from '@/data/travelData';
@@ -7,7 +9,7 @@ import { getAreaNameByPostalCode } from '@/data/travelData';
 import { MenuInclusions } from './summary/MenuInclusions';
 import { LocationSection } from './summary/LocationSection';
 import { PricingSection } from './summary/PricingSection';
-import { MenuSelectionItem } from './summary/MenuSelectionItem';
+import { MenuSelectionItem, MenuOptionDisplay } from './summary/MenuSelectionItem';
 import { ValidationDisplay } from './summary/ValidationDisplay';
 import { BookingRedirect } from './summary/BookingRedirect';
 import { validateMenuSelection, ValidationErrors } from './summary/ValidationUtils';
@@ -103,6 +105,7 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
       <MenuSelectionContent 
         menuOptions={menuOptions}
         minGuests={minGuests}
+        selectedMenuOption={selectedMenuOption}
         menuState={menuState}
         renderValidationError={renderValidationError}
       />
@@ -148,6 +151,7 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
 interface MenuSelectionContentProps {
   menuOptions: MenuOption[];
   minGuests: number;
+  selectedMenuOption: MenuOption | undefined;
   menuState: {
     selectedMenu: string | null;
     numGuests: number;
@@ -165,6 +169,7 @@ interface MenuSelectionContentProps {
 const MenuSelectionContent = ({ 
   menuOptions, 
   minGuests,
+  selectedMenuOption,
   menuState,
   renderValidationError 
 }: MenuSelectionContentProps) => {
@@ -204,10 +209,20 @@ const MenuSelectionContent = ({
       <RenderCutleryOption includeCutlery={includeCutlery} />
 
       {/* Season */}
-      {RenderSeasonOption(selectedMenu, selectedMenuOption, selectedSeason, renderValidationError)}
+      <RenderSeasonOption 
+        selectedMenu={selectedMenu} 
+        selectedMenuOption={selectedMenuOption} 
+        selectedSeason={selectedSeason} 
+        renderValidationError={renderValidationError} 
+      />
 
       {/* Starters */}
-      {RenderStartersOption(selectedMenu, selectedStarters, menuOptions, renderValidationError)}
+      <RenderStartersOption 
+        selectedMenu={selectedMenu} 
+        selectedStarters={selectedStarters} 
+        menuOptions={menuOptions} 
+        renderValidationError={renderValidationError} 
+      />
 
       {/* Sides */}
       <MenuSelectionItem 
@@ -219,7 +234,12 @@ const MenuSelectionContent = ({
       />
 
       {/* Desserts */}
-      {RenderDessertsOption(selectedMenu, selectedDesserts, menuOptions, renderValidationError)}
+      <RenderDessertsOption 
+        selectedMenu={selectedMenu} 
+        selectedDesserts={selectedDesserts} 
+        menuOptions={menuOptions} 
+        renderValidationError={renderValidationError} 
+      />
 
       {/* Extras */}
       {selectedExtras.length > 0 && (
@@ -254,12 +274,17 @@ const RenderCutleryOption = ({ includeCutlery }: { includeCutlery: boolean }) =>
   );
 };
 
-const RenderSeasonOption = (
-  selectedMenu: string | null, 
-  selectedMenuOption: MenuOption | undefined, 
-  selectedSeason: 'summer' | 'winter' | null,
-  renderValidationError: (field: string) => React.ReactNode
-) => {
+const RenderSeasonOption = ({
+  selectedMenu, 
+  selectedMenuOption, 
+  selectedSeason,
+  renderValidationError
+}: {
+  selectedMenu: string | null;
+  selectedMenuOption: MenuOption | undefined;
+  selectedSeason: 'summer' | 'winter' | null;
+  renderValidationError: (field: string) => React.ReactNode;
+}) => {
   if (selectedMenu === 'wedding1' || (selectedMenu === 'matric_premium' && selectedMenuOption?.seasonOptions)) {
     return (
       <MenuSelectionItem 
@@ -274,12 +299,17 @@ const RenderSeasonOption = (
   return null;
 };
 
-const RenderStartersOption = (
-  selectedMenu: string | null,
-  selectedStarters: string[],
-  menuOptions: MenuOption[],
-  renderValidationError: (field: string) => React.ReactNode
-) => {
+const RenderStartersOption = ({
+  selectedMenu,
+  selectedStarters,
+  menuOptions,
+  renderValidationError
+}: {
+  selectedMenu: string | null;
+  selectedStarters: string[];
+  menuOptions: MenuOption[];
+  renderValidationError: (field: string) => React.ReactNode;
+}) => {
   if (selectedMenu === 'menu3' || selectedMenu === 'business' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium') {
     return (
       <MenuSelectionItem 
@@ -294,12 +324,17 @@ const RenderStartersOption = (
   return null;
 };
 
-const RenderDessertsOption = (
-  selectedMenu: string | null,
-  selectedDesserts: string[],
-  menuOptions: MenuOption[],
-  renderValidationError: (field: string) => React.ReactNode
-) => {
+const RenderDessertsOption = ({
+  selectedMenu,
+  selectedDesserts,
+  menuOptions,
+  renderValidationError
+}: {
+  selectedMenu: string | null;
+  selectedDesserts: string[];
+  menuOptions: MenuOption[];
+  renderValidationError: (field: string) => React.ReactNode;
+}) => {
   if (selectedMenu === 'menu3' || selectedMenu === 'business' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium') {
     return (
       <MenuSelectionItem 
@@ -313,6 +348,3 @@ const RenderDessertsOption = (
   }
   return null;
 };
-
-import { Check, X } from 'lucide-react'; 
-import { MenuOptionDisplay } from './summary/MenuSelectionItem';
