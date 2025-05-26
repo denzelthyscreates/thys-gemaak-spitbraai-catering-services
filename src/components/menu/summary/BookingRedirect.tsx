@@ -29,6 +29,7 @@ interface BookingRedirectProps {
   menuOptions: MenuOption[];
   scrollToFirstError: () => void;
   onNextStep?: () => void;
+  performValidationCheck: () => boolean;
 }
 
 export const BookingRedirect = ({
@@ -39,12 +40,16 @@ export const BookingRedirect = ({
   menuOptions,
   scrollToFirstError,
   onNextStep,
+  performValidationCheck,
 }: BookingRedirectProps) => {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const { toast } = useToast();
 
   const handleRedirect = () => {
-    if (!isValid) {
+    // Perform validation check when button is clicked
+    const validationPassed = performValidationCheck();
+    
+    if (!validationPassed) {
       toast({
         variant: "destructive",
         title: "Please complete required fields",

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Check, X } from 'lucide-react'; 
 import { useMenu } from '@/contexts/menu';
@@ -54,7 +53,23 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
     />;
   };
 
-  const isValid = () => {
+  // Fixed: Don't call validation during render, just check if there are errors
+  const hasValidationErrors = () => {
+    const errors = validateMenuSelection(
+      selectedMenu,
+      numGuests,
+      selectedSeason,
+      selectedStarters,
+      selectedSides,
+      selectedDesserts,
+      postalCode,
+      menuOptions
+    );
+    
+    return Object.keys(errors).length > 0;
+  };
+
+  const performValidationCheck = () => {
     const errors = validateMenuSelection(
       selectedMenu,
       numGuests,
@@ -134,13 +149,14 @@ export const MenuSummary = ({ menuOptions, onNextStep }: MenuSummaryProps) => {
       {/* Book button - redirects directly to Systeme */}
       {selectedMenu && (
         <BookingRedirect 
-          isValid={isValid()}
+          isValid={!hasValidationErrors()}
           redirectUrl={systemeBaseUrl}
           menuState={menuState}
           validationErrors={validationErrors}
           menuOptions={menuOptions}
           scrollToFirstError={scrollToFirstError}
           onNextStep={onNextStep}
+          performValidationCheck={performValidationCheck}
         />
       )}
     </div>
