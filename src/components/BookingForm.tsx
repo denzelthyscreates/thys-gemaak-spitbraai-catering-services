@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -236,7 +237,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
       : menuSelection.totalPrice * menuSelection.numberOfGuests;
 
     const bookingData = {
-      id: bookingId,
       client_name: form.getValues('name'),
       client_email: form.getValues('email'),
       client_phone: form.getValues('phone'),
