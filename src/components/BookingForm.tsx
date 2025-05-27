@@ -14,11 +14,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Calendar, Mail, Phone, User, MapPin, CalendarClock, Check, CreditCard } from 'lucide-react';
+import { Calendar, Mail, Phone, User, MapPin, CalendarClock, Check, CreditCard, DollarSign } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { submitBookingToMake, BookingData } from '@/services/GoogleSheetsService';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import PaymentGateway from './payment/PaymentGateway';
+import { submitBookingToLatenode } from '@/services/LatenodeService';
 
 const bookingFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
@@ -49,6 +53,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionComplete, setSubmissionComplete] = useState(false);
+  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
+  const [bookingId, setBookingId] = useState<string | null>(null);
   const summaryRef = useRef<HTMLDivElement>(null);
 
   const defaultValues: BookingFormValues = {
@@ -114,6 +120,12 @@ const BookingForm: React.FC<BookingFormProps> = ({
     summaryRef.current.innerHTML = summaryHTML;
   }, [menuSelection]);
 
+  const generateBookingReference = () => {
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.random().toString(36).substr(2, 4).toUpperCase();
+    return `TGS-${timestamp}-${random}`;
+  };
+
   const onSubmit = async (data: BookingFormValues) => {
     if (!menuSelection) {
       toast.error("Please select a menu package first");
@@ -121,10 +133,16 @@ const BookingForm: React.FC<BookingFormProps> = ({
     }
     
     setIsSubmitting(true);
-    console.log("Starting form submission process...");
+    console.log("Starting enhanced booking submission...");
     
     try {
-      const bookingData: BookingData = {
+      const bookingReference = generateBookingReference();
+      const totalAmount = menuSelection.travelFee 
+        ? (menuSelection.totalPrice * menuSelection.numberOfGuests) + menuSelection.travelFee
+        : menuSelection.totalPrice * menuSelection.numberOfGuests;
+
+      const enhancedBookingData = {
+        // Contact Information
         name: data.name,
         email: data.email,
         phone: data.phone,
@@ -132,6 +150,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
         eventType: data.eventType,
         eventLocation: data.eventLocation,
         additionalNotes: data.additionalNotes,
+        
+        // Menu Selection Details
         menuPackage: menuSelection.menuPackage,
         numberOfGuests: menuSelection.numberOfGuests,
         season: menuSelection.season || "",
@@ -139,23 +159,39 @@ const BookingForm: React.FC<BookingFormProps> = ({
         sides: menuSelection.sides || "",
         desserts: menuSelection.desserts || "",
         extras: menuSelection.extras || "",
-        totalPrice: menuSelection.totalPrice,
+        extraSaladType: menuSelection.extraSaladType || "",
+        includeCutlery: menuSelection.includeCutlery || false,
+        
+        // Pricing Information
+        pricePerPerson: menuSelection.totalPrice,
+        totalAmount: totalAmount,
+        travelFee: menuSelection.travelFee || 0,
+        postalCode: menuSelection.postalCode || "",
+        areaName: menuSelection.areaName || "",
         discountApplied: menuSelection.discountApplied || false,
+        
+        // Booking Management
+        bookingReference: bookingReference,
+        status: 'pending_payment',
         submittedAt: new Date().toISOString(),
       };
       
-      console.log("Form data being sent to Make:", bookingData);
+      console.log("Enhanced booking data being sent:", enhancedBookingData);
       
-      const success = await submitBookingToMake(bookingData);
+      const result = await submitBookingToLatenode(enhancedBookingData);
       
-      if (success) {
-        console.log("Booking submission successful, showing success message");
+      if (result.success) {
+        console.log("Booking submission successful");
+        setBookingId(result.bookingId || bookingReference);
+        
         toast.success("Booking enquiry submitted successfully!", {
-          description: "You'll receive a confirmation email shortly."
+          description: "Your booking reference: " + bookingReference
         });
         
         setSubmissionComplete(true);
+        setShowPaymentOptions(true);
         
+        // Clear form data
         localStorage.removeItem('bookingFormData');
         if (onFormDataChange) {
           onFormDataChange(null);
@@ -165,11 +201,11 @@ const BookingForm: React.FC<BookingFormProps> = ({
           onFormSubmitted();
         }
       } else {
-        throw new Error("Failed to submit booking");
+        throw new Error(result.error || "Failed to submit booking");
       }
       
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error("Error submitting enhanced booking:", error);
       toast.error("There was a problem submitting your booking", {
         description: "Please try again or contact us directly."
       });
@@ -194,50 +230,161 @@ const BookingForm: React.FC<BookingFormProps> = ({
     }
   };
 
-  if (submissionComplete) {
+  if (submissionComplete && showPaymentOptions) {
+    const totalAmount = menuSelection.travelFee 
+      ? (menuSelection.totalPrice * menuSelection.numberOfGuests) + menuSelection.travelFee
+      : menuSelection.totalPrice * menuSelection.numberOfGuests;
+
+    const bookingData = {
+      id: bookingId,
+      client_name: form.getValues('name'),
+      client_email: form.getValues('email'),
+      client_phone: form.getValues('phone'),
+      event_date: form.getValues('eventDate') ? format(form.getValues('eventDate')!, 'yyyy-MM-dd') : undefined,
+      total_amount: totalAmount
+    };
+
     return (
-      <div className="bg-green-50 border border-green-200 rounded-lg p-8 text-center">
-        <div className="flex justify-center mb-4">
-          <div className="bg-green-100 p-3 rounded-full">
-            <Check className="h-8 w-8 text-green-600" />
-          </div>
-        </div>
-        <div className="flex justify-center mb-4">
-          <img 
-            src="https://res.cloudinary.com/dlsjdyti8/image/upload/v1747773661/2025-05-20_TGS_full_round_xtddvs.png" 
-            alt="Thys Gemaak Spitbraai Catering Services Logo" 
-            className="h-20 w-auto"
-          />
-        </div>
-        <h3 className="text-xl font-semibold mb-2">Booking Request Received!</h3>
-        <p className="text-muted-foreground mb-4">
-          Thank you for your booking enquiry. We've sent a confirmation email to your inbox. 
-          Our team will review your request and get back to you within 24 hours.
-        </p>
-        <div className="text-sm text-muted-foreground mb-6">
-          <p className="font-medium">What happens next?</p>
-          <ol className="list-decimal list-inside mt-2 text-left space-y-1">
-            <li>You'll receive an automated confirmation email</li>
-            <li>Our team will review your booking details</li>
-            <li>You'll receive a follow-up email within 24-48 hours</li>
-            <li>Once confirmed, you'll get payment instructions for the deposit</li>
-          </ol>
-        </div>
-        
-        <Button 
-          onClick={handleNavigateToPayment}
-          className="w-full sm:w-auto"
-          size="lg"
-        >
-          <CreditCard className="mr-2 h-4 w-4" />
-          Continue to Payment Options
-        </Button>
+      <div className="space-y-6">
+        {/* Success Message */}
+        <Card className="border-green-200 bg-green-50">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="bg-green-100 p-3 rounded-full">
+                <Check className="h-8 w-8 text-green-600" />
+              </div>
+            </div>
+            <CardTitle className="text-green-800">Booking Confirmed!</CardTitle>
+            <CardDescription className="text-green-700">
+              Your booking reference: <Badge variant="secondary" className="ml-2">{bookingId}</Badge>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-green-700 mb-4">
+              Thank you for your booking! We've sent a confirmation email with all the details.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Payment Options */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              Complete Your Payment
+            </CardTitle>
+            <CardDescription>
+              Choose your payment option to secure your booking
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              {/* Deposit Payment */}
+              <Card className="border-blue-200">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Booking Deposit
+                  </CardTitle>
+                  <CardDescription>
+                    Secure your booking with a R500 deposit
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="text-2xl font-bold text-blue-600">R500</div>
+                    <PaymentGateway 
+                      bookingData={bookingData}
+                      paymentType="deposit"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Remaining balance of R{totalAmount - 500} due before event
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Full Payment */}
+              <Card className="border-green-200">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Full Payment
+                  </CardTitle>
+                  <CardDescription>
+                    Pay the full amount and save on processing
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="text-2xl font-bold text-green-600">R{totalAmount}</div>
+                    <PaymentGateway 
+                      bookingData={bookingData}
+                      paymentType="full"
+                    />
+                    <Badge variant="secondary" className="text-xs">
+                      No additional payments required
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Separator />
+            
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground mb-2">
+                <strong>What happens next?</strong>
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Payment confirmation will be sent to your email</li>
+                <li>• Our team will contact you to finalize event details</li>
+                <li>• Final coordination call 2-3 days before your event</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="booking-form-wrapper">
+    <div className="booking-form-wrapper space-y-6">
+      {/* Enhanced Menu Selection Summary */}
+      {menuSelection && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="text-lg">Your Menu Selection</CardTitle>
+            <CardDescription>Review your selection before booking</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-4 text-sm">
+              <div className="space-y-2">
+                <div><strong>Package:</strong> {menuSelection.menuPackage}</div>
+                <div><strong>Guests:</strong> {menuSelection.numberOfGuests}</div>
+                {menuSelection.season && <div><strong>Season:</strong> {menuSelection.season}</div>}
+                {menuSelection.starters && <div><strong>Starters:</strong> {menuSelection.starters}</div>}
+                {menuSelection.sides && <div><strong>Sides:</strong> {menuSelection.sides}</div>}
+                {menuSelection.desserts && <div><strong>Desserts:</strong> {menuSelection.desserts}</div>}
+              </div>
+              <div className="space-y-2">
+                {menuSelection.extras && <div><strong>Extras:</strong> {menuSelection.extras}</div>}
+                <div><strong>Cutlery:</strong> {menuSelection.includeCutlery ? 'Included' : 'Not included'}</div>
+                {menuSelection.travelFee && (
+                  <div><strong>Travel Fee:</strong> R{menuSelection.travelFee}</div>
+                )}
+                <Separator />
+                <div className="text-lg"><strong>Total: R{
+                  menuSelection.travelFee 
+                    ? (menuSelection.totalPrice * menuSelection.numberOfGuests) + menuSelection.travelFee
+                    : menuSelection.totalPrice * menuSelection.numberOfGuests
+                }</strong></div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -397,34 +544,18 @@ const BookingForm: React.FC<BookingFormProps> = ({
             )}
           />
           
-          {menuSelection && (
-            <div className="menu-selection-summary p-4 bg-primary/5 rounded-lg border border-primary/20">
-              <h4 className="font-semibold mb-2">Your Menu Selection</h4>
-              <div ref={summaryRef}></div>
-              
-              <div className="mt-4 p-3 bg-white rounded border border-border text-sm">
-                <p><strong>What happens next?</strong></p>
-                <ul className="list-disc pl-5 mt-2 space-y-1">
-                  <li>You'll receive a confirmation email immediately</li>
-                  <li>Our team will contact you within 1-2 business days</li>
-                  <li>We'll send payment details for the deposit</li>
-                  <li>Your booking will be finalized after deposit payment</li>
-                </ul>
-              </div>
-            </div>
-          )}
-          
           <Button 
             type="submit" 
             className="w-full" 
             disabled={isSubmitting || !menuSelection}
+            size="lg"
           >
-            {isSubmitting ? "Submitting..." : "Submit Booking Enquiry"}
+            {isSubmitting ? "Submitting..." : "Submit Booking & Choose Payment"}
           </Button>
           
           {!menuSelection && (
             <p className="text-sm text-muted-foreground text-center">
-              Please select a menu package before submitting your booking enquiry.
+              Please select a menu package before submitting your booking.
             </p>
           )}
         </form>

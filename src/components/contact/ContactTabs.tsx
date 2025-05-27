@@ -2,8 +2,8 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MenuBuilder from '../MenuBuilder';
-import SystemeRedirect from './SystemeRedirect';
-import PaymentOptions from '../PaymentOptions';
+import BookingForm from '../BookingForm';
+import { Badge } from "@/components/ui/badge";
 
 interface ContactTabsProps {
   activeTab: string;
@@ -26,16 +26,21 @@ const ContactTabs: React.FC<ContactTabsProps> = ({
   onBookingFormDataChange,
   onBookingSubmitted
 }) => {
-  const defaultNumGuests = 50;
-  const defaultTotalPrice = 0;
-  const travelFee = menuSelection ? menuSelection.travelFee : null;
 
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-      <TabsList className="grid w-full grid-cols-3 mb-8">
-        <TabsTrigger value="menu">Build Your Menu</TabsTrigger>
-        <TabsTrigger value="book" disabled={!menuSelection}>Booking Enquiry</TabsTrigger>
-        <TabsTrigger value="payment">Payment Options</TabsTrigger>
+      <TabsList className="grid w-full grid-cols-2 mb-8">
+        <TabsTrigger value="menu">
+          Build Your Menu
+        </TabsTrigger>
+        <TabsTrigger value="book" disabled={!menuSelection}>
+          Complete Booking
+          {menuSelection && (
+            <Badge variant="secondary" className="ml-2">
+              Ready
+            </Badge>
+          )}
+        </TabsTrigger>
       </TabsList>
       
       <TabsContent value="menu" className="px-1">
@@ -47,18 +52,22 @@ const ContactTabs: React.FC<ContactTabsProps> = ({
       </TabsContent>
       
       <TabsContent value="book">
-        <SystemeRedirect 
-          menuSelection={menuSelection}
-          onNavigateTab={onNavigateTab}
-        />
-      </TabsContent>
-      
-      <TabsContent value="payment">
-        <PaymentOptions 
-          totalPrice={menuSelection ? menuSelection.totalPrice : defaultTotalPrice} 
-          numGuests={menuSelection ? menuSelection.numberOfGuests : defaultNumGuests}
-          travelFee={travelFee} 
-        />
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-2">Complete Your Booking</h2>
+            <p className="text-muted-foreground">
+              Fill in your details and choose your payment option to secure your catering service
+            </p>
+          </div>
+          
+          <BookingForm 
+            menuSelection={menuSelection}
+            savedFormData={bookingFormData}
+            onFormDataChange={onBookingFormDataChange}
+            onFormSubmitted={onBookingSubmitted}
+            onNavigateTab={onNavigateTab}
+          />
+        </div>
       </TabsContent>
     </Tabs>
   );
