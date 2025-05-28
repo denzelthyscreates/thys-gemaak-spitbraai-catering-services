@@ -56,7 +56,7 @@ const ContactTabs: React.FC<ContactTabsProps> = ({
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-2">Complete Your Booking</h2>
             <p className="text-muted-foreground">
-              Fill in your details and choose your payment option to secure your catering service
+              Fill in your details to submit your booking enquiry via our automated system
             </p>
           </div>
           

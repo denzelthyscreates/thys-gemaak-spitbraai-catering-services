@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -55,7 +56,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
   const [submissionComplete, setSubmissionComplete] = useState(false);
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
-  const summaryRef = useRef<HTMLDivElement>(null);
 
   const defaultValues: BookingFormValues = {
     name: '',
@@ -98,28 +98,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
     };
   }, [form, onFormDataChange]);
 
-  useEffect(() => {
-    if (!menuSelection || !summaryRef.current) return;
-    
-    const formattedPrice = `R${menuSelection.totalPrice} pp`;
-    
-    const summaryHTML = `
-      <div class="menu-selection-content">
-        <div class="menu-item"><strong>Menu Package:</strong> ${menuSelection.menuPackage || 'Not selected'}</div>
-        <div class="menu-item"><strong>Number of Guests:</strong> ${menuSelection.numberOfGuests || 0}</div>
-        ${menuSelection.season ? `<div class="menu-item"><strong>Season:</strong> ${menuSelection.season}</div>` : ''}
-        ${menuSelection.starters && menuSelection.starters.length > 0 ? `<div class="menu-item"><strong>Starters:</strong> ${menuSelection.starters}</div>` : ''}
-        ${menuSelection.sides && menuSelection.sides.length > 0 ? `<div class="menu-item"><strong>Sides:</strong> ${menuSelection.sides}</div>` : ''}
-        ${menuSelection.desserts && menuSelection.desserts.length > 0 ? `<div class="menu-item"><strong>Desserts:</strong> ${menuSelection.desserts}</div>` : ''}
-        ${menuSelection.extras && menuSelection.extras.length > 0 ? `<div class="menu-item"><strong>Extras:</strong> ${menuSelection.extras}</div>` : ''}
-        ${menuSelection.discountApplied ? `<div class="menu-item text-success"><strong>Discount:</strong> 10% volume discount applied</div>` : ''}
-        <div class="menu-item price"><strong>Total Price:</strong> ${formattedPrice}</div>
-      </div>
-    `;
-    
-    summaryRef.current.innerHTML = summaryHTML;
-  }, [menuSelection]);
-
   const generateBookingReference = () => {
     const timestamp = Date.now().toString().slice(-6);
     const random = Math.random().toString(36).substr(2, 4).toUpperCase();
@@ -133,7 +111,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     }
     
     setIsSubmitting(true);
-    console.log("Starting enhanced booking submission...");
+    console.log("Starting Latenode booking submission...");
     
     try {
       const bookingReference = generateBookingReference();
@@ -176,12 +154,12 @@ const BookingForm: React.FC<BookingFormProps> = ({
         submittedAt: new Date().toISOString(),
       };
       
-      console.log("Enhanced booking data being sent:", enhancedBookingData);
+      console.log("Sending booking data to Latenode:", enhancedBookingData);
       
       const result = await submitBookingToLatenode(enhancedBookingData);
       
       if (result.success) {
-        console.log("Booking submission successful");
+        console.log("Latenode booking submission successful");
         setBookingId(result.bookingId || bookingReference);
         
         toast.success("Booking enquiry submitted successfully!", {
@@ -201,11 +179,11 @@ const BookingForm: React.FC<BookingFormProps> = ({
           onFormSubmitted();
         }
       } else {
-        throw new Error(result.error || "Failed to submit booking");
+        throw new Error(result.error || "Failed to submit booking to Latenode");
       }
       
     } catch (error) {
-      console.error("Error submitting enhanced booking:", error);
+      console.error("Error submitting booking to Latenode:", error);
       toast.error("There was a problem submitting your booking", {
         description: "Please try again or contact us directly."
       });
@@ -217,7 +195,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
   const eventTypes = [
     "Birthday Party",
     "Wedding",
-    "Business Event",
+    "Business Event", 
     "Year-End Function",
     "Matric Farewell",
     "Family Gathering",
@@ -253,14 +231,14 @@ const BookingForm: React.FC<BookingFormProps> = ({
                 <Check className="h-8 w-8 text-green-600" />
               </div>
             </div>
-            <CardTitle className="text-green-800">Booking Confirmed!</CardTitle>
+            <CardTitle className="text-green-800">Booking Submitted to Latenode!</CardTitle>
             <CardDescription className="text-green-700">
               Your booking reference: <Badge variant="secondary" className="ml-2">{bookingId}</Badge>
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
             <p className="text-green-700 mb-4">
-              Thank you for your booking! We've sent a confirmation email with all the details.
+              Thank you for your booking! Your request has been processed by our automated system.
             </p>
           </CardContent>
         </Card>
@@ -336,9 +314,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
                 <strong>What happens next?</strong>
               </p>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• Payment confirmation will be sent to your email</li>
+                <li>• Your booking is now in our automated system</li>
+                <li>• You'll receive automated confirmations and updates</li>
                 <li>• Our team will contact you to finalize event details</li>
-                <li>• Final coordination call 2-3 days before your event</li>
               </ul>
             </div>
           </CardContent>
@@ -549,7 +527,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
             disabled={isSubmitting || !menuSelection}
             size="lg"
           >
-            {isSubmitting ? "Submitting..." : "Submit Booking & Choose Payment"}
+            {isSubmitting ? "Submitting to Latenode..." : "Submit Booking via Latenode"}
           </Button>
           
           {!menuSelection && (
