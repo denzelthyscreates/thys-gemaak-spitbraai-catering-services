@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -15,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Calendar, Mail, Phone, User, MapPin, CalendarClock, Check, CreditCard, DollarSign } from 'lucide-react';
+import { Calendar, Mail, Phone, User, MapPin, CalendarClock, Check, CreditCard, DollarSign, Home } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
@@ -32,6 +31,12 @@ const bookingFormSchema = z.object({
   eventDate: z.date().optional(),
   eventType: z.string().min(1, { message: 'Please select an event type' }),
   eventLocation: z.string().min(2, { message: 'Please enter an event location' }),
+  // Address fields for invoicing
+  addressLine1: z.string().min(2, { message: 'Please enter your street address' }),
+  addressLine2: z.string().optional(),
+  city: z.string().min(2, { message: 'Please enter your city' }),
+  province: z.string().min(2, { message: 'Please enter your province' }),
+  postalCodeAddress: z.string().min(4, { message: 'Please enter your postal code' }),
   additionalNotes: z.string().optional(),
 });
 
@@ -63,6 +68,11 @@ const BookingForm: React.FC<BookingFormProps> = ({
     phone: '',
     eventType: '',
     eventLocation: '',
+    addressLine1: '',
+    addressLine2: '',
+    city: '',
+    province: '',
+    postalCodeAddress: '',
     additionalNotes: '',
     ...savedFormData
   };
@@ -128,6 +138,13 @@ const BookingForm: React.FC<BookingFormProps> = ({
         eventType: data.eventType,
         eventLocation: data.eventLocation,
         additionalNotes: data.additionalNotes,
+        
+        // Address Information for Invoicing
+        addressLine1: data.addressLine1,
+        addressLine2: data.addressLine2 || "",
+        city: data.city,
+        province: data.province,
+        postalCodeAddress: data.postalCodeAddress,
         
         // Menu Selection Details
         menuPackage: menuSelection.menuPackage,
@@ -495,6 +512,86 @@ const BookingForm: React.FC<BookingFormProps> = ({
                         <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                         <Input placeholder="Venue or Address" className="pl-10" {...field} />
                       </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          {/* Billing Address Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium flex items-center gap-2">
+              <Home className="h-5 w-5" />
+              Billing Address (for invoicing)
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="addressLine1"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Street Address</FormLabel>
+                    <FormControl>
+                      <Input placeholder="123 Main Street" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="addressLine2"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address Line 2 (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Apartment, suite, etc." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Cape Town" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="province"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Province</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Western Cape" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="postalCodeAddress"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Postal Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder="8000" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
