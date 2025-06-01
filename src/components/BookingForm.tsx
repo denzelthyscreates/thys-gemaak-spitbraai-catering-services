@@ -30,7 +30,12 @@ const bookingFormSchema = z.object({
   phone: z.string().min(10, { message: 'Please enter a valid phone number' }),
   eventDate: z.date().optional(),
   eventType: z.string().min(1, { message: 'Please select an event type' }),
-  eventLocation: z.string().min(2, { message: 'Please enter an event location' }),
+  // Event venue details
+  venueName: z.string().optional(),
+  venueStreetAddress: z.string().min(2, { message: 'Please enter the venue street address' }),
+  venueCity: z.string().min(2, { message: 'Please enter the venue city' }),
+  venueProvince: z.string().min(2, { message: 'Please enter the venue province' }),
+  venuePostalCode: z.string().min(4, { message: 'Please enter the venue postal code' }),
   // Address fields for invoicing
   addressLine1: z.string().min(2, { message: 'Please enter your street address' }),
   addressLine2: z.string().optional(),
@@ -67,7 +72,11 @@ const BookingForm: React.FC<BookingFormProps> = ({
     email: '',
     phone: '',
     eventType: '',
-    eventLocation: '',
+    venueName: '',
+    venueStreetAddress: '',
+    venueCity: '',
+    venueProvince: '',
+    venuePostalCode: '',
     addressLine1: '',
     addressLine2: '',
     city: '',
@@ -129,6 +138,11 @@ const BookingForm: React.FC<BookingFormProps> = ({
         ? (menuSelection.totalPrice * menuSelection.numberOfGuests) + menuSelection.travelFee
         : menuSelection.totalPrice * menuSelection.numberOfGuests;
 
+      // Combine venue address into eventLocation for backward compatibility
+      const eventLocation = data.venueName 
+        ? `${data.venueName}, ${data.venueStreetAddress}, ${data.venueCity}, ${data.venueProvince} ${data.venuePostalCode}`
+        : `${data.venueStreetAddress}, ${data.venueCity}, ${data.venueProvince} ${data.venuePostalCode}`;
+
       const enhancedBookingData = {
         // Contact Information
         name: data.name,
@@ -136,8 +150,15 @@ const BookingForm: React.FC<BookingFormProps> = ({
         phone: data.phone,
         eventDate: data.eventDate ? format(data.eventDate, 'yyyy-MM-dd') : undefined,
         eventType: data.eventType,
-        eventLocation: data.eventLocation,
+        eventLocation: eventLocation,
         additionalNotes: data.additionalNotes,
+        
+        // Event Venue Details
+        venueName: data.venueName || "",
+        venueStreetAddress: data.venueStreetAddress,
+        venueCity: data.venueCity,
+        venueProvince: data.venueProvince,
+        venuePostalCode: data.venuePostalCode,
         
         // Address Information for Invoicing
         addressLine1: data.addressLine1,
@@ -500,18 +521,81 @@ const BookingForm: React.FC<BookingFormProps> = ({
                   </FormItem>
                 )}
               />
+            </div>
+          </div>
+
+          {/* Event Venue Location Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Event Venue Details
+            </h3>
+            
+            <FormField
+              control={form.control}
+              name="venueName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Venue Name (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Conference Center, Community Hall, Private Residence" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="venueStreetAddress"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Street Address</FormLabel>
+                    <FormControl>
+                      <Input placeholder="123 Main Street" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               
               <FormField
                 control={form.control}
-                name="eventLocation"
+                name="venueCity"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Event Location</FormLabel>
+                    <FormLabel>City</FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        <Input placeholder="Venue or Address" className="pl-10" {...field} />
-                      </div>
+                      <Input placeholder="Cape Town" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="venueProvince"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Province</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Western Cape" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="venuePostalCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Postal Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder="8000" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
