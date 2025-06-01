@@ -45,12 +45,9 @@ export const eventTypes = [
 ];
 
 export const referralSources = [
-  "Google Search",
-  "Social Media (Facebook/Instagram)",
+  "Facebook",
+  "Instagram",
+  "TikTok",
   "Word of Mouth",
-  "Previous Customer",
-  "Local Advertisement",
-  "Website",
-  "Event Planner Referral",
-  "Other"
+  "Previous Customer"
 ];
