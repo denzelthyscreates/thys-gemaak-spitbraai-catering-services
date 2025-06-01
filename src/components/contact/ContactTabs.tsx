@@ -2,7 +2,7 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MenuBuilder from '../MenuBuilder';
-import BookingForm from '../BookingForm';
+import BookingForm from '../booking/BookingForm';
 import { Badge } from "@/components/ui/badge";
 
 interface ContactTabsProps {
