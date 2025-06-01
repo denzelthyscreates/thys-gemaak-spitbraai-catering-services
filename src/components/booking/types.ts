@@ -19,6 +19,8 @@ export const bookingFormSchema = z.object({
   city: z.string().min(2, { message: 'Please enter your city' }),
   province: z.string().min(2, { message: 'Please enter your province' }),
   postalCodeAddress: z.string().min(4, { message: 'Please enter your postal code' }),
+  // How they heard about us
+  referralSource: z.string().optional(),
   additionalNotes: z.string().optional(),
 });
 
@@ -39,5 +41,16 @@ export const eventTypes = [
   "Year-End Function",
   "Matric Farewell",
   "Family Gathering",
+  "Other"
+];
+
+export const referralSources = [
+  "Google Search",
+  "Social Media (Facebook/Instagram)",
+  "Word of Mouth",
+  "Previous Customer",
+  "Local Advertisement",
+  "Website",
+  "Event Planner Referral",
   "Other"
 ];

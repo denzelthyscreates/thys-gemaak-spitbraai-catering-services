@@ -45,6 +45,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     city: '',
     province: '',
     postalCodeAddress: '',
+    referralSource: '',
     additionalNotes: '',
     ...savedFormData
   };
@@ -109,6 +110,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
         eventType: data.eventType,
         eventLocation: eventLocation,
         additionalNotes: data.additionalNotes,
+        referralSource: data.referralSource || "",
         
         // Event Venue Details
         venueName: data.venueName || "",
