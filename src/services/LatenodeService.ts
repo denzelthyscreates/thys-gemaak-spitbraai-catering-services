@@ -56,7 +56,7 @@ interface LatenodeResponse {
   message?: string;
 }
 
-const LATENODE_WEBHOOK_URL = import.meta.env.VITE_LATENODE_WEBHOOK_URL || 'https://your-latenode-webhook-url.com/webhook';
+const LATENODE_WEBHOOK_URL = 'https://webhook.latenode.com/64480/prod/e682c3eb-ccd2-47ca-921b-590f6c3acd3f';
 
 export const submitBookingToLatenode = async (bookingData: LatenodeBookingData): Promise<LatenodeResponse> => {
   try {
