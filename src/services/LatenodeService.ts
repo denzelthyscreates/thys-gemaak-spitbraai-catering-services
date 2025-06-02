@@ -106,7 +106,25 @@ export const submitBookingToLatenode = async (bookingData: LatenodeBookingData):
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const result = await response.json();
+    // Handle both JSON and text responses
+    let result;
+    const contentType = response.headers.get('content-type');
+    
+    if (contentType && contentType.includes('application/json')) {
+      result = await response.json();
+    } else {
+      // Handle plain text response
+      const textResponse = await response.text();
+      console.log('Latenode text response:', textResponse);
+      
+      // Check if the response indicates success
+      if (textResponse.toLowerCase().includes('accepted') || textResponse.toLowerCase().includes('success')) {
+        result = { message: textResponse, success: true };
+      } else {
+        throw new Error(`Unexpected response: ${textResponse}`);
+      }
+    }
+    
     console.log('Latenode response:', result);
 
     return {
