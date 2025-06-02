@@ -76,12 +76,17 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({ form, menuSel
               <div className="relative">
                 <Users className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                 <Input
-                  type="number"
-                  min="50"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   placeholder="50"
-                  className="pl-10"
+                  className="pl-10 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 50)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9]/g, '');
+                    const numValue = value ? parseInt(value) : '';
+                    field.onChange(numValue);
+                  }}
                   value={field.value || ''}
                 />
               </div>
