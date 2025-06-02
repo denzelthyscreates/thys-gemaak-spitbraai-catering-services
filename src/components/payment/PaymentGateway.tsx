@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import PayFastForm from './PayFastForm';
 import PayNowButton from './PayNowButton';
+import CustomAmountPayNowForm from './CustomAmountPayNowForm';
 import { createBookingDepositPayment, createRemainingBalancePayment, createFullPayment } from '@/services/PayFastService';
 
 export type PaymentType = 'deposit' | 'balance' | 'full';
@@ -29,7 +30,7 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
   onCancel
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState<'paynow' | 'form'>('paynow');
+  const [selectedMethod, setSelectedMethod] = useState<'paynow' | 'custom-paynow' | 'form'>('paynow');
   const { toast } = useToast();
   const [paymentData, setPaymentData] = useState<{url: string; formData: Record<string, string>} | null>(null);
   
@@ -86,9 +87,10 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
   
   return (
     <div className="payment-gateway space-y-4">
-      <Tabs value={selectedMethod} onValueChange={(value) => setSelectedMethod(value as 'paynow' | 'form')}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="paynow">PayNow Button</TabsTrigger>
+      <Tabs value={selectedMethod} onValueChange={(value) => setSelectedMethod(value as 'paynow' | 'custom-paynow' | 'form')}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="paynow">Quick PayNow</TabsTrigger>
+          <TabsTrigger value="custom-paynow">Custom Amount</TabsTrigger>
           <TabsTrigger value="form">Traditional Form</TabsTrigger>
         </TabsList>
         
@@ -118,6 +120,19 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="custom-paynow" className="space-y-4">
+          <CustomAmountPayNowForm
+            bookingData={bookingData}
+            defaultAmount={getPaymentAmount()}
+            itemName={paymentType === 'deposit' ? 'Booking Deposit' : 
+                     paymentType === 'balance' ? 'Final Payment - Spitbraai Catering' : 
+                     'Full Payment - Spitbraai Catering'}
+            itemDescription={paymentType === 'deposit' ? 'Deposit to secure your Spitbraai catering booking.' :
+                           paymentType === 'balance' ? 'Final payment for Spitbraai catering services' :
+                           'Full payment for Spitbraai catering services'}
+          />
         </TabsContent>
         
         <TabsContent value="form" className="space-y-4">
