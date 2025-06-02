@@ -1,13 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { CreditCard, ExternalLink } from "lucide-react";
-import { 
-  createSimplePayNowFormData, 
-  createDynamicPayNowFormData, 
-  submitPayNowForm 
-} from '@/services/PayFastPayNowService';
 import { useToast } from "@/hooks/use-toast";
+import { generateSecurePayNow, submitSecurePaymentForm, SecurePaymentRequest } from '@/services/SecurePaymentService';
 
 interface PayNowButtonProps {
   type: 'simple' | 'dynamic';
@@ -17,6 +13,7 @@ interface PayNowButtonProps {
     client_email?: string;
     client_phone?: string;
     event_date?: string;
+    booking_id?: number;
   };
   paymentType?: 'full' | 'balance';
   buttonText?: string;
@@ -35,31 +32,44 @@ const PayNowButton: React.FC<PayNowButtonProps> = ({
   openInNewTab = false,
   disabled = false
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   
-  const handlePayNowClick = () => {
+  const handlePayNowClick = async () => {
+    setIsLoading(true);
+    
     try {
-      let formData;
+      const paymentAmount = type === 'simple' ? 500 : amount;
+      const paymentTypeForRequest = type === 'simple' ? 'deposit' : paymentType;
       
-      if (type === 'simple') {
-        formData = createSimplePayNowFormData(bookingData);
-      } else {
-        if (!amount) {
-          throw new Error('Amount is required for dynamic PayNow button');
-        }
-        formData = createDynamicPayNowFormData(amount, bookingData, paymentType);
+      if (!paymentAmount) {
+        throw new Error('Amount is required for PayNow payment');
       }
       
-      console.log('PayNow form data:', formData);
-      submitPayNowForm(formData, openInNewTab);
+      const request: SecurePaymentRequest = {
+        amount: paymentAmount,
+        paymentType: paymentTypeForRequest,
+        bookingData
+      };
+      
+      const response = await generateSecurePayNow(request);
+      
+      if (!response.success || response.error) {
+        throw new Error(response.error || 'Failed to generate payment form');
+      }
+      
+      console.log('Secure PayNow form generated');
+      submitSecurePaymentForm(response.formData, response.paymentUrl, openInNewTab);
       
     } catch (error) {
       console.error('Error submitting PayNow form:', error);
       toast({
         title: "Payment Error",
-        description: "Failed to initiate payment. Please try again.",
+        description: "Failed to process payment. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -78,12 +88,12 @@ const PayNowButton: React.FC<PayNowButtonProps> = ({
   return (
     <Button
       onClick={handlePayNowClick}
-      disabled={disabled}
+      disabled={disabled || isLoading}
       variant={variant}
       className="w-full flex items-center justify-center gap-2"
     >
       <CreditCard className="h-4 w-4" />
-      {getDefaultButtonText()}
+      {isLoading ? 'Processing...' : getDefaultButtonText()}
       {openInNewTab && <ExternalLink className="h-4 w-4" />}
     </Button>
   );

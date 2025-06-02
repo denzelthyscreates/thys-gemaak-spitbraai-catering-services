@@ -1,12 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import PayFastForm from './PayFastForm';
 import PayNowButton from './PayNowButton';
 import CustomAmountPayNowForm from './CustomAmountPayNowForm';
-import { createBookingDepositPayment, createRemainingBalancePayment, createFullPayment } from '@/services/PayFastService';
+import { generateSecurePayment, SecurePaymentRequest } from '@/services/SecurePaymentService';
 
 export type PaymentType = 'deposit' | 'balance' | 'full';
 
@@ -34,33 +34,47 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
   const { toast } = useToast();
   const [paymentData, setPaymentData] = useState<{url: string; formData: Record<string, string>} | null>(null);
   
-  React.useEffect(() => {
-    try {
-      let data;
-      
-      switch(paymentType) {
-        case 'deposit':
-          data = createBookingDepositPayment(bookingData);
-          break;
-        case 'balance':
-          data = createRemainingBalancePayment(bookingData);
-          break;
-        case 'full':
-          data = createFullPayment(bookingData);
-          break;
-        default:
-          throw new Error('Invalid payment type');
+  useEffect(() => {
+    const generateSecurePaymentData = async () => {
+      try {
+        setIsLoading(true);
+        
+        const paymentAmount = getPaymentAmount();
+        const request: SecurePaymentRequest = {
+          amount: paymentAmount,
+          paymentType,
+          bookingData: {
+            client_name: bookingData.client_name,
+            client_email: bookingData.client_email,
+            client_phone: bookingData.client_phone,
+            event_date: bookingData.event_date,
+            booking_id: bookingData.id
+          }
+        };
+        
+        const response = await generateSecurePayment(request);
+        
+        if (response.success) {
+          setPaymentData({
+            url: response.paymentUrl,
+            formData: response.formData
+          });
+        } else {
+          throw new Error(response.error || 'Failed to generate payment');
+        }
+      } catch (error) {
+        console.error('Error generating secure payment:', error);
+        toast({
+          title: "Payment Error",
+          description: "Failed to generate payment. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
       }
-      
-      setPaymentData(data);
-    } catch (error) {
-      console.error('Error generating PayFast payment:', error);
-      toast({
-        title: "Payment Error",
-        description: "Failed to generate payment. Please try again.",
-        variant: "destructive"
-      });
-    }
+    };
+    
+    generateSecurePaymentData();
   }, [bookingData, paymentType]);
   
   const getPaymentAmount = () => {
@@ -77,10 +91,10 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
     }
   };
   
-  if (!paymentData) {
+  if (isLoading || !paymentData) {
     return (
       <div className="p-4 text-center">
-        <p>Preparing payment options...</p>
+        <p>Preparing secure payment options...</p>
       </div>
     );
   }
@@ -106,14 +120,26 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
               {paymentType === 'deposit' ? (
                 <PayNowButton
                   type="simple"
-                  bookingData={bookingData}
+                  bookingData={{
+                    client_name: bookingData.client_name,
+                    client_email: bookingData.client_email,
+                    client_phone: bookingData.client_phone,
+                    event_date: bookingData.event_date,
+                    booking_id: bookingData.id
+                  }}
                   buttonText="Pay R500 Deposit with PayNow"
                 />
               ) : (
                 <PayNowButton
                   type="dynamic"
                   amount={getPaymentAmount()}
-                  bookingData={bookingData}
+                  bookingData={{
+                    client_name: bookingData.client_name,
+                    client_email: bookingData.client_email,
+                    client_phone: bookingData.client_phone,
+                    event_date: bookingData.event_date,
+                    booking_id: bookingData.id
+                  }}
                   paymentType={paymentType === 'full' ? 'full' : 'balance'}
                   buttonText={`Pay ${paymentType === 'balance' ? 'Remaining Balance' : 'Full Amount'} with PayNow`}
                 />
@@ -124,7 +150,13 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
         
         <TabsContent value="custom-paynow" className="space-y-4">
           <CustomAmountPayNowForm
-            bookingData={bookingData}
+            bookingData={{
+              client_name: bookingData.client_name,
+              client_email: bookingData.client_email,
+              client_phone: bookingData.client_phone,
+              event_date: bookingData.event_date,
+              booking_id: bookingData.id
+            }}
             defaultAmount={getPaymentAmount()}
             itemName={paymentType === 'deposit' ? 'Booking Deposit' : 
                      paymentType === 'balance' ? 'Final Payment - Spitbraai Catering' : 
