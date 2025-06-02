@@ -9,6 +9,20 @@ interface LatenodeBookingData {
   eventLocation: string;
   additionalNotes?: string;
   
+  // Event Venue Details
+  venueName?: string;
+  venueStreetAddress: string;
+  venueCity: string;
+  venueProvince: string;
+  venuePostalCode: string;
+  
+  // Address Information for Invoicing
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  province: string;
+  postalCodeAddress: string;
+  
   // Menu Selection Details
   menuPackage: string;
   numberOfGuests: number;
@@ -20,10 +34,11 @@ interface LatenodeBookingData {
   extraSaladType?: string;
   includeCutlery: boolean;
   
-  // Pricing Information
+  // Pricing Information with Travel Fee breakdown
   pricePerPerson: number;
-  totalAmount: number;
+  menuSubtotal: number;
   travelFee: number;
+  totalAmount: number;
   postalCode?: string;
   areaName?: string;
   discountApplied: boolean;
@@ -45,7 +60,38 @@ const LATENODE_WEBHOOK_URL = import.meta.env.VITE_LATENODE_WEBHOOK_URL || 'https
 
 export const submitBookingToLatenode = async (bookingData: LatenodeBookingData): Promise<LatenodeResponse> => {
   try {
-    console.log('Submitting booking to Latenode:', bookingData);
+    console.log('Submitting booking to Latenode with travel fee data:', bookingData);
+    
+    // Ensure travel fee information is clearly structured
+    const enhancedPayload = {
+      event: 'booking_submitted',
+      data: {
+        ...bookingData,
+        // Explicitly include pricing breakdown for clarity
+        pricing: {
+          pricePerPerson: bookingData.pricePerPerson,
+          numberOfGuests: bookingData.numberOfGuests,
+          menuSubtotal: bookingData.menuSubtotal,
+          travelFee: bookingData.travelFee,
+          totalAmount: bookingData.totalAmount,
+          discountApplied: bookingData.discountApplied
+        },
+        // Include location information for travel fee context
+        location: {
+          postalCode: bookingData.postalCode,
+          areaName: bookingData.areaName,
+          venue: {
+            name: bookingData.venueName,
+            address: bookingData.venueStreetAddress,
+            city: bookingData.venueCity,
+            province: bookingData.venueProvince,
+            postalCode: bookingData.venuePostalCode
+          }
+        }
+      },
+      timestamp: new Date().toISOString(),
+      source: 'website'
+    };
     
     const response = await fetch(LATENODE_WEBHOOK_URL, {
       method: 'POST',
@@ -53,12 +99,7 @@ export const submitBookingToLatenode = async (bookingData: LatenodeBookingData):
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: JSON.stringify({
-        event: 'booking_submitted',
-        data: bookingData,
-        timestamp: new Date().toISOString(),
-        source: 'website'
-      }),
+      body: JSON.stringify(enhancedPayload),
     });
 
     if (!response.ok) {

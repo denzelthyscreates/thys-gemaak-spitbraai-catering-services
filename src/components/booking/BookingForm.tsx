@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
@@ -102,9 +101,11 @@ const BookingForm: React.FC<BookingFormProps> = ({
     
     try {
       const bookingReference = generateBookingReference();
-      const totalAmount = menuSelection.travelFee 
-        ? (menuSelection.totalPrice * menuSelection.numberOfGuests) + menuSelection.travelFee
-        : menuSelection.totalPrice * menuSelection.numberOfGuests;
+      
+      // Calculate total amount including travel fee
+      const menuSubtotal = menuSelection.totalPrice * menuSelection.numberOfGuests;
+      const travelFee = menuSelection.travelFee || 0;
+      const totalAmount = menuSubtotal + travelFee;
 
       // Combine venue address into eventLocation for backward compatibility
       const eventLocation = data.venueName 
@@ -147,10 +148,11 @@ const BookingForm: React.FC<BookingFormProps> = ({
         extraSaladType: menuSelection.extraSaladType || "",
         includeCutlery: menuSelection.includeCutlery || false,
         
-        // Pricing Information
+        // Pricing Information with Travel Fee
         pricePerPerson: menuSelection.totalPrice,
+        menuSubtotal: menuSubtotal,
+        travelFee: travelFee,
         totalAmount: totalAmount,
-        travelFee: menuSelection.travelFee || 0,
         postalCode: menuSelection.postalCode || "",
         areaName: menuSelection.areaName || "",
         discountApplied: menuSelection.discountApplied || false,
