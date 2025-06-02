@@ -71,7 +71,7 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({ form, menuSel
         name="numberOfGuests"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Number of Guests (Minimum 50)</FormLabel>
+            <FormLabel>Number of Guests</FormLabel>
             <FormControl>
               <div className="relative">
                 <Users className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
@@ -79,7 +79,7 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({ form, menuSel
                   type="text"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  placeholder="50"
+                  placeholder="Enter number of guests"
                   className="pl-10 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   {...field}
                   onChange={(e) => {
