@@ -1,27 +1,19 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { CalendarClock, Users } from 'lucide-react';
-import { format } from 'date-fns';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar, CalendarDays } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
-import { BookingFormValues } from './types';
+import { BookingFormValues, eventTypes } from './types';
+import AvailabilityCalendar from '../calendar/AvailabilityCalendar';
 
 interface EventDetailsSectionProps {
   form: UseFormReturn<BookingFormValues>;
-  menuSelection?: any;
+  menuSelection: any;
 }
 
 const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({ form, menuSelection }) => {
-  // Pre-populate number of guests from menu selection
-  useEffect(() => {
-    if (menuSelection?.numberOfGuests) {
-      form.setValue('numberOfGuests', menuSelection.numberOfGuests);
-    }
-  }, [menuSelection, form]);
+  const selectedDate = form.watch('eventDate');
 
   return (
     <div className="space-y-4">
@@ -29,38 +21,27 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({ form, menuSel
       
       <FormField
         control={form.control}
-        name="eventDate"
+        name="eventType"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Event Date</FormLabel>
-            <FormControl>
-              <div className="relative">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-left font-normal pl-10"
-                    >
-                      <CalendarClock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span className="text-muted-foreground">Select date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComponent
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                      disabled={(date) => date < new Date()}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </FormControl>
+            <FormLabel>Event Type</FormLabel>
+            <Select 
+              onValueChange={field.onChange} 
+              defaultValue={field.value || menuSelection?.eventType}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select event type" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {eventTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         )}
@@ -68,26 +49,19 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({ form, menuSel
 
       <FormField
         control={form.control}
-        name="numberOfGuests"
+        name="eventDate"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Number of Guests</FormLabel>
+            <FormLabel className="flex items-center gap-2">
+              <CalendarDays className="h-4 w-4" />
+              Event Date
+            </FormLabel>
             <FormControl>
-              <div className="relative">
-                <Users className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                <Input
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="Enter number of guests"
-                  className="pl-10"
-                  value={field.value || ''}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/[^0-9]/g, '');
-                    const numValue = value ? parseInt(value) : undefined;
-                    field.onChange(numValue);
-                  }}
-                  onBlur={field.onBlur}
-                  name={field.name}
+              <div className="space-y-3">
+                <AvailabilityCalendar
+                  selectedDate={field.value}
+                  onDateSelect={field.onChange}
+                  className="w-full"
                 />
               </div>
             </FormControl>

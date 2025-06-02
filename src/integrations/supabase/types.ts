@@ -9,6 +9,27 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      blocked_dates: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          reason: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          reason?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           contact_email: string
@@ -69,6 +90,66 @@ export type Database = {
           status?: string
           total_price?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      calendar_sync: {
+        Row: {
+          error_message: string | null
+          events_synced: number | null
+          id: string
+          last_sync: string
+          sync_status: string
+        }
+        Insert: {
+          error_message?: string | null
+          events_synced?: number | null
+          id?: string
+          last_sync?: string
+          sync_status?: string
+        }
+        Update: {
+          error_message?: string | null
+          events_synced?: number | null
+          id?: string
+          last_sync?: string
+          sync_status?: string
+        }
+        Relationships: []
+      }
+      event_availability: {
+        Row: {
+          booked_events: number | null
+          created_at: string
+          date: string
+          google_calendar_events: Json | null
+          id: string
+          is_available: boolean
+          max_events: number | null
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          booked_events?: number | null
+          created_at?: string
+          date: string
+          google_calendar_events?: Json | null
+          id?: string
+          is_available?: boolean
+          max_events?: number | null
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          booked_events?: number | null
+          created_at?: string
+          date?: string
+          google_calendar_events?: Json | null
+          id?: string
+          is_available?: boolean
+          max_events?: number | null
+          notes?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
