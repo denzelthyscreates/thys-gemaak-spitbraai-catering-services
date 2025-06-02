@@ -16,7 +16,8 @@ export const PricingSection = ({
   areaName,
   discountApplied
 }: PricingSectionProps) => {
-  const finalTotalPrice = travelFee ? totalPrice * numGuests + travelFee : totalPrice * numGuests;
+  const menuSubtotal = totalPrice * numGuests;
+  const finalTotalPrice = travelFee ? menuSubtotal + travelFee : menuSubtotal;
   
   return (
     <>
@@ -27,13 +28,13 @@ export const PricingSection = ({
 
       <div className="grid grid-cols-3 gap-2">
         <span className="font-medium">Menu subtotal:</span>
-        <span className="col-span-2">R{totalPrice * numGuests}</span>
+        <span className="col-span-2">R{menuSubtotal}</span>
       </div>
 
-      {travelFee !== null && (
+      {travelFee !== null && travelFee > 0 && (
         <div className="grid grid-cols-3 gap-2">
           <span className="font-medium">Travel fee:</span>
-          <span className="col-span-2">R{travelFee} <span className="text-sm text-muted-foreground">({areaName})</span></span>
+          <span className="col-span-2">R{travelFee} {areaName && <span className="text-sm text-muted-foreground">({areaName})</span>}</span>
         </div>
       )}
 
