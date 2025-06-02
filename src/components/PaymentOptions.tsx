@@ -3,7 +3,10 @@ import React, { useState } from 'react';
 import { Check, CreditCard, BanknoteIcon, ArrowRight, Calendar, AlertCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import PaymentGateway from './payment/PaymentGateway';
+import PayNowButton from './payment/PayNowButton';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PaymentOptionProps {
   totalPrice: number;
@@ -20,7 +23,7 @@ const PaymentOptions: React.FC<PaymentOptionProps> = ({
 }) => {
   const [showBankDetails, setShowBankDetails] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'eft' | 'payfast' | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'eft' | 'payfast' | 'paynow' | null>(null);
   const [paymentType, setPaymentType] = useState<'deposit' | 'balance' | 'full' | null>(null);
   const { toast } = useToast();
   
@@ -73,6 +76,20 @@ const PaymentOptions: React.FC<PaymentOptionProps> = ({
     
     setPaymentType(type);
     setPaymentMethod('payfast');
+  };
+
+  const handlePayNowPayment = (type: 'deposit' | 'balance' | 'full') => {
+    if (!acceptTerms) {
+      toast({
+        title: "Please accept the terms",
+        description: "You must accept the terms and conditions before proceeding.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setPaymentType(type);
+    setPaymentMethod('paynow');
   };
   
   const handleResetPayment = () => {
@@ -171,38 +188,80 @@ const PaymentOptions: React.FC<PaymentOptionProps> = ({
         <div className="space-y-4">
           <div className="p-4 border rounded-lg bg-slate-50">
             <h4 className="font-medium mb-3">Select Payment Method</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <Button
-                onClick={handleShowBankDetails}
-                className="w-full flex items-center justify-center gap-2"
-                disabled={!acceptTerms}
-                variant="outline"
-              >
-                <BanknoteIcon className="h-5 w-5" />
-                Pay via EFT
-              </Button>
-              
-              <Button
-                onClick={() => handlePayFastPayment('deposit')}
-                className="w-full flex items-center justify-center gap-2"
-                disabled={!acceptTerms}
-              >
-                <CreditCard className="h-5 w-5" />
-                Pay Deposit with PayFast
-              </Button>
-            </div>
             
-            <div className="mt-3">
-              <Button
-                onClick={() => handlePayFastPayment('full')}
-                className="w-full flex items-center justify-center gap-2"
-                disabled={!acceptTerms}
-                variant="secondary"
-              >
-                <ArrowRight className="h-5 w-5" />
-                Pay Full Amount with PayFast
-              </Button>
-            </div>
+            <Tabs defaultValue="paynow" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="paynow">PayNow</TabsTrigger>
+                <TabsTrigger value="payfast">PayFast</TabsTrigger>
+                <TabsTrigger value="eft">EFT</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="paynow" className="space-y-3 mt-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Quick PayNow Options</CardTitle>
+                    <CardDescription className="text-xs">
+                      Instant redirect to secure PayFast payment page
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <PayNowButton
+                      type="simple"
+                      bookingData={mockBookingData}
+                      buttonText="Pay R500 Deposit"
+                      variant="outline"
+                      disabled={!acceptTerms}
+                    />
+                    
+                    <PayNowButton
+                      type="dynamic"
+                      amount={totalEventCost}
+                      bookingData={mockBookingData}
+                      paymentType="full"
+                      buttonText={`Pay Full Amount (R${totalEventCost})`}
+                      variant="secondary"
+                      disabled={!acceptTerms}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="payfast" className="space-y-3 mt-4">
+                <div className="grid grid-cols-1 gap-2">
+                  <Button
+                    onClick={() => handlePayFastPayment('deposit')}
+                    className="w-full flex items-center justify-center gap-2"
+                    disabled={!acceptTerms}
+                    variant="outline"
+                  >
+                    <CreditCard className="h-4 w-4" />
+                    Pay Deposit with PayFast
+                  </Button>
+                  
+                  <Button
+                    onClick={() => handlePayFastPayment('full')}
+                    className="w-full flex items-center justify-center gap-2"
+                    disabled={!acceptTerms}
+                    variant="secondary"
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                    Pay Full Amount with PayFast
+                  </Button>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="eft" className="mt-4">
+                <Button
+                  onClick={handleShowBankDetails}
+                  className="w-full flex items-center justify-center gap-2"
+                  disabled={!acceptTerms}
+                  variant="outline"
+                >
+                  <BanknoteIcon className="h-5 w-5" />
+                  Pay via EFT
+                </Button>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       )}
@@ -220,6 +279,43 @@ const PaymentOptions: React.FC<PaymentOptionProps> = ({
             paymentType={paymentType}
             onCancel={handleResetPayment}
           />
+        </div>
+      )}
+
+      {/* PayNow Payment Gateway */}
+      {paymentMethod === 'paynow' && paymentType && (
+        <div className="mt-6 border border-primary/30 rounded-lg p-4 bg-primary/5 animate-fade-in">
+          <h4 className="font-semibold mb-3 flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-primary" />
+            PayNow Payment
+          </h4>
+          
+          <div className="space-y-3">
+            {paymentType === 'deposit' ? (
+              <PayNowButton
+                type="simple"
+                bookingData={mockBookingData}
+                buttonText="Pay R500 Deposit with PayNow"
+              />
+            ) : (
+              <PayNowButton
+                type="dynamic"
+                amount={paymentType === 'full' ? totalEventCost : finalPayment}
+                bookingData={mockBookingData}
+                paymentType={paymentType === 'full' ? 'full' : 'balance'}
+                buttonText={`Pay ${paymentType === 'full' ? 'Full Amount' : 'Balance'} with PayNow`}
+              />
+            )}
+            
+            <div className="text-center">
+              <button
+                onClick={handleResetPayment}
+                className="text-primary underline text-sm"
+              >
+                Choose another payment method
+              </button>
+            </div>
+          </div>
         </div>
       )}
       

@@ -1,7 +1,10 @@
 
 import React, { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import PayFastForm from './PayFastForm';
+import PayNowButton from './PayNowButton';
 import { createBookingDepositPayment, createRemainingBalancePayment, createFullPayment } from '@/services/PayFastService';
 
 export type PaymentType = 'deposit' | 'balance' | 'full';
@@ -26,6 +29,7 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
   onCancel
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedMethod, setSelectedMethod] = useState<'paynow' | 'form'>('paynow');
   const { toast } = useToast();
   const [paymentData, setPaymentData] = useState<{url: string; formData: Record<string, string>} | null>(null);
   
@@ -58,6 +62,20 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
     }
   }, [bookingData, paymentType]);
   
+  const getPaymentAmount = () => {
+    switch(paymentType) {
+      case 'deposit':
+        return 500;
+      case 'balance':
+        const depositPaid = bookingData.deposit_paid || 500;
+        return bookingData.total_amount - depositPaid;
+      case 'full':
+        return bookingData.total_amount;
+      default:
+        return 0;
+    }
+  };
+  
   if (!paymentData) {
     return (
       <div className="p-4 text-center">
@@ -67,13 +85,60 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
   }
   
   return (
-    <div className="payment-gateway">
-      <PayFastForm 
-        formData={paymentData.formData}
-        paymentUrl={paymentData.url}
-        isLoading={isLoading}
-        buttonText={`Pay ${paymentType === 'deposit' ? 'Deposit' : paymentType === 'balance' ? 'Remaining Balance' : 'Full Amount'}`}
-      />
+    <div className="payment-gateway space-y-4">
+      <Tabs value={selectedMethod} onValueChange={(value) => setSelectedMethod(value as 'paynow' | 'form')}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="paynow">PayNow Button</TabsTrigger>
+          <TabsTrigger value="form">Traditional Form</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="paynow" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Quick PayNow Payment</CardTitle>
+              <CardDescription>
+                Click the button below to be redirected to PayFast's secure payment page
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {paymentType === 'deposit' ? (
+                <PayNowButton
+                  type="simple"
+                  bookingData={bookingData}
+                  buttonText="Pay R500 Deposit with PayNow"
+                />
+              ) : (
+                <PayNowButton
+                  type="dynamic"
+                  amount={getPaymentAmount()}
+                  bookingData={bookingData}
+                  paymentType={paymentType === 'full' ? 'full' : 'balance'}
+                  buttonText={`Pay ${paymentType === 'balance' ? 'Remaining Balance' : 'Full Amount'} with PayNow`}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="form" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Traditional Payment Form</CardTitle>
+              <CardDescription>
+                Use the traditional payment form method
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PayFastForm 
+                formData={paymentData.formData}
+                paymentUrl={paymentData.url}
+                isLoading={isLoading}
+                buttonText={`Pay ${paymentType === 'deposit' ? 'Deposit' : paymentType === 'balance' ? 'Remaining Balance' : 'Full Amount'}`}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
       
       {onCancel && (
         <button 
