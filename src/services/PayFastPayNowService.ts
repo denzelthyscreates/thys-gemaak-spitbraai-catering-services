@@ -1,71 +1,50 @@
 
-export interface PayNowButtonConfig {
-  merchant_id: string;
-  merchant_key: string;
-  amount?: number;
+export interface PayNowFormData {
+  cmd: string;
+  receiver: string;
+  return_url: string;
+  cancel_url: string;
+  notify_url: string;
+  amount: string;
   item_name: string;
-  item_description?: string;
-  name_first?: string;
-  name_last?: string;
-  email_address?: string;
-  cell_number?: string;
-  return_url?: string;
-  cancel_url?: string;
-  notify_url?: string;
+  item_description: string;
 }
 
-// Environment-specific URLs
-const isProd = import.meta.env.PROD;
-const PAYFAST_PAYNOW_URL = isProd
-  ? 'https://www.payfast.co.za/eng/process'
-  : 'https://sandbox.payfast.co.za/eng/process';
+// PayNow form action URL (different from regular PayFast)
+const PAYFAST_PAYNOW_FORM_URL = 'https://payment.payfast.io/eng/process';
 
-const DEFAULT_MERCHANT_ID = import.meta.env.VITE_PAYFAST_MERCHANT_ID || '';
-const DEFAULT_MERCHANT_KEY = import.meta.env.VITE_PAYFAST_MERCHANT_KEY || '';
+// Your PayFast receiver ID from the HTML
+const PAYFAST_RECEIVER_ID = '29885651';
 
 /**
- * Creates a simple PayNow button URL with fixed amount (R500 deposit)
+ * Creates form data for a simple PayNow button with fixed R500 amount
  */
-export const createSimplePayNowButton = (
+export const createSimplePayNowFormData = (
   bookingData: {
     client_name?: string;
     client_email?: string;
     client_phone?: string;
     event_date?: string;
   }
-): string => {
-  const merchant_id = DEFAULT_MERCHANT_ID;
-  const merchant_key = DEFAULT_MERCHANT_KEY;
-  
-  if (!merchant_id || !merchant_key) {
-    throw new Error('PayFast merchant credentials not configured');
-  }
-  
+): PayNowFormData => {
   const baseUrl = window.location.origin;
-  const depositAmount = 500; // Fixed R500 booking deposit
   
-  const params = new URLSearchParams({
-    merchant_id,
-    merchant_key,
-    amount: depositAmount.toFixed(2),
-    item_name: `Booking Deposit - ${bookingData.event_date || 'Event'}`,
-    item_description: 'Non-refundable booking deposit for catering services',
-    name_first: bookingData.client_name?.split(' ')[0] || '',
-    name_last: bookingData.client_name?.split(' ').slice(1).join(' ') || '',
-    email_address: bookingData.client_email || '',
-    cell_number: bookingData.client_phone || '',
+  return {
+    cmd: '_paynow',
+    receiver: PAYFAST_RECEIVER_ID,
     return_url: `${baseUrl}/payment-success`,
     cancel_url: `${baseUrl}/payment-cancelled`,
-    notify_url: `${baseUrl}/api/payfast-notification`
-  });
-  
-  return `${PAYFAST_PAYNOW_URL}?${params.toString()}`;
+    notify_url: `${baseUrl}/api/payfast-notification`,
+    amount: '500',
+    item_name: 'Booking Deposit',
+    item_description: 'Deposit to secure your Spitbraai catering booking.'
+  };
 };
 
 /**
- * Creates a dynamic PayNow button URL with variable amount
+ * Creates form data for a dynamic PayNow button with variable amount
  */
-export const createDynamicPayNowButton = (
+export const createDynamicPayNowFormData = (
   amount: number,
   bookingData: {
     client_name?: string;
@@ -74,48 +53,58 @@ export const createDynamicPayNowButton = (
     event_date?: string;
   },
   paymentType: 'full' | 'balance' = 'full'
-): string => {
-  const merchant_id = DEFAULT_MERCHANT_ID;
-  const merchant_key = DEFAULT_MERCHANT_KEY;
-  
-  if (!merchant_id || !merchant_key) {
-    throw new Error('PayFast merchant credentials not configured');
-  }
-  
+): PayNowFormData => {
   const baseUrl = window.location.origin;
+  
   const itemName = paymentType === 'full' 
-    ? `Full Payment - ${bookingData.event_date || 'Event'}`
-    : `Final Payment - ${bookingData.event_date || 'Event'}`;
+    ? 'Full Payment - Spitbraai Catering'
+    : 'Final Payment - Spitbraai Catering';
   
   const itemDescription = paymentType === 'full'
-    ? 'Full payment for catering services'
-    : 'Final payment for catering services';
+    ? 'Full payment for Spitbraai catering services'
+    : 'Final payment for Spitbraai catering services';
   
-  const params = new URLSearchParams({
-    merchant_id,
-    merchant_key,
-    amount: amount.toFixed(2),
-    item_name: itemName,
-    item_description: itemDescription,
-    name_first: bookingData.client_name?.split(' ')[0] || '',
-    name_last: bookingData.client_name?.split(' ').slice(1).join(' ') || '',
-    email_address: bookingData.client_email || '',
-    cell_number: bookingData.client_phone || '',
+  return {
+    cmd: '_paynow',
+    receiver: PAYFAST_RECEIVER_ID,
     return_url: `${baseUrl}/payment-success`,
     cancel_url: `${baseUrl}/payment-cancelled`,
-    notify_url: `${baseUrl}/api/payfast-notification`
-  });
-  
-  return `${PAYFAST_PAYNOW_URL}?${params.toString()}`;
+    notify_url: `${baseUrl}/api/payfast-notification`,
+    amount: amount.toFixed(2),
+    item_name: itemName,
+    item_description: itemDescription
+  };
 };
 
 /**
- * Helper function to open PayNow URL in a new tab or redirect
+ * Gets the PayNow form action URL
  */
-export const redirectToPayNow = (payNowUrl: string, openInNewTab: boolean = false): void => {
+export const getPayNowFormUrl = (): string => {
+  return PAYFAST_PAYNOW_FORM_URL;
+};
+
+/**
+ * Helper function to submit PayNow form programmatically
+ */
+export const submitPayNowForm = (formData: PayNowFormData, openInNewTab: boolean = false): void => {
+  const form = document.createElement('form');
+  form.method = 'post';
+  form.action = PAYFAST_PAYNOW_FORM_URL;
+  
   if (openInNewTab) {
-    window.open(payNowUrl, '_blank');
-  } else {
-    window.location.href = payNowUrl;
+    form.target = '_blank';
   }
+  
+  // Add all form fields
+  Object.entries(formData).forEach(([key, value]) => {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = key;
+    input.value = value;
+    form.appendChild(input);
+  });
+  
+  document.body.appendChild(form);
+  form.submit();
+  document.body.removeChild(form);
 };

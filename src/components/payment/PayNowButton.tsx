@@ -2,7 +2,11 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { CreditCard, ExternalLink } from "lucide-react";
-import { createSimplePayNowButton, createDynamicPayNowButton, redirectToPayNow } from '@/services/PayFastPayNowService';
+import { 
+  createSimplePayNowFormData, 
+  createDynamicPayNowFormData, 
+  submitPayNowForm 
+} from '@/services/PayFastPayNowService';
 import { useToast } from "@/hooks/use-toast";
 
 interface PayNowButtonProps {
@@ -35,25 +39,25 @@ const PayNowButton: React.FC<PayNowButtonProps> = ({
   
   const handlePayNowClick = () => {
     try {
-      let payNowUrl: string;
+      let formData;
       
       if (type === 'simple') {
-        payNowUrl = createSimplePayNowButton(bookingData);
+        formData = createSimplePayNowFormData(bookingData);
       } else {
         if (!amount) {
           throw new Error('Amount is required for dynamic PayNow button');
         }
-        payNowUrl = createDynamicPayNowButton(amount, bookingData, paymentType);
+        formData = createDynamicPayNowFormData(amount, bookingData, paymentType);
       }
       
-      console.log('PayNow URL generated:', payNowUrl);
-      redirectToPayNow(payNowUrl, openInNewTab);
+      console.log('PayNow form data:', formData);
+      submitPayNowForm(formData, openInNewTab);
       
     } catch (error) {
-      console.error('Error generating PayNow URL:', error);
+      console.error('Error submitting PayNow form:', error);
       toast({
         title: "Payment Error",
-        description: "Failed to generate payment link. Please try again.",
+        description: "Failed to initiate payment. Please try again.",
         variant: "destructive"
       });
     }
