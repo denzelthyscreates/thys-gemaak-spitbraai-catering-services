@@ -75,20 +75,19 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({ form, menuSel
             <FormControl>
               <div className="relative">
                 <Users className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                <input
-                  type="number"
+                <Input
+                  type="text"
                   inputMode="numeric"
-                  pattern="[0-9]*"
                   placeholder="Enter number of guests"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
+                  className="pl-10"
+                  value={field.value || ''}
                   onChange={(e) => {
                     const value = e.target.value.replace(/[^0-9]/g, '');
-                    const numValue = value ? parseInt(value) : '';
+                    const numValue = value ? parseInt(value) : undefined;
                     field.onChange(numValue);
                   }}
-                  value={field.value || ''}
-                  name={field.name}
                   onBlur={field.onBlur}
+                  name={field.name}
                 />
               </div>
             </FormControl>
