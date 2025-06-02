@@ -76,7 +76,7 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({ form, menuSel
               <div className="relative">
                 <Users className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                 <input
-                  type="text"
+                  type="number"
                   inputMode="numeric"
                   pattern="[0-9]*"
                   placeholder="Enter number of guests"
