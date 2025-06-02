@@ -1,44 +1,31 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { CalendarClock } from 'lucide-react';
+import { CalendarClock, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { UseFormReturn } from 'react-hook-form';
-import { BookingFormValues, eventTypes } from './types';
+import { BookingFormValues } from './types';
 
 interface EventDetailsSectionProps {
   form: UseFormReturn<BookingFormValues>;
+  menuSelection?: any;
 }
 
-const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({ form }) => {
+const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({ form, menuSelection }) => {
+  // Pre-populate number of guests from menu selection
+  useEffect(() => {
+    if (menuSelection?.numberOfGuests) {
+      form.setValue('numberOfGuests', menuSelection.numberOfGuests);
+    }
+  }, [menuSelection, form]);
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Event Details</h3>
-      
-      <FormField
-        control={form.control}
-        name="eventType"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Event Type</FormLabel>
-            <FormControl>
-              <select 
-                className="w-full px-3 py-2 border rounded-md"
-                {...field}
-              >
-                <option value="">Select Event Type</option>
-                {eventTypes.map((type) => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
       
       <FormField
         control={form.control}
@@ -72,6 +59,31 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({ form }) => {
                     />
                   </PopoverContent>
                 </Popover>
+              </div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="numberOfGuests"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Number of Guests (Minimum 50)</FormLabel>
+            <FormControl>
+              <div className="relative">
+                <Users className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="number"
+                  min="50"
+                  placeholder="50"
+                  className="pl-10"
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value) || 50)}
+                  value={field.value || ''}
+                />
               </div>
             </FormControl>
             <FormMessage />

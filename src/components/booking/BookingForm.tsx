@@ -34,12 +34,12 @@ const BookingForm: React.FC<BookingFormProps> = ({
     name: '',
     email: '',
     phone: '',
-    eventType: '',
+    eventType: menuSelection?.eventType || '',
     venueName: '',
     venueStreetAddress: '',
     venueCity: '',
     venueProvince: '',
-    venuePostalCode: '',
+    venuePostalCode: menuSelection?.postalCode || '',
     addressLine1: '',
     addressLine2: '',
     city: '',
@@ -67,7 +67,17 @@ const BookingForm: React.FC<BookingFormProps> = ({
         form.setValue('eventDate', new Date(savedFormData.eventDate));
       }
     }
-  }, [savedFormData, form]);
+
+    // Pre-populate event type and postal code from menu selection
+    if (menuSelection) {
+      if (menuSelection.eventType) {
+        form.setValue('eventType', menuSelection.eventType);
+      }
+      if (menuSelection.postalCode) {
+        form.setValue('venuePostalCode', menuSelection.postalCode);
+      }
+    }
+  }, [savedFormData, menuSelection, form]);
 
   useEffect(() => {
     const subscription = form.watch((values) => {
@@ -107,7 +117,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
         email: data.email,
         phone: data.phone,
         eventDate: data.eventDate ? format(data.eventDate, 'yyyy-MM-dd') : undefined,
-        eventType: data.eventType,
+        eventType: menuSelection.eventType || data.eventType,
         eventLocation: eventLocation,
         additionalNotes: data.additionalNotes,
         referralSource: data.referralSource || "",
@@ -207,7 +217,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <ContactSection form={form} />
-            <EventDetailsSection form={form} />
+            <EventDetailsSection form={form} menuSelection={menuSelection} />
           </div>
 
           <VenueSection form={form} />
@@ -237,7 +247,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
             disabled={isSubmitting || !menuSelection}
             size="lg"
           >
-            {isSubmitting ? "Submitting to Latenode..." : "Submit Booking via Latenode"}
+            {isSubmitting ? "Submitting..." : "Submit Booking Form"}
           </Button>
           
           {!menuSelection && (
