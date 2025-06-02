@@ -43,7 +43,9 @@ export class CalendarAvailabilityService {
       isAvailable: item.is_available,
       bookedEvents: item.booked_events,
       maxEvents: item.max_events,
-      googleCalendarEvents: item.google_calendar_events || [],
+      googleCalendarEvents: Array.isArray(item.google_calendar_events) 
+        ? item.google_calendar_events 
+        : [],
       notes: item.notes
     }));
   }
@@ -121,7 +123,7 @@ export class CalendarAvailabilityService {
 
     return {
       lastSync: data.last_sync,
-      status: data.sync_status,
+      status: data.sync_status as 'success' | 'error' | 'pending',
       errorMessage: data.error_message,
       eventsSynced: data.events_synced
     };
