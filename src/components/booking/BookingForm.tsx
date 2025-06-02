@@ -213,52 +213,61 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
   return (
     <div className="booking-form-wrapper space-y-6">
-      <MenuSummary menuSelection={menuSelection} />
+      <div className="space-y-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">Complete Your Booking</h2>
+          <p className="text-muted-foreground">
+            Fill in your details to submit your booking enquiry
+          </p>
+        </div>
+        
+        <MenuSummary menuSelection={menuSelection} />
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <ContactSection form={form} />
-            <EventDetailsSection form={form} menuSelection={menuSelection} />
-          </div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <ContactSection form={form} />
+              <EventDetailsSection form={form} menuSelection={menuSelection} />
+            </div>
 
-          <VenueSection form={form} />
-          <BillingSection form={form} />
-          
-          <FormField
-            control={form.control}
-            name="additionalNotes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Additional Information or Requests</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Please share any specific requirements or questions you have..."
-                    className="min-h-[120px]"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+            <VenueSection form={form} />
+            <BillingSection form={form} />
+            
+            <FormField
+              control={form.control}
+              name="additionalNotes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Additional Information or Requests</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Please share any specific requirements or questions you have..."
+                      className="min-h-[120px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isSubmitting || !menuSelection}
+              size="lg"
+            >
+              {isSubmitting ? "Submitting..." : "Submit Booking Form"}
+            </Button>
+            
+            {!menuSelection && (
+              <p className="text-sm text-muted-foreground text-center">
+                Please select a menu package before submitting your booking.
+              </p>
             )}
-          />
-          
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={isSubmitting || !menuSelection}
-            size="lg"
-          >
-            {isSubmitting ? "Submitting..." : "Submit Booking Form"}
-          </Button>
-          
-          {!menuSelection && (
-            <p className="text-sm text-muted-foreground text-center">
-              Please select a menu package before submitting your booking.
-            </p>
-          )}
-        </form>
-      </Form>
+          </form>
+        </Form>
+      </div>
     </div>
   );
 };
