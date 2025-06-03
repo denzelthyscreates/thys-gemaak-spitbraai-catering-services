@@ -13,6 +13,7 @@ interface EventDetailsSectionProps {
 
 const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({ form, menuSelection }) => {
   const selectedDate = form.watch('eventDate');
+  const venuePostalCode = form.watch('venuePostalCode');
 
   return (
     <div className="space-y-4">
@@ -30,6 +31,7 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({ form, menuSel
                 <AvailabilityCalendar
                   selectedDate={field.value}
                   onDateSelect={field.onChange}
+                  userPostalCode={venuePostalCode || menuSelection?.postalCode}
                   className="w-full"
                 />
               </div>

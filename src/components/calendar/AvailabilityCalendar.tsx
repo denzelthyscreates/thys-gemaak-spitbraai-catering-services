@@ -4,7 +4,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, RefreshCw, CheckCircle, XCircle } from 'lucide-react';
+import { CalendarDays, RefreshCw, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { CalendarAvailabilityService, AvailabilityData, SyncStatus } from '@/services/CalendarAvailabilityService';
 import { toast } from 'sonner';
 
@@ -12,18 +12,25 @@ interface AvailabilityCalendarProps {
   selectedDate?: Date;
   onDateSelect?: (date: Date | undefined) => void;
   className?: string;
+  userPostalCode?: string;
 }
 
 const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   selectedDate,
   onDateSelect,
-  className
+  className,
+  userPostalCode
 }) => {
   const [availability, setAvailability] = useState<AvailabilityData[]>([]);
   const [blockedDates, setBlockedDates] = useState<string[]>([]);
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [dateConflictInfo, setDateConflictInfo] = useState<{
+    hasConflict: boolean;
+    message: string;
+    canProceed: boolean;
+  } | null>(null);
 
   // Load availability data
   const loadAvailability = async () => {
@@ -53,6 +60,29 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     loadAvailability();
   }, []);
 
+  // Check for area-based conflicts when date is selected
+  useEffect(() => {
+    if (selectedDate && userPostalCode) {
+      checkDateConflicts(selectedDate);
+    } else {
+      setDateConflictInfo(null);
+    }
+  }, [selectedDate, userPostalCode]);
+
+  const checkDateConflicts = async (date: Date) => {
+    try {
+      const conflicts = await CalendarAvailabilityService.getDateConflicts(date, userPostalCode);
+      setDateConflictInfo(conflicts);
+    } catch (error) {
+      console.error('Error checking date conflicts:', error);
+      setDateConflictInfo({
+        hasConflict: false,
+        message: 'Unable to check for conflicts. Please contact us to verify availability.',
+        canProceed: true
+      });
+    }
+  };
+
   // Handle sync with Google Calendar
   const handleSync = async () => {
     setIsSyncing(true);
@@ -72,43 +102,19 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     }
   };
 
-  // Check if date is available
-  const isDateAvailable = (date: Date): boolean => {
+  // Check if date should be disabled (only blocked dates and weekends)
+  const isDateDisabled = (date: Date): boolean => {
     const dateStr = date.toISOString().split('T')[0];
     
     // Check if date is blocked
-    if (blockedDates.includes(dateStr)) return false;
+    if (blockedDates.includes(dateStr)) return true;
     
-    // Check availability data
-    const dateAvailability = availability.find(a => a.date === dateStr);
-    if (dateAvailability) {
-      return dateAvailability.isAvailable && dateAvailability.bookedEvents < dateAvailability.maxEvents;
-    }
+    // Block past dates
+    if (date < new Date()) return true;
     
-    // Default check for weekends
+    // Block Sundays and Mondays
     const dayOfWeek = date.getDay();
-    return !(dayOfWeek === 0 || dayOfWeek === 1); // Block Sundays and Mondays
-  };
-
-  // Custom day renderer
-  const renderDay = (date: Date) => {
-    const available = isDateAvailable(date);
-    const dateStr = date.toISOString().split('T')[0];
-    const dateAvailability = availability.find(a => a.date === dateStr);
-    
-    return (
-      <div className={`relative w-full h-full flex items-center justify-center ${
-        !available ? 'opacity-50' : 'cursor-pointer'
-      }`}>
-        <span>{date.getDate()}</span>
-        {dateAvailability && dateAvailability.bookedEvents > 0 && (
-          <div className="absolute top-0 right-0 w-2 h-2 bg-yellow-500 rounded-full" />
-        )}
-        {!available && (
-          <div className="absolute top-0 left-0 w-2 h-2 bg-red-500 rounded-full" />
-        )}
-      </div>
-    );
+    return dayOfWeek === 0 || dayOfWeek === 1;
   };
 
   if (isLoading) {
@@ -144,7 +150,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
           </Button>
         </div>
         <CardDescription>
-          Choose an available date for your event
+          Choose a date for your event. We can accommodate up to 2 events per day in the same area.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -170,43 +176,62 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
           mode="single"
           selected={selectedDate}
           onSelect={onDateSelect}
-          disabled={(date) => !isDateAvailable(date) || date < new Date()}
+          disabled={isDateDisabled}
           className="rounded-md border"
         />
 
-        {/* Legend */}
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-green-100 border border-green-300 rounded-sm" />
-            <span>Available</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-yellow-100 border border-yellow-300 rounded-sm relative">
-              <div className="absolute top-0 right-0 w-2 h-2 bg-yellow-500 rounded-full transform translate-x-1 -translate-y-1" />
-            </div>
-            <span>Has bookings (may still be available)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-red-100 border border-red-300 rounded-sm relative">
-              <div className="absolute top-0 left-0 w-2 h-2 bg-red-500 rounded-full transform -translate-x-1 -translate-y-1" />
-            </div>
-            <span>Unavailable</span>
-          </div>
-        </div>
-
+        {/* Date Selection Info */}
         {selectedDate && (
-          <div className="p-3 bg-blue-50 rounded-lg">
-            <h4 className="font-medium text-blue-900">Selected Date</h4>
-            <p className="text-blue-700">
-              {selectedDate.toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </p>
+          <div className="space-y-3">
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <h4 className="font-medium text-blue-900">Selected Date</h4>
+              <p className="text-blue-700">
+                {selectedDate.toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </p>
+            </div>
+
+            {/* Conflict Information */}
+            {dateConflictInfo && (
+              <div className={`p-3 rounded-lg ${
+                dateConflictInfo.hasConflict 
+                  ? 'bg-yellow-50 border border-yellow-200' 
+                  : 'bg-green-50 border border-green-200'
+              }`}>
+                <div className="flex items-start gap-2">
+                  {dateConflictInfo.hasConflict ? (
+                    <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                  ) : (
+                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
+                  )}
+                  <div>
+                    <h4 className={`font-medium ${
+                      dateConflictInfo.hasConflict ? 'text-yellow-900' : 'text-green-900'
+                    }`}>
+                      {dateConflictInfo.hasConflict ? 'Potential Booking Conflict' : 'Date Available'}
+                    </h4>
+                    <p className={`text-sm ${
+                      dateConflictInfo.hasConflict ? 'text-yellow-700' : 'text-green-700'
+                    }`}>
+                      {dateConflictInfo.message}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
+
+        {/* Usage Information */}
+        <div className="text-xs text-muted-foreground space-y-1">
+          <p>• Sundays and Mondays are not available for bookings</p>
+          <p>• We can handle up to 2 events per day if they are in the same service area</p>
+          <p>• Events in different areas on the same day may require coordination</p>
+        </div>
       </CardContent>
     </Card>
   );
