@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { getAreaNameByPostalCode } from '@/data/travelData';
 
@@ -80,6 +79,8 @@ export class CalendarAvailabilityService {
 
   /**
    * Check for area-based conflicts on a specific date
+   * Note: Currently the bookings table doesn't store venue postal code
+   * This is a simplified version that will need database updates to fully implement
    */
   static async getDateConflicts(date: Date, userPostalCode: string): Promise<DateConflictInfo> {
     const dateStr = date.toISOString().split('T')[0];
@@ -94,9 +95,11 @@ export class CalendarAvailabilityService {
     }
 
     // Get existing bookings for this date
+    // Note: Since venue_postal_code doesn't exist in the bookings table yet,
+    // we'll get basic booking count for now
     const { data: bookings, error } = await supabase
       .from('bookings')
-      .select('id, venue_postal_code, status')
+      .select('id, status')
       .eq('event_date', dateStr)
       .in('status', ['confirmed', 'pending_payment', 'pending']);
 
@@ -126,25 +129,10 @@ export class CalendarAvailabilityService {
       };
     }
 
-    // Check area conflicts
-    const existingAreas = bookings
-      .map(booking => getAreaNameByPostalCode(booking.venue_postal_code))
-      .filter(area => area !== null);
-
-    const differentAreas = existingAreas.filter(area => area !== userArea);
-
-    if (differentAreas.length > 0) {
-      return {
-        hasConflict: true,
-        message: `This date has ${bookings.length} existing booking(s) in different service area(s). This may require special coordination. We will review and confirm availability.`,
-        canProceed: true
-      };
-    }
-
-    // Same area, less than 2 bookings
+    // Since we don't have venue postal code data yet, provide a general message
     return {
-      hasConflict: false,
-      message: `This date has ${bookings.length} existing booking(s) in the same service area (${userArea}). Your event can be accommodated.`,
+      hasConflict: true,
+      message: `This date has ${bookings.length} existing booking(s). We will review area compatibility and confirm availability.`,
       canProceed: true
     };
   }
