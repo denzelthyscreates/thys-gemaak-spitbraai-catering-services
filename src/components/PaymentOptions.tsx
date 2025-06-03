@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Check, CreditCard, BanknoteIcon, ArrowRight, Calendar, AlertCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
@@ -100,8 +99,6 @@ const PaymentOptions: React.FC<PaymentOptionProps> = ({
   
   return (
     <div className="bg-white rounded-xl p-8 shadow-prominent border border-border animate-fade-in">
-      <h3 className="text-xl font-semibold mb-6">Payment Information</h3>
-      
       {/* Payment Timeline */}
       <div className="mb-8">
         <h4 className="font-semibold mb-4">Payment Schedule</h4>
@@ -154,12 +151,10 @@ const PaymentOptions: React.FC<PaymentOptionProps> = ({
             <span>Menu Subtotal:</span>
             <span>R{menuSubtotal}</span>
           </div>
-          {travelFee && (
-            <div className="flex justify-between">
-              <span>Travel Fee:</span>
-              <span>R{travelFee}</span>
-            </div>
-          )}
+          <div className="flex justify-between">
+            <span>Travel Fee:</span>
+            <span>R{travelAmount}</span>
+          </div>
           <div className="flex justify-between font-semibold border-t border-border pt-2 mt-2">
             <span>Total Event Cost:</span>
             <span>R{totalEventCost}</span>
