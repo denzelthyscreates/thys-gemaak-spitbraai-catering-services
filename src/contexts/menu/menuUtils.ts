@@ -2,7 +2,7 @@
 import { MenuOption } from '@/types/menu';
 import { MenuContextState } from './types';
 import { menuOptions } from '@/data/menuData';
-import { getAreaNameByPostalCode } from '@/data/travelData';
+import { getAreaNameByPostalCode, getTravelFee } from '@/data/travelData';
 
 export const calculateTotalPrice = (state: MenuContextState): number => {
   const { 
@@ -51,7 +51,6 @@ export const getCompleteMenuSelection = (state: MenuContextState, totalPrice: nu
     extraSaladType,
     includeCutlery,
     postalCode,
-    travelFee,
     eventType
   } = state;
 
@@ -71,6 +70,8 @@ export const getCompleteMenuSelection = (state: MenuContextState, totalPrice: nu
   const extraNames = selectedExtras.map(id => 
     menuOptions.find(opt => opt.id === id)?.name || '').join(', ');
   
+  // Calculate travel fee and area name from postal code
+  const travelFee = postalCode ? getTravelFee(postalCode) : null;
   const areaName = postalCode ? getAreaNameByPostalCode(postalCode) : '';
   
   return {

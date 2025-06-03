@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import { EventTypeSelector } from './menu/EventTypeSelector';
 import { MenuOption, MenuBuilderProps } from '@/types/menu';
 import { useToast } from '@/hooks/use-toast';
 import { menuOptions } from '@/data/menuData';
+import { getTravelFee, getAreaNameByPostalCode } from '@/data/travelData';
 
 const MenuBuilderContent = ({ onSelectionChange, menuOptions, onNavigateTab }: { 
   onSelectionChange: (selection: any) => void,
@@ -27,6 +29,7 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions, onNavigateTab }: {
     extraSaladType,
     eventType,
     includeCutlery,
+    postalCode,
     handleReset 
   } = useMenu();
   const { toast } = useToast();
@@ -47,6 +50,10 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions, onNavigateTab }: {
       const extraNames = selectedExtras.map(id => 
         menuOptions.find(opt => opt.id === id)?.name || '').join(', ');
       
+      // Calculate travel fee and area name from postal code
+      const travelFee = postalCode ? getTravelFee(postalCode) : null;
+      const areaName = postalCode ? getAreaNameByPostalCode(postalCode) : '';
+      
       const completeSelection = {
         menuPackage,
         numberOfGuests: numGuests,
@@ -58,7 +65,11 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions, onNavigateTab }: {
         extraSaladType,
         eventType,
         includeCutlery,
-        totalPrice
+        totalPrice,
+        postalCode,
+        travelFee,
+        areaName,
+        discountApplied: numGuests >= 100
       };
       
       onSelectionChange(completeSelection);
@@ -66,7 +77,7 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions, onNavigateTab }: {
       onSelectionChange(null);
     }
   }, [selectedMenu, selectedStarters, selectedSides, selectedDesserts, selectedExtras, 
-     selectedSeason, numGuests, extraSaladType, totalPrice, eventType, includeCutlery]);
+     selectedSeason, numGuests, extraSaladType, totalPrice, eventType, includeCutlery, postalCode]);
   
   const resetMenu = () => {
     handleReset();
