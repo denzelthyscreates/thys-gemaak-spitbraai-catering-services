@@ -52,22 +52,13 @@ const ContactTabs: React.FC<ContactTabsProps> = ({
       </TabsContent>
       
       <TabsContent value="book">
-        <div className="space-y-6">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-2">Complete Your Booking</h2>
-            <p className="text-muted-foreground">
-              Fill in your details to submit your booking enquiry
-            </p>
-          </div>
-          
-          <BookingForm 
-            menuSelection={menuSelection}
-            savedFormData={bookingFormData}
-            onFormDataChange={onBookingFormDataChange}
-            onFormSubmitted={onBookingSubmitted}
-            onNavigateTab={onNavigateTab}
-          />
-        </div>
+        <BookingForm 
+          menuSelection={menuSelection}
+          savedFormData={bookingFormData}
+          onFormDataChange={onBookingFormDataChange}
+          onFormSubmitted={onBookingSubmitted}
+          onNavigateTab={onNavigateTab}
+        />
       </TabsContent>
     </Tabs>
   );

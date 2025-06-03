@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
@@ -214,13 +215,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
   return (
     <div className="booking-form-wrapper space-y-6">
       <div className="space-y-6">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">Complete Your Booking</h2>
-          <p className="text-muted-foreground">
-            Fill in your details to submit your booking enquiry
-          </p>
-        </div>
-        
         <MenuSummary menuSelection={menuSelection} />
 
         <Form {...form}>

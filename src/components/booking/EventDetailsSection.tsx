@@ -1,10 +1,9 @@
 
 import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, CalendarDays } from 'lucide-react';
+import { CalendarDays } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
-import { BookingFormValues, eventTypes } from './types';
+import { BookingFormValues } from './types';
 import AvailabilityCalendar from '../calendar/AvailabilityCalendar';
 
 interface EventDetailsSectionProps {
@@ -19,34 +18,6 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({ form, menuSel
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Event Details</h3>
       
-      <FormField
-        control={form.control}
-        name="eventType"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Event Type</FormLabel>
-            <Select 
-              onValueChange={field.onChange} 
-              defaultValue={field.value || menuSelection?.eventType}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select event type" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {eventTypes.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
       <FormField
         control={form.control}
         name="eventDate"

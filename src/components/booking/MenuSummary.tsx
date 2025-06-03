@@ -24,6 +24,7 @@ const MenuSummary: React.FC<MenuSummaryProps> = ({ menuSelection }) => {
       <CardContent>
         <div className="grid md:grid-cols-2 gap-4 text-sm">
           <div className="space-y-2">
+            {menuSelection.eventType && <div><strong>Event Type:</strong> {menuSelection.eventType}</div>}
             <div><strong>Package:</strong> {menuSelection.menuPackage}</div>
             <div><strong>Guests:</strong> {menuSelection.numberOfGuests}</div>
             {menuSelection.season && <div><strong>Season:</strong> {menuSelection.season}</div>}
@@ -50,12 +51,14 @@ const MenuSummary: React.FC<MenuSummaryProps> = ({ menuSelection }) => {
             <span>Menu subtotal ({menuSelection.numberOfGuests} guests):</span>
             <span>R{menuSubtotal}</span>
           </div>
-          {travelFee > 0 && (
-            <div className="flex justify-between">
-              <span>Travel fee ({menuSelection.areaName || 'Area fee'}):</span>
-              <span>R{travelFee}</span>
-            </div>
-          )}
+          <div className="flex justify-between">
+            <span>Travel fee:</span>
+            <span>
+              R{travelFee}
+              {menuSelection.areaName && <span className="text-muted-foreground"> ({menuSelection.areaName})</span>}
+              {travelFee === 0 && !menuSelection.areaName && <span className="text-muted-foreground"> (No travel fee)</span>}
+            </span>
+          </div>
           <Separator />
           <div className="flex justify-between text-lg font-semibold">
             <span>Total:</span>
