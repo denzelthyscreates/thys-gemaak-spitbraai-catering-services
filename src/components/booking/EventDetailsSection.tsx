@@ -16,8 +16,6 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({ form, menuSel
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium">Event Details</h3>
-      
       <FormField
         control={form.control}
         name="eventDate"

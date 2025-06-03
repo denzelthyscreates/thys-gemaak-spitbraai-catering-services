@@ -2,7 +2,6 @@
 import React, { useEffect } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { MapPin } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { BookingFormValues } from './types';
 import { getAreaByPostalCode } from '@/data/travelData';
@@ -28,11 +27,6 @@ const VenueSection: React.FC<VenueSectionProps> = ({ form }) => {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium flex items-center gap-2">
-        <MapPin className="h-5 w-5" />
-        Event Venue Details
-      </h3>
-      
       <FormField
         control={form.control}
         name="venueName"
