@@ -50,6 +50,7 @@ export type Database = {
           status: string
           total_price: number
           user_id: string
+          venue_postal_code: string | null
         }
         Insert: {
           contact_email: string
@@ -70,6 +71,7 @@ export type Database = {
           status?: string
           total_price: number
           user_id?: string
+          venue_postal_code?: string | null
         }
         Update: {
           contact_email?: string
@@ -90,6 +92,7 @@ export type Database = {
           status?: string
           total_price?: number
           user_id?: string
+          venue_postal_code?: string | null
         }
         Relationships: []
       }
