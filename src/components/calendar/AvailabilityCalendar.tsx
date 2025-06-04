@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { Calendar } from '@/components/ui/calendar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { CalendarDays, RefreshCw, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
-import { CalendarAvailabilityService, AvailabilityData, SyncStatus } from '@/services/CalendarAvailabilityService';
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
+import { CalendarAvailabilityService, AvailabilityData, SyncStatus, DateConflictInfo } from '@/services/calendar';
 import { toast } from 'sonner';
+import CalendarHeader from './CalendarHeader';
+import SyncStatusDisplay from './SyncStatusDisplay';
+import SelectedDateInfo from './SelectedDateInfo';
+import CalendarLegend from './CalendarLegend';
 
 interface AvailabilityCalendarProps {
   selectedDate?: Date;
@@ -26,11 +27,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [dateConflictInfo, setDateConflictInfo] = useState<{
-    hasConflict: boolean;
-    message: string;
-    canProceed: boolean;
-  } | null>(null);
+  const [dateConflictInfo, setDateConflictInfo] = useState<DateConflictInfo | null>(null);
 
   // Load availability data
   const loadAvailability = async () => {
@@ -121,10 +118,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     return (
       <Card className={className}>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CalendarDays className="h-5 w-5" />
-            Loading Calendar...
-          </CardTitle>
+          <CalendarHeader onSync={handleSync} isSyncing={false} />
         </CardHeader>
       </Card>
     );
@@ -133,45 +127,14 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   return (
     <Card className={className}>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <CalendarDays className="h-5 w-5" />
-            Select Event Date
-          </CardTitle>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSync}
-            disabled={isSyncing}
-            className="gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-            {isSyncing ? 'Syncing...' : 'Sync Calendar'}
-          </Button>
-        </div>
+        <CalendarHeader onSync={handleSync} isSyncing={isSyncing} />
         <CardDescription>
           Choose a date for your event. We can accommodate up to 2 events per day in the same area.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Sync Status */}
-        {syncStatus && (
-          <div className="flex items-center gap-2 text-sm">
-            {syncStatus.status === 'success' ? (
-              <CheckCircle className="h-4 w-4 text-green-500" />
-            ) : (
-              <XCircle className="h-4 w-4 text-red-500" />
-            )}
-            <span>
-              Last sync: {new Date(syncStatus.lastSync).toLocaleString()}
-            </span>
-            {syncStatus.status === 'success' && (
-              <Badge variant="secondary">{syncStatus.eventsSynced} events</Badge>
-            )}
-          </div>
-        )}
+        <SyncStatusDisplay syncStatus={syncStatus} />
 
-        {/* Calendar */}
         <Calendar
           mode="single"
           selected={selectedDate}
@@ -180,58 +143,14 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
           className="rounded-md border"
         />
 
-        {/* Date Selection Info */}
         {selectedDate && (
-          <div className="space-y-3">
-            <div className="p-3 bg-blue-50 rounded-lg">
-              <h4 className="font-medium text-blue-900">Selected Date</h4>
-              <p className="text-blue-700">
-                {selectedDate.toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </p>
-            </div>
-
-            {/* Conflict Information */}
-            {dateConflictInfo && (
-              <div className={`p-3 rounded-lg ${
-                dateConflictInfo.hasConflict 
-                  ? 'bg-yellow-50 border border-yellow-200' 
-                  : 'bg-green-50 border border-green-200'
-              }`}>
-                <div className="flex items-start gap-2">
-                  {dateConflictInfo.hasConflict ? (
-                    <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
-                  ) : (
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
-                  )}
-                  <div>
-                    <h4 className={`font-medium ${
-                      dateConflictInfo.hasConflict ? 'text-yellow-900' : 'text-green-900'
-                    }`}>
-                      {dateConflictInfo.hasConflict ? 'Potential Booking Conflict' : 'Date Available'}
-                    </h4>
-                    <p className={`text-sm ${
-                      dateConflictInfo.hasConflict ? 'text-yellow-700' : 'text-green-700'
-                    }`}>
-                      {dateConflictInfo.message}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          <SelectedDateInfo 
+            selectedDate={selectedDate} 
+            dateConflictInfo={dateConflictInfo} 
+          />
         )}
 
-        {/* Usage Information */}
-        <div className="text-xs text-muted-foreground space-y-1">
-          <p>• Sundays and Mondays are not available for bookings</p>
-          <p>• We can handle up to 2 events per day if they are in the same service area</p>
-          <p>• Events in different areas on the same day may require coordination</p>
-        </div>
+        <CalendarLegend />
       </CardContent>
     </Card>
   );
