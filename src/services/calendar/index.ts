@@ -1,4 +1,8 @@
 
+import { AvailabilityService } from './availabilityService';
+import { ConflictService } from './conflictService';
+import { SyncService } from './syncService';
+
 export { AvailabilityService } from './availabilityService';
 export { ConflictService } from './conflictService';
 export { SyncService } from './syncService';
