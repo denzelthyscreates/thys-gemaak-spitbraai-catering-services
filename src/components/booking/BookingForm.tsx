@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
@@ -96,16 +97,24 @@ const BookingForm: React.FC<BookingFormProps> = ({
       return;
     }
     
+    console.log("Form submission started with data:", data);
     setIsSubmitting(true);
-    console.log("Starting Latenode booking submission...");
     
     try {
       const bookingReference = generateBookingReference();
+      console.log("Generated booking reference:", bookingReference);
       
       // Calculate total amount including travel fee
       const menuSubtotal = menuSelection.totalPrice * menuSelection.numberOfGuests;
       const travelFee = menuSelection.travelFee || 0;
       const totalAmount = menuSubtotal + travelFee;
+
+      console.log("Pricing calculation:", {
+        menuSubtotal,
+        travelFee,
+        totalAmount,
+        numberOfGuests: menuSelection.numberOfGuests
+      });
 
       // Combine venue address into eventLocation for backward compatibility
       const eventLocation = data.venueName 
@@ -163,12 +172,13 @@ const BookingForm: React.FC<BookingFormProps> = ({
         submittedAt: new Date().toISOString(),
       };
       
-      console.log("Sending booking data to Latenode:", enhancedBookingData);
+      console.log("Prepared booking data for Latenode:", enhancedBookingData);
       
       const result = await submitBookingToLatenode(enhancedBookingData);
+      console.log("Latenode submission result:", result);
       
       if (result.success) {
-        console.log("Latenode booking submission successful");
+        console.log("Booking submission successful");
         setBookingId(result.bookingId || bookingReference);
         
         toast.success("Booking enquiry submitted successfully!", {
@@ -188,11 +198,12 @@ const BookingForm: React.FC<BookingFormProps> = ({
           onFormSubmitted();
         }
       } else {
+        console.error("Latenode submission failed:", result.error);
         throw new Error(result.error || "Failed to submit booking to Latenode");
       }
       
     } catch (error) {
-      console.error("Error submitting booking to Latenode:", error);
+      console.error("Error submitting booking:", error);
       toast.error("There was a problem submitting your booking", {
         description: "Please try again or contact us directly."
       });
@@ -210,6 +221,10 @@ const BookingForm: React.FC<BookingFormProps> = ({
       />
     );
   }
+
+  console.log("Rendering booking form with menu selection:", menuSelection);
+  console.log("Form errors:", form.formState.errors);
+  console.log("Form is valid:", form.formState.isValid);
 
   return (
     <div className="booking-form-wrapper space-y-6">
