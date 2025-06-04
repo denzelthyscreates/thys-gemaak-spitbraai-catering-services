@@ -35,6 +35,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     email: '',
     phone: '',
     eventType: menuSelection?.eventType || '',
+    numberOfGuests: menuSelection?.numberOfGuests || 0,
     venueName: '',
     venueStreetAddress: '',
     venueCity: '',
@@ -56,10 +57,14 @@ const BookingForm: React.FC<BookingFormProps> = ({
   });
 
   useEffect(() => {
+    console.log('BookingForm useEffect - Menu selection:', menuSelection);
+    console.log('BookingForm useEffect - Saved form data:', savedFormData);
+    
     if (savedFormData) {
       Object.entries(savedFormData).forEach(([field, value]) => {
         if (field !== 'eventDate') {
           form.setValue(field as keyof BookingFormValues, value);
+          console.log(`Set form field ${field} to:`, value);
         }
       });
       
@@ -68,19 +73,26 @@ const BookingForm: React.FC<BookingFormProps> = ({
       }
     }
 
-    // Pre-populate event type and postal code from menu selection
+    // Pre-populate fields from menu selection
     if (menuSelection) {
       if (menuSelection.eventType) {
         form.setValue('eventType', menuSelection.eventType);
+        console.log('Set eventType to:', menuSelection.eventType);
       }
       if (menuSelection.postalCode) {
         form.setValue('venuePostalCode', menuSelection.postalCode);
+        console.log('Set venuePostalCode to:', menuSelection.postalCode);
+      }
+      if (menuSelection.numberOfGuests) {
+        form.setValue('numberOfGuests', menuSelection.numberOfGuests);
+        console.log('Set numberOfGuests to:', menuSelection.numberOfGuests);
       }
     }
   }, [savedFormData, menuSelection, form]);
 
   useEffect(() => {
     const subscription = form.watch((values) => {
+      console.log('Form values changed:', values);
       if (onFormDataChange && Object.keys(form.formState.dirtyFields).length > 0) {
         onFormDataChange(values as BookingFormValues);
       }
@@ -92,12 +104,14 @@ const BookingForm: React.FC<BookingFormProps> = ({
   }, [form, onFormDataChange]);
 
   const onSubmit = async (data: BookingFormValues) => {
+    console.log("Form submission started with data:", data);
+    console.log("Menu selection at submission:", menuSelection);
+    
     if (!menuSelection) {
       toast.error("Please select a menu package first");
       return;
     }
     
-    console.log("Form submission started with data:", data);
     setIsSubmitting(true);
     
     try {
@@ -225,6 +239,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
   console.log("Rendering booking form with menu selection:", menuSelection);
   console.log("Form errors:", form.formState.errors);
   console.log("Form is valid:", form.formState.isValid);
+  console.log("Form values:", form.getValues());
 
   return (
     <div className="booking-form-wrapper space-y-6">
