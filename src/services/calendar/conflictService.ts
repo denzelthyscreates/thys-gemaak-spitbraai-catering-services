@@ -43,6 +43,7 @@ export class ConflictService {
           hasConflict: false,
           conflictType: 'none',
           message: 'Date is available',
+          canProceed: true,
           existingBookings: []
         };
       }
@@ -51,6 +52,7 @@ export class ConflictService {
         hasConflict: true,
         conflictType: 'booking',
         message: `${bookings.length} booking(s) already exist for this date`,
+        canProceed: true,
         existingBookings: bookings
       };
 

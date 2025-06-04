@@ -59,7 +59,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
   // Check for area-based conflicts when date is selected
   useEffect(() => {
-    if (selectedDate && userPostalCode) {
+    if (selectedDate) {
       checkDateConflicts(selectedDate);
     } else {
       setDateConflictInfo(null);
@@ -68,7 +68,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
   const checkDateConflicts = async (date: Date) => {
     try {
-      const conflicts = await CalendarAvailabilityService.getDateConflicts(date, userPostalCode);
+      const conflicts = await CalendarAvailabilityService.getDateConflicts(date);
       setDateConflictInfo(conflicts);
     } catch (error) {
       console.error('Error checking date conflicts:', error);

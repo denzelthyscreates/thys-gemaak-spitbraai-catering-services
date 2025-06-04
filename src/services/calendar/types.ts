@@ -17,6 +17,8 @@ export interface SyncStatus {
 
 export interface DateConflictInfo {
   hasConflict: boolean;
+  conflictType?: 'none' | 'booking' | 'area';
   message: string;
-  canProceed: boolean;
+  canProceed?: boolean;
+  existingBookings?: any[];
 }
