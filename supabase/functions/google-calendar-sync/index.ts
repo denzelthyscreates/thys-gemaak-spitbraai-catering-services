@@ -2,6 +2,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { create } from "https://deno.land/x/djwt@v2.8/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -29,29 +30,53 @@ serve(async (req) => {
     // Parse service account key
     const serviceAccount = JSON.parse(googleServiceAccountKey);
     
-    // Get OAuth token for service account
-    const jwtHeader = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+    if (!serviceAccount.private_key || !serviceAccount.client_email) {
+      throw new Error('Invalid service account key format');
+    }
+
+    // Create JWT for Google API authentication
     const now = Math.floor(Date.now() / 1000);
-    const jwtPayload = btoa(JSON.stringify({
+    const jwtPayload = {
       iss: serviceAccount.client_email,
       scope: 'https://www.googleapis.com/auth/calendar.readonly',
       aud: 'https://oauth2.googleapis.com/token',
       exp: now + 3600,
       iat: now
-    }));
+    };
 
-    // Create JWT for Google API authentication
-    const jwtData = `${jwtHeader}.${jwtPayload}`;
+    // Import the private key
+    const privateKey = await crypto.subtle.importKey(
+      "pkcs8",
+      new TextEncoder().encode(serviceAccount.private_key.replace(/\\n/g, '\n')),
+      {
+        name: "RSASSA-PKCS1-v1_5",
+        hash: "SHA-256",
+      },
+      false,
+      ["sign"]
+    );
+
+    const jwt = await create({ alg: "RS256", typ: "JWT" }, jwtPayload, privateKey);
     
     // Get access token
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwtData}`
+      body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`
     });
+
+    if (!tokenResponse.ok) {
+      const tokenError = await tokenResponse.text();
+      console.error('Token response error:', tokenError);
+      throw new Error(`Failed to get access token: ${tokenError}`);
+    }
 
     const tokenData = await tokenResponse.json();
     const accessToken = tokenData.access_token;
+
+    if (!accessToken) {
+      throw new Error('No access token received from Google');
+    }
 
     // Get calendar events for next 90 days
     const startDate = new Date();
@@ -59,14 +84,22 @@ serve(async (req) => {
     endDate.setDate(startDate.getDate() + 90);
 
     const calendarResponse = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/${googleCalendarId}/events?timeMin=${startDate.toISOString()}&timeMax=${endDate.toISOString()}&singleEvents=true&orderBy=startTime`,
+      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(googleCalendarId)}/events?timeMin=${startDate.toISOString()}&timeMax=${endDate.toISOString()}&singleEvents=true&orderBy=startTime`,
       {
         headers: { 'Authorization': `Bearer ${accessToken}` }
       }
     );
 
+    if (!calendarResponse.ok) {
+      const calendarError = await calendarResponse.text();
+      console.error('Calendar response error:', calendarError);
+      throw new Error(`Failed to fetch calendar events: ${calendarError}`);
+    }
+
     const calendarData = await calendarResponse.json();
     const events = calendarData.items || [];
+
+    console.log(`Fetched ${events.length} events from Google Calendar`);
 
     // Process events and update availability
     const dateEventMap = new Map();
@@ -83,7 +116,7 @@ serve(async (req) => {
         
         dateEventMap.get(eventDate).push({
           id: event.id,
-          summary: event.summary,
+          summary: event.summary || 'Untitled Event',
           start: event.start,
           end: event.end
         });
@@ -109,7 +142,12 @@ serve(async (req) => {
       );
     }
 
-    await Promise.all(updatePromises);
+    const results = await Promise.allSettled(updatePromises);
+    const failedUpdates = results.filter(result => result.status === 'rejected');
+    
+    if (failedUpdates.length > 0) {
+      console.error('Some updates failed:', failedUpdates);
+    }
 
     // Update sync status
     await supabaseClient
@@ -122,6 +160,8 @@ serve(async (req) => {
         error_message: null
       });
 
+    console.log(`Sync completed successfully: ${events.length} events, ${dateEventMap.size} dates updated`);
+
     return new Response(
       JSON.stringify({ 
         success: true, 
@@ -132,25 +172,37 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Calendar sync error:', error);
+    console.error('Detailed calendar sync error:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     
     // Log error to sync table
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    );
-    
-    await supabaseClient
-      .from('calendar_sync')
-      .upsert({
-        id: 'main-sync',
-        last_sync: new Date().toISOString(),
-        sync_status: 'error',
-        error_message: error.message
-      });
+    try {
+      const supabaseClient = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      );
+      
+      await supabaseClient
+        .from('calendar_sync')
+        .upsert({
+          id: 'main-sync',
+          last_sync: new Date().toISOString(),
+          sync_status: 'error',
+          error_message: error.message
+        });
+    } catch (dbError) {
+      console.error('Failed to log error to database:', dbError);
+    }
 
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ 
+        success: false, 
+        error: error.message,
+        details: error.stack 
+      }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

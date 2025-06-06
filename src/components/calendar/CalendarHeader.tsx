@@ -17,6 +17,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ onSync, isSyncing }) =>
         Select Event Date
       </CardTitle>
       <Button
+        type="button"
         variant="outline"
         size="sm"
         onClick={onSync}
