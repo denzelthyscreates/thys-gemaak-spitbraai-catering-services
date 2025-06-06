@@ -35,14 +35,18 @@ export const useAuthProvider = () => {
         setLoading(true);
         const { user, error } = await getCurrentUser();
         
-        if (error) {
+        if (error && error.message !== 'Auth session missing!') {
+          // Only throw error if it's not the expected "no session" error
           throw error;
         }
         
         setUser(user);
       } catch (err: any) {
-        console.error('Auth error:', err);
-        setError(err);
+        // Only log non-session errors
+        if (err.message !== 'Auth session missing!') {
+          console.error('Auth error:', err);
+          setError(err);
+        }
       } finally {
         setLoading(false);
       }
