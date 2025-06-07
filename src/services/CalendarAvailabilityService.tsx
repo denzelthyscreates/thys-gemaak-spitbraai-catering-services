@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { getAreaNameByPostalCode } from '@/data/travelData';
 
@@ -127,11 +128,10 @@ export class CalendarAvailabilityService {
 
     // Check area conflicts using postal codes
     const existingAreas = bookings
-      .filter(booking => booking.venue_postal_code) // Only check bookings with postal codes
+      .filter(booking => booking.venue_postal_code)
       .map(booking => getAreaNameByPostalCode(booking.venue_postal_code!))
       .filter(area => area !== null);
 
-    // If some bookings don't have postal codes, we need to be cautious
     const bookingsWithoutPostalCode = bookings.filter(booking => !booking.venue_postal_code);
     
     if (bookingsWithoutPostalCode.length > 0) {
@@ -142,7 +142,6 @@ export class CalendarAvailabilityService {
       };
     }
 
-    // Check if any existing bookings are in different areas
     const differentAreas = existingAreas.filter(area => area !== userArea);
 
     if (differentAreas.length > 0) {
@@ -153,7 +152,6 @@ export class CalendarAvailabilityService {
       };
     }
 
-    // Same area, less than 2 bookings - this is ideal
     return {
       hasConflict: false,
       message: `This date has ${bookings.length} existing booking(s) in the same service area (${userArea}). Your event can be accommodated.`,
@@ -182,6 +180,16 @@ export class CalendarAvailabilityService {
    */
   static async syncWithGoogleCalendar(): Promise<{ success: boolean; message: string }> {
     try {
+      // Update sync status to pending before starting
+      await supabase
+        .from('calendar_sync')
+        .upsert({
+          id: 'main-sync',
+          last_sync: new Date().toISOString(),
+          sync_status: 'pending',
+          error_message: null
+        });
+
       const { data, error } = await supabase.functions.invoke('google-calendar-sync');
       
       if (error) throw error;
@@ -189,6 +197,17 @@ export class CalendarAvailabilityService {
       return data;
     } catch (error) {
       console.error('Sync error:', error);
+      
+      // Update sync status to error
+      await supabase
+        .from('calendar_sync')
+        .upsert({
+          id: 'main-sync',
+          last_sync: new Date().toISOString(),
+          sync_status: 'error',
+          error_message: error.message
+        });
+      
       return { 
         success: false, 
         message: 'Failed to sync with Google Calendar: ' + error.message 

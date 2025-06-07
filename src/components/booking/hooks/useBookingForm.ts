@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { submitBookingToLatenode } from '@/services/LatenodeService';
+import { createBooking } from '@/lib/supabase';
 import { BookingFormValues, bookingFormSchema } from '../types';
 import { generateBookingReference } from '../utils';
 
@@ -62,7 +62,6 @@ export const useBookingForm = (
       }
     }
 
-    // Pre-populate fields from menu selection
     if (menuSelection) {
       if (menuSelection.eventType) {
         form.setValue('eventType', menuSelection.eventType);
@@ -119,13 +118,66 @@ export const useBookingForm = (
         numberOfGuests: menuSelection.numberOfGuests
       });
 
-      // Combine venue address into eventLocation for backward compatibility
+      // Prepare booking data for Supabase
+      const supabaseBookingData = {
+        contact_name: data.name,
+        contact_email: data.email,
+        contact_phone: data.phone,
+        event_date: data.eventDate ? data.eventDate.toISOString() : null,
+        event_type: menuSelection.eventType || data.eventType,
+        venue_name: data.venueName || null,
+        venue_street_address: data.venueStreetAddress,
+        venue_city: data.venueCity,
+        venue_province: data.venueProvince,
+        venue_postal_code: data.venuePostalCode,
+        address_line1: data.addressLine1,
+        address_line2: data.addressLine2 || null,
+        city: data.city,
+        province: data.province,
+        postal_code_address: data.postalCodeAddress,
+        referral_source: data.referralSource || null,
+        additional_notes: data.additionalNotes || null,
+        menu_package: menuSelection.menuPackage,
+        number_of_guests: menuSelection.numberOfGuests,
+        season: menuSelection.season || null,
+        starters: menuSelection.starters || null,
+        sides: menuSelection.sides || null,
+        desserts: menuSelection.desserts || null,
+        extras: menuSelection.extras || null,
+        extra_salad_type: menuSelection.extraSaladType || null,
+        include_cutlery: menuSelection.includeCutlery || false,
+        price_per_person: menuSelection.totalPrice,
+        menu_subtotal: menuSubtotal,
+        travel_fee: travelFee,
+        total_price: totalAmount,
+        area_name: menuSelection.areaName || null,
+        discount_applied: menuSelection.discountApplied || false,
+        booking_reference: bookingReference,
+        status: 'pending_payment',
+        submitted_at: new Date().toISOString(),
+        notes: data.additionalNotes || ''
+      };
+
+      // Save to Supabase first
+      console.log("Saving booking to Supabase:", supabaseBookingData);
+      const { data: supabaseResult, error: supabaseError } = await createBooking(supabaseBookingData);
+      
+      if (supabaseError) {
+        console.error("Failed to save to Supabase:", supabaseError);
+        toast.error("Failed to save booking", {
+          description: "Please try again or contact us directly."
+        });
+        return;
+      }
+
+      console.log("Booking saved to Supabase successfully:", supabaseResult);
+
+      // Combine venue address into eventLocation for backward compatibility with Latenode
       const eventLocation = data.venueName 
         ? `${data.venueName}, ${data.venueStreetAddress}, ${data.venueCity}, ${data.venueProvince} ${data.venuePostalCode}`
         : `${data.venueStreetAddress}, ${data.venueCity}, ${data.venueProvince} ${data.venuePostalCode}`;
 
       const enhancedBookingData = {
-        // Contact Information
         name: data.name,
         email: data.email,
         phone: data.phone,
@@ -134,22 +186,16 @@ export const useBookingForm = (
         eventLocation: eventLocation,
         additionalNotes: data.additionalNotes,
         referralSource: data.referralSource || "",
-        
-        // Event Venue Details
         venueName: data.venueName || "",
         venueStreetAddress: data.venueStreetAddress,
         venueCity: data.venueCity,
         venueProvince: data.venueProvince,
         venuePostalCode: data.venuePostalCode,
-        
-        // Address Information for Invoicing
         addressLine1: data.addressLine1,
         addressLine2: data.addressLine2 || "",
         city: data.city,
         province: data.province,
         postalCodeAddress: data.postalCodeAddress,
-        
-        // Menu Selection Details
         menuPackage: menuSelection.menuPackage,
         numberOfGuests: menuSelection.numberOfGuests,
         season: menuSelection.season || "",
@@ -159,8 +205,6 @@ export const useBookingForm = (
         extras: menuSelection.extras || "",
         extraSaladType: menuSelection.extraSaladType || "",
         includeCutlery: menuSelection.includeCutlery || false,
-        
-        // Pricing Information with Travel Fee
         pricePerPerson: menuSelection.totalPrice,
         menuSubtotal: menuSubtotal,
         travelFee: travelFee,
@@ -168,21 +212,21 @@ export const useBookingForm = (
         postalCode: menuSelection.postalCode || "",
         areaName: menuSelection.areaName || "",
         discountApplied: menuSelection.discountApplied || false,
-        
-        // Booking Management
         bookingReference: bookingReference,
         status: 'pending_payment',
         submittedAt: new Date().toISOString(),
+        supabaseId: supabaseResult.id // Include the Supabase booking ID
       };
       
       console.log("Prepared booking data for Latenode:", enhancedBookingData);
       
+      // Send to Latenode (secondary)
       const result = await submitBookingToLatenode(enhancedBookingData);
       console.log("Latenode submission result:", result);
       
       if (result.success) {
         console.log("Booking submission successful");
-        setBookingId(result.bookingId || bookingReference);
+        setBookingId(supabaseResult.id);
         
         toast.success("Booking enquiry submitted successfully!", {
           description: "Your booking reference: " + bookingReference
@@ -191,7 +235,6 @@ export const useBookingForm = (
         setSubmissionComplete(true);
         setShowPaymentOptions(true);
         
-        // Clear form data
         localStorage.removeItem('bookingFormData');
         if (onFormDataChange) {
           onFormDataChange(null);
@@ -202,7 +245,18 @@ export const useBookingForm = (
         }
       } else {
         console.error("Latenode submission failed:", result.error);
-        throw new Error(result.error || "Failed to submit booking to Latenode");
+        // Don't throw error here since Supabase save was successful
+        toast.success("Booking saved successfully!", {
+          description: "Your booking reference: " + bookingReference + " (Note: External notification may be delayed)"
+        });
+        
+        setBookingId(supabaseResult.id);
+        setSubmissionComplete(true);
+        setShowPaymentOptions(true);
+        
+        if (onFormSubmitted) {
+          onFormSubmitted();
+        }
       }
       
     } catch (error) {
