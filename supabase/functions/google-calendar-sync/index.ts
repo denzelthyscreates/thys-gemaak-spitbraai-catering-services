@@ -15,24 +15,52 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting Google Calendar sync...');
+    
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
+    // Update sync status to pending
+    await supabaseClient
+      .from('calendar_sync')
+      .upsert({
+        id: 'main-sync',
+        last_sync: new Date().toISOString(),
+        sync_status: 'pending',
+        error_message: null
+      });
+
     const googleCalendarId = Deno.env.get('GOOGLE_CALENDAR_ID');
     const googleServiceAccountKey = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_KEY');
 
-    if (!googleCalendarId || !googleServiceAccountKey) {
-      throw new Error('Missing Google Calendar credentials');
+    console.log('Calendar ID exists:', !!googleCalendarId);
+    console.log('Service account key exists:', !!googleServiceAccountKey);
+
+    if (!googleCalendarId) {
+      throw new Error('GOOGLE_CALENDAR_ID environment variable is not set');
     }
 
-    // Parse service account key
-    const serviceAccount = JSON.parse(googleServiceAccountKey);
+    if (!googleServiceAccountKey) {
+      throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY environment variable is not set');
+    }
+
+    // Parse service account key with better error handling
+    let serviceAccount;
+    try {
+      serviceAccount = JSON.parse(googleServiceAccountKey);
+      console.log('Service account key parsed successfully');
+    } catch (parseError) {
+      console.error('Failed to parse service account key:', parseError.message);
+      throw new Error('Invalid GOOGLE_SERVICE_ACCOUNT_KEY format - must be valid JSON');
+    }
     
     if (!serviceAccount.private_key || !serviceAccount.client_email) {
-      throw new Error('Invalid service account key format');
+      throw new Error('Service account key is missing required fields (private_key or client_email)');
     }
+
+    console.log('Creating JWT for authentication...');
 
     // Create JWT for Google API authentication
     const now = Math.floor(Date.now() / 1000);
@@ -44,21 +72,35 @@ serve(async (req) => {
       iat: now
     };
 
-    // Import the private key
-    const privateKey = await crypto.subtle.importKey(
-      "pkcs8",
-      new TextEncoder().encode(serviceAccount.private_key.replace(/\\n/g, '\n')),
-      {
-        name: "RSASSA-PKCS1-v1_5",
-        hash: "SHA-256",
-      },
-      false,
-      ["sign"]
-    );
+    // Import the private key with better error handling
+    let privateKey;
+    try {
+      const privateKeyString = serviceAccount.private_key.replace(/\\n/g, '\n');
+      
+      // Remove any extra whitespace or formatting issues
+      const cleanPrivateKey = privateKeyString.trim();
+      
+      privateKey = await crypto.subtle.importKey(
+        "pkcs8",
+        new TextEncoder().encode(cleanPrivateKey),
+        {
+          name: "RSASSA-PKCS1-v1_5",
+          hash: "SHA-256",
+        },
+        false,
+        ["sign"]
+      );
+      console.log('Private key imported successfully');
+    } catch (keyError) {
+      console.error('Failed to import private key:', keyError.message);
+      throw new Error('Invalid private key format in service account key');
+    }
 
     const jwt = await create({ alg: "RS256", typ: "JWT" }, jwtPayload, privateKey);
+    console.log('JWT created successfully');
     
     // Get access token
+    console.log('Requesting access token from Google...');
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -78,10 +120,14 @@ serve(async (req) => {
       throw new Error('No access token received from Google');
     }
 
+    console.log('Access token received successfully');
+
     // Get calendar events for next 90 days
     const startDate = new Date();
     const endDate = new Date();
     endDate.setDate(startDate.getDate() + 90);
+
+    console.log(`Fetching calendar events from ${startDate.toISOString()} to ${endDate.toISOString()}`);
 
     const calendarResponse = await fetch(
       `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(googleCalendarId)}/events?timeMin=${startDate.toISOString()}&timeMax=${endDate.toISOString()}&singleEvents=true&orderBy=startTime`,
@@ -122,6 +168,8 @@ serve(async (req) => {
         });
       }
     });
+
+    console.log(`Processing ${dateEventMap.size} dates with events`);
 
     // Update Supabase availability table
     const updatePromises = [];
