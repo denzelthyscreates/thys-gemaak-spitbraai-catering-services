@@ -1,5 +1,4 @@
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
@@ -12,18 +11,28 @@ interface VenueSectionProps {
 
 const VenueSection: React.FC<VenueSectionProps> = ({ form }) => {
   const postalCode = form.watch('venuePostalCode');
+  const lastProcessedPostalCode = useRef<string>('');
 
-  // Auto-populate address fields based on postal code
+  // Memoize the setValue function to prevent unnecessary re-renders
+  const setFormValues = useCallback((city: string, province: string) => {
+    form.setValue('venueCity', city, { shouldDirty: false });
+    form.setValue('venueProvince', province, { shouldDirty: false });
+  }, [form.setValue]);
+
+  // Auto-populate address fields based on postal code with optimization
   useEffect(() => {
-    if (postalCode && postalCode.length >= 4) {
+    if (postalCode && 
+        postalCode.length >= 4 && 
+        postalCode !== lastProcessedPostalCode.current) {
+      
       const areaInfo = getAreaByPostalCode(postalCode);
       if (areaInfo) {
         // Set city and province based on the area information
-        form.setValue('venueCity', areaInfo.city || '');
-        form.setValue('venueProvince', areaInfo.province || 'Western Cape');
+        setFormValues(areaInfo.city || '', areaInfo.province || 'Western Cape');
+        lastProcessedPostalCode.current = postalCode;
       }
     }
-  }, [postalCode, form]);
+  }, [postalCode, setFormValues]);
 
   return (
     <div className="space-y-4">
