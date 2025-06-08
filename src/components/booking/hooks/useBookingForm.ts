@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { useRouter } from 'next/router';
 import { submitBookingToLatenode } from '@/services/LatenodeService';
 import { createBooking } from '@/lib/supabase';
 import { BookingFormValues, bookingFormSchema } from '../types';
@@ -20,8 +19,7 @@ export const useBookingForm = (
   const [submissionComplete, setSubmissionComplete] = useState(false);
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
-  const router = useRouter();
-
+ 
   const defaultValues: BookingFormValues = {
     name: '',
     email: '',
