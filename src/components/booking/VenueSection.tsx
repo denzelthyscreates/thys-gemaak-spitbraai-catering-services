@@ -34,7 +34,11 @@ const VenueSection: React.FC<VenueSectionProps> = ({ form }) => {
           <FormItem>
             <FormLabel>Venue Name (Optional)</FormLabel>
             <FormControl>
-              <Input placeholder="e.g., Conference Center, Community Hall, Private Residence" {...field} />
+              <Input 
+                placeholder="e.g., Conference Center, Community Hall, Private Residence" 
+                autoComplete="organization"
+                {...field} 
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -49,7 +53,11 @@ const VenueSection: React.FC<VenueSectionProps> = ({ form }) => {
             <FormItem>
               <FormLabel>Street Address</FormLabel>
               <FormControl>
-                <Input placeholder="123 Main Street" {...field} />
+                <Input 
+                  placeholder="123 Main Street" 
+                  autoComplete="street-address"
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -63,7 +71,11 @@ const VenueSection: React.FC<VenueSectionProps> = ({ form }) => {
             <FormItem>
               <FormLabel>Postal Code</FormLabel>
               <FormControl>
-                <Input placeholder="8000" {...field} />
+                <Input 
+                  placeholder="8000" 
+                  autoComplete="postal-code"
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -77,7 +89,11 @@ const VenueSection: React.FC<VenueSectionProps> = ({ form }) => {
             <FormItem>
               <FormLabel>City</FormLabel>
               <FormControl>
-                <Input placeholder="Cape Town" {...field} />
+                <Input 
+                  placeholder="Cape Town" 
+                  autoComplete="address-level2"
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -91,7 +107,11 @@ const VenueSection: React.FC<VenueSectionProps> = ({ form }) => {
             <FormItem>
               <FormLabel>Province</FormLabel>
               <FormControl>
-                <Input placeholder="Western Cape" {...field} />
+                <Input 
+                  placeholder="Western Cape" 
+                  autoComplete="address-level1"
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

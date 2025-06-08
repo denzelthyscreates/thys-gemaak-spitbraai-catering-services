@@ -26,7 +26,11 @@ const BillingSection: React.FC<BillingSectionProps> = ({ form }) => {
             <FormItem>
               <FormLabel>Street Address</FormLabel>
               <FormControl>
-                <Input placeholder="123 Main Street" {...field} />
+                <Input 
+                  placeholder="123 Main Street" 
+                  autoComplete="address-line1"
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -40,7 +44,11 @@ const BillingSection: React.FC<BillingSectionProps> = ({ form }) => {
             <FormItem>
               <FormLabel>Address Line 2 (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="Apartment, suite, etc." {...field} />
+                <Input 
+                  placeholder="Apartment, suite, etc." 
+                  autoComplete="address-line2"
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -54,7 +62,11 @@ const BillingSection: React.FC<BillingSectionProps> = ({ form }) => {
             <FormItem>
               <FormLabel>City</FormLabel>
               <FormControl>
-                <Input placeholder="Cape Town" {...field} />
+                <Input 
+                  placeholder="Cape Town" 
+                  autoComplete="address-level2"
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -68,7 +80,11 @@ const BillingSection: React.FC<BillingSectionProps> = ({ form }) => {
             <FormItem>
               <FormLabel>Province</FormLabel>
               <FormControl>
-                <Input placeholder="Western Cape" {...field} />
+                <Input 
+                  placeholder="Western Cape" 
+                  autoComplete="address-level1"
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -82,7 +98,11 @@ const BillingSection: React.FC<BillingSectionProps> = ({ form }) => {
             <FormItem>
               <FormLabel>Postal Code</FormLabel>
               <FormControl>
-                <Input placeholder="8000" {...field} />
+                <Input 
+                  placeholder="8000" 
+                  autoComplete="postal-code"
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
