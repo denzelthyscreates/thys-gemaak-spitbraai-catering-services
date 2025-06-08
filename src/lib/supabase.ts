@@ -1,9 +1,8 @@
-
 import { createClient } from '@supabase/supabase-js';
 
-// Get environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Get environment variables with fallback to hardcoded values for development
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://pcvmdyhzufupgckszrdy.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjdm1keWh6dWZ1cGdja3N6cmR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMxMTI0ODEsImV4cCI6MjA1ODY4ODQ4MX0.hNNiDqgi8MDavGcP7Bwc2KR59CTsdWAw8g4gdSr_Kq0';
 
 // Check if environment variables are available
 const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey);
@@ -12,12 +11,15 @@ if (!isSupabaseConfigured) {
   console.error('Missing Supabase environment variables. Authentication will not work!');
 }
 
-// Create the Supabase client with proper fallbacks
-// Using dummy values when real ones aren't available allows the app to at least load
-export const supabase = createClient(
-  supabaseUrl || 'https://placeholder-supabase-url.supabase.co', 
-  supabaseAnonKey || 'placeholder-anon-key-for-fallback-purposes'
-);
+// Create the unified Supabase client
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    // Allow anonymous access for booking submissions
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+});
 
 // Export configuration status for UI components to use
 export const isSupabaseReady = isSupabaseConfigured;
@@ -80,9 +82,14 @@ export const createBooking = async (bookingData: any) => {
   }
 
   // Get the current user (may be null for anonymous bookings)
-  const { user } = await getCurrentUser();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError && userError.message !== 'Auth session missing!') {
+    console.warn('Error getting user, proceeding with anonymous booking:', userError);
+  }
   
   // Add the user_id to the booking data if user is authenticated, otherwise leave it null
+  // This allows anonymous bookings while still associating bookings with users when they're logged in
   const bookingWithUserId = {
     ...bookingData,
     user_id: user?.id || null

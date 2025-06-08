@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -46,6 +45,14 @@ export const useBookingForm = (
     defaultValues,
   });
 
+  // Memoize the form data change handler to prevent unnecessary re-renders
+  const handleFormDataChange = useCallback((values: BookingFormValues) => {
+    if (onFormDataChange && Object.keys(form.formState.dirtyFields).length > 0) {
+      onFormDataChange(values);
+    }
+  }, [onFormDataChange, form.formState.dirtyFields]);
+
+  // Fix: Remove 'form' from dependency array to prevent infinite loop
   useEffect(() => {
     console.log('BookingForm useEffect - Menu selection:', menuSelection);
     console.log('BookingForm useEffect - Saved form data:', savedFormData);
@@ -77,20 +84,19 @@ export const useBookingForm = (
         console.log('Set numberOfGuests to:', menuSelection.numberOfGuests);
       }
     }
-  }, [savedFormData, menuSelection, form]);
+  }, [savedFormData, menuSelection]); // Removed 'form' from dependencies
 
+  // Fix: Optimize form watch subscription with proper cleanup
   useEffect(() => {
     const subscription = form.watch((values) => {
       console.log('Form values changed:', values);
-      if (onFormDataChange && Object.keys(form.formState.dirtyFields).length > 0) {
-        onFormDataChange(values as BookingFormValues);
-      }
+      handleFormDataChange(values as BookingFormValues);
     });
     
     return () => {
       subscription.unsubscribe();
     };
-  }, [form, onFormDataChange]);
+  }, [handleFormDataChange]); // Removed 'form' from dependencies
 
   const onSubmit = async (data: BookingFormValues) => {
     console.log("=== FORM SUBMISSION STARTED ===");
@@ -121,7 +127,7 @@ export const useBookingForm = (
         numberOfGuests: menuSelection.numberOfGuests
       });
 
-      // Prepare booking data for Supabase (without user_id since we'll handle auth in createBooking)
+      // Prepare booking data for Supabase (anonymous booking support)
       const supabaseBookingData = {
         contact_name: data.name,
         contact_email: data.email,
@@ -161,37 +167,25 @@ export const useBookingForm = (
         notes: data.additionalNotes || ''
       };
 
-      // Save to Supabase first
+      // Save to Supabase first (now supports anonymous bookings)
       console.log("Saving booking to Supabase:", supabaseBookingData);
       const { data: supabaseResult, error: supabaseError } = await createBooking(supabaseBookingData);
       
       if (supabaseError) {
         console.error("Failed to save to Supabase:", supabaseError);
         
-        // Check if it's an authentication error
-        if (supabaseError.message?.includes('auth') || supabaseError.message?.includes('authentication')) {
-          toast.error("Authentication required", {
-            description: "Please log in to submit a booking. For now, we'll save your data locally."
-          });
-          
-          // Save to localStorage as fallback
-          const fallbackData = {
-            ...supabaseBookingData,
-            timestamp: new Date().toISOString(),
-            status: 'pending_auth'
-          };
-          localStorage.setItem(`booking_${bookingReference}`, JSON.stringify(fallbackData));
-          
-          toast.success("Booking data saved locally", {
-            description: "Your booking reference: " + bookingReference + ". Please log in to complete your booking."
-          });
-          
-          return;
-        }
+        // Save to localStorage as fallback for any error
+        const fallbackData = {
+          ...supabaseBookingData,
+          timestamp: new Date().toISOString(),
+          status: 'pending_submission'
+        };
+        localStorage.setItem(`booking_${bookingReference}`, JSON.stringify(fallbackData));
         
-        toast.error("Failed to save booking", {
-          description: "Please try again or contact us directly. Error: " + supabaseError.message
+        toast.error("Unable to save booking to database", {
+          description: "Your booking data has been saved locally. Reference: " + bookingReference + ". Please try again or contact us directly."
         });
+        
         return;
       }
 
