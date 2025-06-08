@@ -70,20 +70,25 @@ export const getCurrentUser = async () => {
   return { user: data.user, error };
 };
 
-// Database helpers for the booking system with RLS support
+// Database helpers for the booking system with support for anonymous bookings
 export const createBooking = async (bookingData: any) => {
-  // Get the current user to ensure we have authentication
+  if (!isSupabaseConfigured) {
+    return { 
+      data: null, 
+      error: new Error('Supabase is not configured. Please set the required environment variables.') 
+    };
+  }
+
+  // Get the current user (may be null for anonymous bookings)
   const { user } = await getCurrentUser();
   
-  if (!user) {
-    return { data: null, error: new Error('User must be authenticated to create a booking') };
-  }
-  
-  // Add the user_id to the booking data for RLS
+  // Add the user_id to the booking data if user is authenticated, otherwise leave it null
   const bookingWithUserId = {
     ...bookingData,
-    user_id: user.id
+    user_id: user?.id || null
   };
+  
+  console.log('Creating booking with data:', bookingWithUserId);
   
   const { data, error } = await supabase
     .from('bookings')
