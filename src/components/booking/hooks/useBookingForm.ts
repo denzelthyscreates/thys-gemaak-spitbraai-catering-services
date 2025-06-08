@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -92,10 +93,12 @@ export const useBookingForm = (
   }, [form, onFormDataChange]);
 
   const onSubmit = async (data: BookingFormValues) => {
+    console.log("=== FORM SUBMISSION STARTED ===");
     console.log("Form submission started with data:", data);
     console.log("Menu selection at submission:", menuSelection);
     
     if (!menuSelection) {
+      console.error("No menu selection found");
       toast.error("Please select a menu package first");
       return;
     }
@@ -118,7 +121,7 @@ export const useBookingForm = (
         numberOfGuests: menuSelection.numberOfGuests
       });
 
-      // Prepare booking data for Supabase
+      // Prepare booking data for Supabase (without user_id since we'll handle auth in createBooking)
       const supabaseBookingData = {
         contact_name: data.name,
         contact_email: data.email,
@@ -164,8 +167,30 @@ export const useBookingForm = (
       
       if (supabaseError) {
         console.error("Failed to save to Supabase:", supabaseError);
+        
+        // Check if it's an authentication error
+        if (supabaseError.message?.includes('auth') || supabaseError.message?.includes('authentication')) {
+          toast.error("Authentication required", {
+            description: "Please log in to submit a booking. For now, we'll save your data locally."
+          });
+          
+          // Save to localStorage as fallback
+          const fallbackData = {
+            ...supabaseBookingData,
+            timestamp: new Date().toISOString(),
+            status: 'pending_auth'
+          };
+          localStorage.setItem(`booking_${bookingReference}`, JSON.stringify(fallbackData));
+          
+          toast.success("Booking data saved locally", {
+            description: "Your booking reference: " + bookingReference + ". Please log in to complete your booking."
+          });
+          
+          return;
+        }
+        
         toast.error("Failed to save booking", {
-          description: "Please try again or contact us directly."
+          description: "Please try again or contact us directly. Error: " + supabaseError.message
         });
         return;
       }
@@ -262,10 +287,11 @@ export const useBookingForm = (
     } catch (error) {
       console.error("Error submitting booking:", error);
       toast.error("There was a problem submitting your booking", {
-        description: "Please try again or contact us directly."
+        description: "Please try again or contact us directly. Error: " + (error instanceof Error ? error.message : 'Unknown error')
       });
     } finally {
       setIsSubmitting(false);
+      console.log("=== FORM SUBMISSION COMPLETED ===");
     }
   };
 

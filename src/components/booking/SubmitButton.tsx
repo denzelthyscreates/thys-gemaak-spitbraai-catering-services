@@ -8,6 +8,17 @@ interface SubmitButtonProps {
 }
 
 const SubmitButton: React.FC<SubmitButtonProps> = ({ isSubmitting, menuSelection }) => {
+  const handleClick = (e: React.MouseEvent) => {
+    console.log("Submit button clicked!", { isSubmitting, menuSelection });
+    
+    if (!menuSelection) {
+      console.warn("No menu selection available");
+      return;
+    }
+    
+    // Let the form handle the actual submission
+  };
+
   return (
     <div className="space-y-4">
       <Button 
@@ -15,6 +26,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({ isSubmitting, menuSelection
         className="w-full" 
         disabled={isSubmitting || !menuSelection}
         size="lg"
+        onClick={handleClick}
       >
         {isSubmitting ? "Submitting..." : "Submit Booking Form"}
       </Button>
