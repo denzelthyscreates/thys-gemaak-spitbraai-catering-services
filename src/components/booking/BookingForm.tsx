@@ -28,6 +28,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     onSubmit
   } = useBookingForm(menuSelection, savedFormData, onFormDataChange, onFormSubmitted);
 
+  // Show payment page after successful submission
   if (submissionComplete && showPaymentOptions) {
     return (
       <PaymentComplete 
@@ -38,10 +39,12 @@ const BookingForm: React.FC<BookingFormProps> = ({
     );
   }
 
-  console.log("Rendering booking form with menu selection:", menuSelection);
-  console.log("Form errors:", form.formState.errors);
-  console.log("Form is valid:", form.formState.isValid);
-  console.log("Form values:", form.getValues());
+  // Only log in development mode to prevent infinite console spam
+  if (process.env.NODE_ENV === 'development') {
+    console.log("Rendering booking form with menu selection:", menuSelection);
+    console.log("Form errors:", form.formState.errors);
+    console.log("Form is valid:", form.formState.isValid);
+  }
 
   return (
     <div className="booking-form-wrapper space-y-6">

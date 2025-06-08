@@ -3,7 +3,8 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Check, CreditCard, DollarSign } from 'lucide-react';
+import { Check, CreditCard, DollarSign, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import PaymentGateway from '../payment/PaymentGateway';
 import { format } from 'date-fns';
 import { UseFormReturn } from 'react-hook-form';
@@ -28,6 +29,11 @@ const PaymentComplete: React.FC<PaymentCompleteProps> = ({ bookingId, menuSelect
     total_amount: totalAmount
   };
 
+  const handleBackToForm = () => {
+    // Reload the page to go back to the booking form
+    window.location.reload();
+  };
+
   return (
     <div className="space-y-6">
       {/* Success Message */}
@@ -38,14 +44,17 @@ const PaymentComplete: React.FC<PaymentCompleteProps> = ({ bookingId, menuSelect
               <Check className="h-8 w-8 text-green-600" />
             </div>
           </div>
-          <CardTitle className="text-green-800">Booking Submitted to Latenode!</CardTitle>
+          <CardTitle className="text-green-800">Booking Successfully Submitted!</CardTitle>
           <CardDescription className="text-green-700">
             Your booking reference: <Badge variant="secondary" className="ml-2">{bookingId}</Badge>
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">
           <p className="text-green-700 mb-4">
-            Thank you for your booking! Your request has been processed by our automated system.
+            Thank you for your booking! Your request has been processed and saved to our system.
+          </p>
+          <p className="text-sm text-green-600">
+            You can now proceed with payment to secure your booking date.
           </p>
         </CardContent>
       </Card>
@@ -58,7 +67,7 @@ const PaymentComplete: React.FC<PaymentCompleteProps> = ({ bookingId, menuSelect
             Complete Your Payment
           </CardTitle>
           <CardDescription>
-            Choose your payment option to secure your booking
+            Choose your payment option to secure your booking date
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -116,15 +125,27 @@ const PaymentComplete: React.FC<PaymentCompleteProps> = ({ bookingId, menuSelect
 
           <Separator />
           
-          <div className="text-center">
+          <div className="text-center space-y-4">
             <p className="text-sm text-muted-foreground mb-2">
               <strong>What happens next?</strong>
             </p>
             <ul className="text-sm text-muted-foreground space-y-1">
-              <li>• Your booking is now in our automated system</li>
+              <li>• Your booking is now saved in our system</li>
               <li>• You'll receive automated confirmations and updates</li>
               <li>• Our team will contact you to finalize event details</li>
+              <li>• Payment secures your date and starts the catering process</li>
             </ul>
+            
+            <div className="pt-4">
+              <Button 
+                variant="outline" 
+                onClick={handleBackToForm}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Booking Form
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

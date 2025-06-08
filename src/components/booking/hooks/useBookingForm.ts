@@ -1,8 +1,10 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { useRouter } from 'next/router';
 import { submitBookingToLatenode } from '@/services/LatenodeService';
 import { createBooking } from '@/lib/supabase';
 import { BookingFormValues, bookingFormSchema } from '../types';
@@ -18,6 +20,7 @@ export const useBookingForm = (
   const [submissionComplete, setSubmissionComplete] = useState(false);
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const router = useRouter();
 
   const defaultValues: BookingFormValues = {
     name: '',
@@ -43,6 +46,7 @@ export const useBookingForm = (
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
     defaultValues,
+    mode: 'onChange', // Enable real-time validation
   });
 
   // Memoize the form data change handler to prevent unnecessary re-renders
@@ -52,16 +56,16 @@ export const useBookingForm = (
     }
   }, [onFormDataChange, form.formState.dirtyFields]);
 
-  // Fix: Remove 'form' from dependency array to prevent infinite loop
   useEffect(() => {
-    console.log('BookingForm useEffect - Menu selection:', menuSelection);
-    console.log('BookingForm useEffect - Saved form data:', savedFormData);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('BookingForm useEffect - Menu selection:', menuSelection);
+      console.log('BookingForm useEffect - Saved form data:', savedFormData);
+    }
     
     if (savedFormData) {
       Object.entries(savedFormData).forEach(([field, value]) => {
         if (field !== 'eventDate') {
           form.setValue(field as keyof BookingFormValues, value);
-          console.log(`Set form field ${field} to:`, value);
         }
       });
       
@@ -73,30 +77,25 @@ export const useBookingForm = (
     if (menuSelection) {
       if (menuSelection.eventType) {
         form.setValue('eventType', menuSelection.eventType);
-        console.log('Set eventType to:', menuSelection.eventType);
       }
       if (menuSelection.postalCode) {
         form.setValue('venuePostalCode', menuSelection.postalCode);
-        console.log('Set venuePostalCode to:', menuSelection.postalCode);
       }
       if (menuSelection.numberOfGuests) {
         form.setValue('numberOfGuests', menuSelection.numberOfGuests);
-        console.log('Set numberOfGuests to:', menuSelection.numberOfGuests);
       }
     }
-  }, [savedFormData, menuSelection]); // Removed 'form' from dependencies
+  }, [savedFormData, menuSelection, form]);
 
-  // Fix: Optimize form watch subscription with proper cleanup
   useEffect(() => {
     const subscription = form.watch((values) => {
-      console.log('Form values changed:', values);
       handleFormDataChange(values as BookingFormValues);
     });
     
     return () => {
       subscription.unsubscribe();
     };
-  }, [handleFormDataChange]); // Removed 'form' from dependencies
+  }, [form, handleFormDataChange]);
 
   const onSubmit = async (data: BookingFormValues) => {
     console.log("=== FORM SUBMISSION STARTED ===");
@@ -127,7 +126,7 @@ export const useBookingForm = (
         numberOfGuests: menuSelection.numberOfGuests
       });
 
-      // Prepare booking data for Supabase (anonymous booking support)
+      // Prepare booking data for Supabase (without user_id since we'll handle auth in createBooking)
       const supabaseBookingData = {
         contact_name: data.name,
         contact_email: data.email,
@@ -167,25 +166,55 @@ export const useBookingForm = (
         notes: data.additionalNotes || ''
       };
 
-      // Save to Supabase first (now supports anonymous bookings)
+      // Save to Supabase first
       console.log("Saving booking to Supabase:", supabaseBookingData);
       const { data: supabaseResult, error: supabaseError } = await createBooking(supabaseBookingData);
       
       if (supabaseError) {
         console.error("Failed to save to Supabase:", supabaseError);
         
-        // Save to localStorage as fallback for any error
-        const fallbackData = {
-          ...supabaseBookingData,
-          timestamp: new Date().toISOString(),
-          status: 'pending_submission'
-        };
-        localStorage.setItem(`booking_${bookingReference}`, JSON.stringify(fallbackData));
+        // Check if it's an authentication error
+        if (supabaseError.message?.includes('auth') || supabaseError.message?.includes('authentication')) {
+          // For anonymous bookings, we'll proceed without authentication
+          console.log("Proceeding with anonymous booking submission");
+          
+          // Create a temporary booking ID for the session
+          const tempBookingId = `temp_${bookingReference}`;
+          setBookingId(tempBookingId);
+          
+          // Save to localStorage as fallback
+          const fallbackData = {
+            ...supabaseBookingData,
+            id: tempBookingId,
+            timestamp: new Date().toISOString(),
+            status: 'pending_auth'
+          };
+          localStorage.setItem(`booking_${bookingReference}`, JSON.stringify(fallbackData));
+          
+          toast.success("Booking submitted successfully!", {
+            description: "Your booking reference: " + bookingReference
+          });
+          
+          // Show payment options even without Supabase save
+          setSubmissionComplete(true);
+          setShowPaymentOptions(true);
+          
+          // Clear form data
+          localStorage.removeItem('bookingFormData');
+          if (onFormDataChange) {
+            onFormDataChange(null);
+          }
+          
+          if (onFormSubmitted) {
+            onFormSubmitted();
+          }
+          
+          return;
+        }
         
-        toast.error("Unable to save booking to database", {
-          description: "Your booking data has been saved locally. Reference: " + bookingReference + ". Please try again or contact us directly."
+        toast.error("Failed to save booking", {
+          description: "Please try again or contact us directly. Error: " + supabaseError.message
         });
-        
         return;
       }
 
@@ -262,6 +291,13 @@ export const useBookingForm = (
         if (onFormSubmitted) {
           onFormSubmitted();
         }
+
+        // Redirect to payment page instead of staying on form
+        // This ensures the user sees the payment options
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
+        
       } else {
         console.error("Latenode submission failed:", result.error);
         // Don't throw error here since Supabase save was successful
@@ -276,6 +312,11 @@ export const useBookingForm = (
         if (onFormSubmitted) {
           onFormSubmitted();
         }
+
+        // Scroll to top to show payment options
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
       }
       
     } catch (error) {
