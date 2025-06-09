@@ -1,3 +1,4 @@
+
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -12,7 +13,7 @@ export const useBookingForm = (menuSelection: any) => {
 
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingFormSchema),
-    mode: 'onBlur', // Changed from 'onChange' to prevent validation spam
+    mode: 'onBlur',
     defaultValues: {
       firstName: '',
       lastName: '',
@@ -54,7 +55,7 @@ export const useBookingForm = (menuSelection: any) => {
       }
     }
     initializationRef.current = true;
-  }, []); // Removed form from dependencies to prevent infinite loop
+  }, []);
 
   // Watch form changes with debouncing
   useEffect(() => {
