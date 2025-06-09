@@ -80,10 +80,36 @@ export const useBookingForm = (menuSelection: any) => {
     setSubmitError(null);
 
     try {
+      // Map form fields to database column names
       const bookingData = {
-        ...data,
-        menuSelection,
-        totalAmount: calculateTotal(menuSelection, data.numberOfGuests),
+        contact_name: data.name,
+        contact_email: data.email,
+        contact_phone: data.phone,
+        event_date: data.eventDate,
+        event_type: data.eventType,
+        number_of_guests: data.numberOfGuests,
+        venue_name: data.venueName,
+        venue_street_address: data.venueStreetAddress,
+        venue_city: data.venueCity,
+        venue_province: data.venueProvince,
+        venue_postal_code: data.venuePostalCode,
+        address_line1: data.addressLine1,
+        address_line2: data.addressLine2,
+        city: data.city,
+        province: data.province,
+        postal_code_address: data.postalCodeAddress,
+        referral_source: data.referralSource,
+        additional_notes: data.additionalNotes,
+        menu_selection: menuSelection,
+        total_price: calculateTotal(menuSelection, data.numberOfGuests),
+        menu_package: menuSelection?.menuPackage || '',
+        season: menuSelection?.season || '',
+        starters: menuSelection?.starters || '',
+        sides: menuSelection?.sides || '',
+        desserts: menuSelection?.desserts || '',
+        extras: menuSelection?.extras || '',
+        extra_salad_type: menuSelection?.extraSaladType || '',
+        notes: `Event Type: ${data.eventType}${data.additionalNotes ? '\n\nAdditional Notes: ' + data.additionalNotes : ''}`
       };
 
       const { data: result, error } = await createBooking(bookingData);
@@ -131,6 +157,5 @@ function debounce<T extends (...args: any[]) => any>(func: T, wait: number): T {
 }
 
 function calculateTotal(menuSelection: any, numberOfGuests: number): number {
-  // Add your pricing calculation logic here
-  return 0;
+  return menuSelection?.totalPrice || 0;
 }

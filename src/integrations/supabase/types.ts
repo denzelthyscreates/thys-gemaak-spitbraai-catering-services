@@ -32,6 +32,7 @@ export type Database = {
       }
       bookings: {
         Row: {
+          additional_notes: string | null
           contact_email: string
           contact_name: string
           contact_phone: string
@@ -53,6 +54,7 @@ export type Database = {
           venue_postal_code: string | null
         }
         Insert: {
+          additional_notes?: string | null
           contact_email: string
           contact_name: string
           contact_phone: string
@@ -74,6 +76,7 @@ export type Database = {
           venue_postal_code?: string | null
         }
         Update: {
+          additional_notes?: string | null
           contact_email?: string
           contact_name?: string
           contact_phone?: string
