@@ -117,7 +117,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     }
   };
 
-  // Check if date should be disabled (only blocked dates and weekends)
+  // Check if date should be disabled (only blocked dates and past dates)
   const isDateDisabled = (date: Date): boolean => {
     const dateStr = date.toISOString().split('T')[0];
     
@@ -127,9 +127,8 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     // Block past dates
     if (date < new Date()) return true;
     
-    // Block Sundays and Mondays
-    const dayOfWeek = date.getDay();
-    return dayOfWeek === 0 || dayOfWeek === 1;
+    // All days of the week are now available for booking
+    return false;
   };
 
   if (isLoading) {

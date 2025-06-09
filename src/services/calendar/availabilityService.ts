@@ -47,9 +47,8 @@ export class AvailabilityService {
       .single();
 
     if (error || !data) {
-      // If no data exists for this date, check if it's a blocked day (weekend, etc.)
-      const dayOfWeek = date.getDay();
-      return !(dayOfWeek === 0 || dayOfWeek === 1); // Block Sundays and Mondays by default
+      // All days are now available for booking by default
+      return true;
     }
 
     return data.is_available && data.booked_events < data.max_events;
