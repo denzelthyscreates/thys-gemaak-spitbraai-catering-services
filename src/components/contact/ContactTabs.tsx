@@ -1,34 +1,51 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MenuBuilder from '../MenuBuilder';
 import BookingForm from '../booking/BookingForm';
 import { Badge } from "@/components/ui/badge";
 
 interface ContactTabsProps {
-  activeTab: string;
-  menuSelection: any;
-  bookingFormData: any;
-  onMenuSelectionChange: (selection: any) => void;
-  onTabChange: (value: string) => void;
-  onNavigateTab: (tabValue: string) => void;
-  onBookingFormDataChange: (data: any) => void;
-  onBookingSubmitted: () => void;
+  initialMenuSelection?: any;
 }
 
 const ContactTabs: React.FC<ContactTabsProps> = ({
-  activeTab,
-  menuSelection,
-  bookingFormData,
-  onMenuSelectionChange,
-  onTabChange,
-  onNavigateTab,
-  onBookingFormDataChange,
-  onBookingSubmitted
+  initialMenuSelection
 }) => {
+  const [activeTab, setActiveTab] = useState('menu');
+  const [menuSelection, setMenuSelection] = useState<any>(initialMenuSelection || null);
+  const [bookingFormData, setBookingFormData] = useState<any>(null);
+
+  // If we have an initial menu selection, start on the booking tab
+  useEffect(() => {
+    if (initialMenuSelection) {
+      setActiveTab('book');
+    }
+  }, [initialMenuSelection]);
+
+  const handleMenuSelectionChange = (selection: any) => {
+    setMenuSelection(selection);
+  };
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
+
+  const handleNavigateTab = (tabValue: string) => {
+    setActiveTab(tabValue);
+  };
+
+  const handleBookingFormDataChange = (data: any) => {
+    setBookingFormData(data);
+  };
+
+  const handleBookingSubmitted = () => {
+    // Handle successful booking submission
+    console.log('Booking submitted successfully');
+  };
 
   return (
-    <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
+    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
       <TabsList className="grid w-full grid-cols-2 mb-8">
         <TabsTrigger value="menu">
           Build Your Menu
@@ -45,9 +62,9 @@ const ContactTabs: React.FC<ContactTabsProps> = ({
       
       <TabsContent value="menu" className="px-1">
         <MenuBuilder 
-          onSelectionChange={onMenuSelectionChange} 
+          onSelectionChange={handleMenuSelectionChange} 
           initialSelection={menuSelection}
-          onNavigateTab={onNavigateTab}
+          onNavigateTab={handleNavigateTab}
         />
       </TabsContent>
       
@@ -55,9 +72,9 @@ const ContactTabs: React.FC<ContactTabsProps> = ({
         <BookingForm 
           menuSelection={menuSelection}
           savedFormData={bookingFormData}
-          onFormDataChange={onBookingFormDataChange}
-          onFormSubmitted={onBookingSubmitted}
-          onNavigateTab={onNavigateTab}
+          onFormDataChange={handleBookingFormDataChange}
+          onFormSubmitted={handleBookingSubmitted}
+          onNavigateTab={handleNavigateTab}
         />
       </TabsContent>
     </Tabs>
