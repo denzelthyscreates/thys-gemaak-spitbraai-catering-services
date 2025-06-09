@@ -26,7 +26,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     showPaymentOptions,
     bookingId,
     onSubmit
-  } = useBookingForm(menuSelection, savedFormData, onFormDataChange, onFormSubmitted);
+  } = useBookingForm(menuSelection);
 
   // Show payment page after successful submission
   if (submissionComplete && showPaymentOptions) {

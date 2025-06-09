@@ -2,38 +2,46 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { BookingFormData, bookingFormSchema } from '../types';
+import { BookingFormValues, bookingFormSchema } from '../types';
 import { createBooking } from '../../../lib/supabase';
 
 export const useBookingForm = (menuSelection: any) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submissionComplete, setSubmissionComplete] = useState(false);
+  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
+  const [bookingId, setBookingId] = useState<string | null>(null);
   const initializationRef = useRef(false);
 
-  const form = useForm<BookingFormData>({
+  const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
     mode: 'onBlur',
     defaultValues: {
-      firstName: '',
-      lastName: '',
+      name: '',
       email: '',
       phone: '',
-      address: '',
-      city: '',
-      postalCode: '',
-      province: '',
-      eventDate: '',
-      eventTime: '',
+      eventDate: undefined,
+      eventType: '',
       numberOfGuests: 50,
-      venue: '',
-      specialRequests: '',
+      venueName: '',
+      venueStreetAddress: '',
+      venueCity: '',
+      venueProvince: '',
+      venuePostalCode: '',
+      addressLine1: '',
+      addressLine2: '',
+      city: '',
+      province: '',
+      postalCodeAddress: '',
+      referralSource: '',
+      additionalNotes: '',
     },
   });
 
   // Debounced form data change handler
   const handleFormDataChange = useCallback(
-    debounce((data: BookingFormData) => {
+    debounce((data: BookingFormValues) => {
       if (initializationRef.current) {
         localStorage.setItem('bookingFormData', JSON.stringify(data));
       }
@@ -48,7 +56,7 @@ export const useBookingForm = (menuSelection: any) => {
       try {
         const parsedData = JSON.parse(savedData);
         Object.keys(parsedData).forEach((key) => {
-          form.setValue(key as keyof BookingFormData, parsedData[key], { shouldDirty: false });
+          form.setValue(key as keyof BookingFormValues, parsedData[key], { shouldDirty: false });
         });
       } catch (error) {
         console.error('Error loading saved form data:', error);
@@ -60,10 +68,14 @@ export const useBookingForm = (menuSelection: any) => {
   // Watch form changes with debouncing
   useEffect(() => {
     const subscription = form.watch(handleFormDataChange);
-    return () => subscription.unsubscribe();
+    return () => {
+      if (subscription && typeof subscription.unsubscribe === 'function') {
+        subscription.unsubscribe();
+      }
+    };
   }, [handleFormDataChange]);
 
-  const onSubmit = async (data: BookingFormData) => {
+  const onSubmit = async (data: BookingFormValues) => {
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -74,8 +86,11 @@ export const useBookingForm = (menuSelection: any) => {
         totalAmount: calculateTotal(menuSelection, data.numberOfGuests),
       };
 
-      await createBooking(bookingData);
+      const result = await createBooking(bookingData);
       setIsSubmitted(true);
+      setSubmissionComplete(true);
+      setShowPaymentOptions(true);
+      setBookingId(result.id);
       localStorage.removeItem('bookingFormData');
       
       // Scroll to top to show success message
@@ -95,6 +110,9 @@ export const useBookingForm = (menuSelection: any) => {
     isSubmitting,
     submitError,
     isSubmitted,
+    submissionComplete,
+    showPaymentOptions,
+    bookingId,
   };
 };
 
