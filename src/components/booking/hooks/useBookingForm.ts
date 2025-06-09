@@ -86,11 +86,16 @@ export const useBookingForm = (menuSelection: any) => {
         totalAmount: calculateTotal(menuSelection, data.numberOfGuests),
       };
 
-      const result = await createBooking(bookingData);
+      const { data: result, error } = await createBooking(bookingData);
+      
+      if (error) {
+        throw error;
+      }
+      
       setIsSubmitted(true);
       setSubmissionComplete(true);
       setShowPaymentOptions(true);
-      setBookingId(result.id);
+      setBookingId(result?.id || null);
       localStorage.removeItem('bookingFormData');
       
       // Scroll to top to show success message
