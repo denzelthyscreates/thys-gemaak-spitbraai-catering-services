@@ -47,6 +47,7 @@ export type Database = {
           extras: string | null
           id: string
           menu_package: string
+          menu_selection: Json | null
           notes: string
           number_of_guests: number
           postal_code_address: string | null
@@ -80,6 +81,7 @@ export type Database = {
           extras?: string | null
           id?: string
           menu_package: string
+          menu_selection?: Json | null
           notes: string
           number_of_guests: number
           postal_code_address?: string | null
@@ -113,6 +115,7 @@ export type Database = {
           extras?: string | null
           id?: string
           menu_package?: string
+          menu_selection?: Json | null
           notes?: string
           number_of_guests?: number
           postal_code_address?: string | null
