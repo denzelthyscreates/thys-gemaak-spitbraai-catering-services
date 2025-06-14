@@ -80,13 +80,19 @@ export const useBookingForm = (menuSelection: any) => {
     setSubmitError(null);
 
     try {
+      console.log('Form data received:', data);
+      console.log('Menu selection:', menuSelection);
+      
+      // Ensure event date is properly formatted
+      const eventDate = data.eventDate ? data.eventDate.toISOString() : null;
+      
       // Map form fields to database column names
       const bookingData = {
         contact_name: data.name,
         contact_email: data.email,
         contact_phone: data.phone,
-        event_date: data.eventDate,
-        event_type: data.eventType,
+        event_date: eventDate,
+        event_type: data.eventType || menuSelection?.eventType || '',
         number_of_guests: data.numberOfGuests,
         venue_name: data.venueName,
         venue_street_address: data.venueStreetAddress,
@@ -94,12 +100,12 @@ export const useBookingForm = (menuSelection: any) => {
         venue_province: data.venueProvince,
         venue_postal_code: data.venuePostalCode,
         address_line1: data.addressLine1,
-        address_line2: data.addressLine2,
+        address_line2: data.addressLine2 || '',
         city: data.city,
         province: data.province,
         postal_code_address: data.postalCodeAddress,
-        referral_source: data.referralSource,
-        additional_notes: data.additionalNotes,
+        referral_source: data.referralSource || '',
+        additional_notes: data.additionalNotes || '',
         menu_selection: menuSelection,
         total_price: calculateTotal(menuSelection, data.numberOfGuests),
         menu_package: menuSelection?.menuPackage || '',
@@ -109,14 +115,20 @@ export const useBookingForm = (menuSelection: any) => {
         desserts: menuSelection?.desserts || '',
         extras: menuSelection?.extras || '',
         extra_salad_type: menuSelection?.extraSaladType || '',
-        notes: `Event Type: ${data.eventType}${data.additionalNotes ? '\n\nAdditional Notes: ' + data.additionalNotes : ''}`
+        notes: `Event Type: ${data.eventType || menuSelection?.eventType || ''}${data.additionalNotes ? '\n\nAdditional Notes: ' + data.additionalNotes : ''}`,
+        status: 'pending'
       };
+
+      console.log('Final booking data to be sent:', bookingData);
 
       const { data: result, error } = await createBooking(bookingData);
       
       if (error) {
+        console.error('Supabase error details:', error);
         throw error;
       }
+      
+      console.log('Booking created successfully:', result);
       
       setIsSubmitted(true);
       setSubmissionComplete(true);
