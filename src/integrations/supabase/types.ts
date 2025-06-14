@@ -33,69 +33,102 @@ export type Database = {
       bookings: {
         Row: {
           additional_notes: string | null
+          address_line1: string | null
+          address_line2: string | null
+          city: string | null
           contact_email: string
           contact_name: string
           contact_phone: string
           created_at: string
           desserts: string | null
           event_date: string | null
+          event_type: string | null
           extra_salad_type: string | null
           extras: string | null
           id: string
           menu_package: string
           notes: string
           number_of_guests: number
+          postal_code_address: string | null
+          province: string | null
+          referral_source: string | null
           season: string | null
           sides: string | null
           starters: string | null
           status: string
           total_price: number
           user_id: string | null
+          venue_city: string | null
+          venue_name: string | null
           venue_postal_code: string | null
+          venue_province: string | null
+          venue_street_address: string | null
         }
         Insert: {
           additional_notes?: string | null
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
           contact_email: string
           contact_name: string
           contact_phone: string
           created_at?: string
           desserts?: string | null
           event_date?: string | null
+          event_type?: string | null
           extra_salad_type?: string | null
           extras?: string | null
           id?: string
           menu_package: string
           notes: string
           number_of_guests: number
+          postal_code_address?: string | null
+          province?: string | null
+          referral_source?: string | null
           season?: string | null
           sides?: string | null
           starters?: string | null
           status?: string
           total_price: number
           user_id?: string | null
+          venue_city?: string | null
+          venue_name?: string | null
           venue_postal_code?: string | null
+          venue_province?: string | null
+          venue_street_address?: string | null
         }
         Update: {
           additional_notes?: string | null
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
           contact_email?: string
           contact_name?: string
           contact_phone?: string
           created_at?: string
           desserts?: string | null
           event_date?: string | null
+          event_type?: string | null
           extra_salad_type?: string | null
           extras?: string | null
           id?: string
           menu_package?: string
           notes?: string
           number_of_guests?: number
+          postal_code_address?: string | null
+          province?: string | null
+          referral_source?: string | null
           season?: string | null
           sides?: string | null
           starters?: string | null
           status?: string
           total_price?: number
           user_id?: string | null
+          venue_city?: string | null
+          venue_name?: string | null
           venue_postal_code?: string | null
+          venue_province?: string | null
+          venue_street_address?: string | null
         }
         Relationships: []
       }
