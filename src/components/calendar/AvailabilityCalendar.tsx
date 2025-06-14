@@ -29,7 +29,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   const [isSyncing, setIsSyncing] = useState(false);
   const [dateConflictInfo, setDateConflictInfo] = useState<DateConflictInfo | null>(null);
 
-  // Load availability data
+  // Load availability data and sync status
   const loadAvailability = async () => {
     try {
       const startDate = new Date();
@@ -45,6 +45,14 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
         setAvailability(availabilityData);
         setBlockedDates(blockedDatesData);
+
+        // Load sync status to show when last sync occurred
+        try {
+          const statusData = await CalendarAvailabilityService.getSyncStatus();
+          setSyncStatus(statusData);
+        } catch (syncError) {
+          console.log('Sync status not available:', syncError);
+        }
       } catch (error) {
         console.log('Availability service not available, using default calendar');
         // Set empty arrays as fallback
@@ -86,9 +94,29 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     }
   };
 
-  // Handle sync with Google Calendar (disabled for anonymous users)
+  // Handle sync with Google Calendar (now enabled for all users)
   const handleSync = async () => {
-    toast.error('Calendar sync is only available for authenticated users');
+    setIsSyncing(true);
+    
+    try {
+      toast.info('Starting Google Calendar sync...');
+      
+      const result = await CalendarAvailabilityService.syncWithGoogleCalendar();
+      
+      if (result.success) {
+        toast.success(`Calendar synced successfully! ${result.message || 'Events updated'}`);
+        
+        // Reload availability data to show updated information
+        await loadAvailability();
+      } else {
+        toast.error(`Sync failed: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Sync error:', error);
+      toast.error('Failed to sync calendar. Please check your connection.');
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   // Check if date should be disabled (only blocked dates and past dates)
@@ -109,7 +137,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     return (
       <Card className={className}>
         <CardHeader>
-          <CalendarHeader onSync={handleSync} isSyncing={false} />
+          <CalendarHeader onSync={handleSync} isSyncing={isSyncing} />
         </CardHeader>
       </Card>
     );
@@ -124,6 +152,9 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Show sync status for all users */}
+        <SyncStatusDisplay syncStatus={syncStatus} />
+
         <Calendar
           mode="single"
           selected={selectedDate}
