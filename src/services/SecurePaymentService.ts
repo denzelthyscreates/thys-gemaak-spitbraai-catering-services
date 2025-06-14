@@ -27,13 +27,33 @@ export const generateSecurePayment = async (
   request: SecurePaymentRequest
 ): Promise<PaymentFormResponse> => {
   try {
+    console.log('Calling PayFast payment function with:', request);
+    
     const { data, error } = await supabase.functions.invoke('payfast-payment', {
       body: request,
     });
 
+    console.log('PayFast payment function response:', { data, error });
+
     if (error) {
       console.error('Payment generation error:', error);
-      throw new Error('Failed to generate payment form');
+      return {
+        success: false,
+        formData: {},
+        paymentUrl: '',
+        error: error.message || 'Failed to generate payment form'
+      };
+    }
+
+    // Check if the response indicates failure
+    if (!data || !data.success) {
+      console.error('Payment generation failed:', data);
+      return {
+        success: false,
+        formData: {},
+        paymentUrl: '',
+        error: data?.error || 'Payment processing failed'
+      };
     }
 
     return data;
@@ -61,7 +81,22 @@ export const generateSecurePayNow = async (
 
     if (error) {
       console.error('PayNow generation error:', error);
-      throw new Error('Failed to generate PayNow form');
+      return {
+        success: false,
+        formData: {},
+        paymentUrl: '',
+        error: error.message || 'Failed to generate PayNow form'
+      };
+    }
+
+    // Check if the response indicates failure
+    if (!data || !data.success) {
+      return {
+        success: false,
+        formData: {},
+        paymentUrl: '',
+        error: data?.error || 'PayNow processing failed'
+      };
     }
 
     return data;

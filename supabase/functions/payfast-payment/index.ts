@@ -53,6 +53,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('PayFast payment function called');
+    
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -63,25 +65,45 @@ serve(async (req) => {
     const merchantKey = Deno.env.get('PAYFAST_MERCHANT_KEY');
     const passphrase = Deno.env.get('PAYFAST_PASSPHRASE');
 
+    console.log('PayFast credentials check:', {
+      merchantId: merchantId ? 'Present' : 'Missing',
+      merchantKey: merchantKey ? 'Present' : 'Missing',
+      passphrase: passphrase ? 'Present' : 'Missing'
+    });
+
     if (!merchantId || !merchantKey) {
       console.error('PayFast credentials not configured');
       return new Response(
-        JSON.stringify({ error: 'Payment service not configured' }),
+        JSON.stringify({ 
+          success: false,
+          error: 'Payment service not configured',
+          formData: {},
+          paymentUrl: ''
+        }),
         { 
-          status: 500, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
     }
 
-    const { amount, paymentType, bookingData }: PaymentRequest = await req.json();
+    const requestBody = await req.json();
+    console.log('Request body:', requestBody);
+    
+    const { amount, paymentType, bookingData }: PaymentRequest = requestBody;
 
     // Validate input
     if (!amount || amount < 5 || !paymentType || !bookingData) {
+      console.error('Invalid payment request:', { amount, paymentType, bookingData });
       return new Response(
-        JSON.stringify({ error: 'Invalid payment request' }),
+        JSON.stringify({ 
+          success: false,
+          error: 'Invalid payment request',
+          formData: {},
+          paymentUrl: ''
+        }),
         { 
-          status: 400, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
@@ -147,17 +169,25 @@ serve(async (req) => {
 
     // Generate signature if passphrase is available
     if (passphrase) {
-      formData.signature = await generateSignature(formData, passphrase);
+      try {
+        formData.signature = await generateSignature(formData, passphrase);
+        console.log('Signature generated successfully');
+      } catch (error) {
+        console.error('Error generating signature:', error);
+        // Continue without signature if there's an error
+      }
     }
 
     console.log('Generated secure payment form for amount:', amount, 'type:', paymentType);
 
+    const response = {
+      success: true, 
+      formData,
+      paymentUrl: 'https://www.payfast.co.za/eng/process'
+    };
+
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        formData,
-        paymentUrl: 'https://www.payfast.co.za/eng/process'
-      }),
+      JSON.stringify(response),
       { 
         status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -167,9 +197,14 @@ serve(async (req) => {
   } catch (error) {
     console.error('Payment processing error:', error);
     return new Response(
-      JSON.stringify({ error: 'Payment processing failed' }),
+      JSON.stringify({ 
+        success: false,
+        error: 'Payment processing failed',
+        formData: {},
+        paymentUrl: ''
+      }),
       { 
-        status: 500, 
+        status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );
