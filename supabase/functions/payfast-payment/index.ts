@@ -19,11 +19,11 @@ interface PaymentRequest {
   };
 }
 
-// Generate MD5 hash for PayFast signature
-async function generateMD5(data: string): Promise<string> {
+// Generate SHA-256 hash for PayFast signature
+async function generateSHA256(data: string): Promise<string> {
   const encoder = new TextEncoder();
   const dataBuffer = encoder.encode(data);
-  const hashBuffer = await crypto.subtle.digest('MD5', dataBuffer);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
@@ -43,7 +43,7 @@ async function generateSignature(formData: Record<string, string>, passphrase: s
   // Add passphrase if provided
   const finalString = passphrase ? `${paramString}&passphrase=${encodeURIComponent(passphrase)}` : paramString;
   
-  return await generateMD5(finalString);
+  return await generateSHA256(finalString);
 }
 
 serve(async (req) => {
