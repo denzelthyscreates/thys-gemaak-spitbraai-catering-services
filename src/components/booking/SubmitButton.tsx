@@ -13,9 +13,11 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({ isSubmitting, menuSelection
     
     if (!menuSelection) {
       console.warn("No menu selection available");
+      e.preventDefault();
       return;
     }
     
+    console.log("Form submission proceeding...");
     // Let the form handle the actual submission
   };
 
