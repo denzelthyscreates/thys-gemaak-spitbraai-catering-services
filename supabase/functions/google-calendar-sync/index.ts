@@ -72,17 +72,38 @@ serve(async (req) => {
       iat: now
     };
 
-    // Import the private key with better error handling
+    // Import the private key with improved error handling
     let privateKey;
     try {
-      const privateKeyString = serviceAccount.private_key.replace(/\\n/g, '\n');
+      // Clean up the private key string
+      let privateKeyString = serviceAccount.private_key;
       
-      // Remove any extra whitespace or formatting issues
-      const cleanPrivateKey = privateKeyString.trim();
+      // Handle escaped newlines
+      privateKeyString = privateKeyString.replace(/\\n/g, '\n');
+      
+      // Ensure proper PEM format
+      if (!privateKeyString.includes('-----BEGIN PRIVATE KEY-----')) {
+        throw new Error('Private key must be in PEM format with proper headers');
+      }
+      
+      // Convert PEM to DER format for Web Crypto API
+      const pemHeader = '-----BEGIN PRIVATE KEY-----';
+      const pemFooter = '-----END PRIVATE KEY-----';
+      const pemContents = privateKeyString
+        .replace(pemHeader, '')
+        .replace(pemFooter, '')
+        .replace(/\s+/g, '');
+      
+      // Decode base64 to get DER format
+      const binaryDerString = atob(pemContents);
+      const binaryDer = new Uint8Array(binaryDerString.length);
+      for (let i = 0; i < binaryDerString.length; i++) {
+        binaryDer[i] = binaryDerString.charCodeAt(i);
+      }
       
       privateKey = await crypto.subtle.importKey(
         "pkcs8",
-        new TextEncoder().encode(cleanPrivateKey),
+        binaryDer,
         {
           name: "RSASSA-PKCS1-v1_5",
           hash: "SHA-256",
@@ -93,7 +114,7 @@ serve(async (req) => {
       console.log('Private key imported successfully');
     } catch (keyError) {
       console.error('Failed to import private key:', keyError.message);
-      throw new Error('Invalid private key format in service account key');
+      throw new Error(`Invalid private key format: ${keyError.message}`);
     }
 
     const jwt = await create({ alg: "RS256", typ: "JWT" }, jwtPayload, privateKey);
