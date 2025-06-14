@@ -32,8 +32,6 @@ type BookingFormData = z.infer<typeof bookingSchema>;
 export const useBookingForm = (menuSelection: any) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionComplete, setSubmissionComplete] = useState(false);
-  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
-  const [bookingId, setBookingId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const form = useForm<BookingFormData>({
@@ -119,7 +117,9 @@ export const useBookingForm = (menuSelection: any) => {
         extra_salad_type: menuSelection.extraSaladType || null,
         menu_selection: menuSelection,
         status: 'pending',
-        notes: `Travel Fee: R${menuSelection.travelFee || 0}, Area: ${menuSelection.areaName || 'Unknown'}`
+        notes: `Travel Fee: R${menuSelection.travelFee || 0}, Area: ${menuSelection.areaName || 'Unknown'}`,
+        // Remove user_id completely - this is now an anonymous booking system
+        user_id: null
       };
 
       console.log('📤 Booking data prepared for database:', bookingData);
@@ -136,16 +136,17 @@ export const useBookingForm = (menuSelection: any) => {
       }
 
       console.log('✅ Booking created successfully in database:', booking);
-      setBookingId(booking.id);
       setSubmissionComplete(true);
-      setShowPaymentOptions(true);
-      console.log('🎉 Booking process completed, showing payment options');
+      console.log('🎉 Booking submission completed successfully');
 
       toast({
-        title: "Booking Submitted!",
-        description: "Your booking has been submitted successfully. Please proceed with payment.",
+        title: "Booking Submitted Successfully!",
+        description: "Thank you for your booking. We will contact you soon to confirm the details.",
         duration: 5000
       });
+
+      // Reset form after successful submission
+      form.reset();
 
     } catch (error) {
       console.error('❌ BOOKING SUBMISSION ERROR:', error);
@@ -171,8 +172,6 @@ export const useBookingForm = (menuSelection: any) => {
     form,
     isSubmitting,
     submissionComplete,
-    showPaymentOptions,
-    bookingId,
     onSubmit
   };
 };
