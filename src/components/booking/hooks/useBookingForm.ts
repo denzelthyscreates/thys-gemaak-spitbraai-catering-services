@@ -106,7 +106,7 @@ export const useBookingForm = (menuSelection: any) => {
         postal_code_address: data.postalCodeAddress,
         referral_source: data.referralSource || '',
         additional_notes: data.additionalNotes || '',
-        menu_selection: menuSelection,
+        menu_selection: JSON.stringify(menuSelection), // Serialize the menu selection as JSON
         total_price: calculateTotal(menuSelection, data.numberOfGuests),
         menu_package: menuSelection?.menuPackage || '',
         season: menuSelection?.season || '',
