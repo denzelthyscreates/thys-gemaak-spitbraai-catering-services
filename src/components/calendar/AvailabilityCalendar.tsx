@@ -4,7 +4,6 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { CalendarAvailabilityService, AvailabilityData, SyncStatus, DateConflictInfo } from '@/services/calendar';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/auth';
 import CalendarHeader from './CalendarHeader';
 import SyncStatusDisplay from './SyncStatusDisplay';
 import SelectedDateInfo from './SelectedDateInfo';
@@ -29,7 +28,6 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [dateConflictInfo, setDateConflictInfo] = useState<DateConflictInfo | null>(null);
-  const { user, supabaseReady } = useAuth();
 
   // Load availability data
   const loadAvailability = async () => {
@@ -38,8 +36,8 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
       const endDate = new Date();
       endDate.setDate(startDate.getDate() + 90);
 
-      // Only load availability data if we have a proper Supabase connection
-      if (supabaseReady) {
+      // Load basic availability data (no authentication required)
+      try {
         const [availabilityData, blockedDatesData] = await Promise.all([
           CalendarAvailabilityService.getAvailability(startDate, endDate),
           CalendarAvailabilityService.getBlockedDates()
@@ -47,16 +45,11 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
         setAvailability(availabilityData);
         setBlockedDates(blockedDatesData);
-
-        // Only try to get sync status if user is authenticated
-        if (user) {
-          try {
-            const statusData = await CalendarAvailabilityService.getSyncStatus();
-            setSyncStatus(statusData);
-          } catch (syncError) {
-            console.log('Sync status not available (user not authenticated)');
-          }
-        }
+      } catch (error) {
+        console.log('Availability service not available, using default calendar');
+        // Set empty arrays as fallback
+        setAvailability([]);
+        setBlockedDates([]);
       }
     } catch (error) {
       console.error('Error loading availability:', error);
@@ -68,7 +61,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
   useEffect(() => {
     loadAvailability();
-  }, [user, supabaseReady]);
+  }, []);
 
   // Check for area-based conflicts when date is selected
   useEffect(() => {
@@ -93,28 +86,9 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     }
   };
 
-  // Handle sync with Google Calendar
+  // Handle sync with Google Calendar (disabled for anonymous users)
   const handleSync = async () => {
-    if (!user) {
-      toast.error('Please sign in to sync calendar');
-      return;
-    }
-
-    setIsSyncing(true);
-    try {
-      const result = await CalendarAvailabilityService.syncWithGoogleCalendar();
-      
-      if (result.success) {
-        toast.success('Calendar synced successfully!');
-        loadAvailability(); // Reload data
-      } else {
-        toast.error(result.message);
-      }
-    } catch (error) {
-      toast.error('Failed to sync calendar');
-    } finally {
-      setIsSyncing(false);
-    }
+    toast.error('Calendar sync is only available for authenticated users');
   };
 
   // Check if date should be disabled (only blocked dates and past dates)
@@ -150,8 +124,6 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {user && <SyncStatusDisplay syncStatus={syncStatus} />}
-
         <Calendar
           mode="single"
           selected={selectedDate}
