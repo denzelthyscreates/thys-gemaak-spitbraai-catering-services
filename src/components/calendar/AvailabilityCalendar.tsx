@@ -1,13 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { CalendarAvailabilityService, AvailabilityData, SyncStatus, DateConflictInfo } from '@/services/calendar';
 import { toast } from 'sonner';
 import CalendarHeader from './CalendarHeader';
-import SyncStatusDisplay from './SyncStatusDisplay';
 import SelectedDateInfo from './SelectedDateInfo';
 import CalendarLegend from './CalendarLegend';
-import BookedDatesDisplay from './BookedDatesDisplay';
 
 interface AvailabilityCalendarProps {
   selectedDate?: Date;
@@ -28,7 +27,6 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [dateConflictInfo, setDateConflictInfo] = useState<DateConflictInfo | null>(null);
-  const [showBookedDates, setShowBookedDates] = useState(false);
 
   // Load availability data and sync status
   const loadAvailability = async () => {
@@ -98,7 +96,6 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   // Handle sync with Google Calendar (now enabled for all users)
   const handleSync = async () => {
     setIsSyncing(true);
-    setShowBookedDates(false); // Hide previous results
     
     try {
       toast.info('Starting Google Calendar sync...');
@@ -110,14 +107,6 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
         
         // Reload availability data to show updated information
         await loadAvailability();
-        
-        // Show the booked dates after successful sync
-        setShowBookedDates(true);
-        
-        // Auto-hide the booked dates after 30 seconds
-        setTimeout(() => {
-          setShowBookedDates(false);
-        }, 30000);
       } else {
         toast.error(`Sync failed: ${result.message}`);
       }
@@ -162,12 +151,6 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Show sync status for all users */}
-        <SyncStatusDisplay syncStatus={syncStatus} />
-
-        {/* Show booked dates after sync */}
-        <BookedDatesDisplay availability={availability} isVisible={showBookedDates} />
-
         <Calendar
           mode="single"
           selected={selectedDate}
