@@ -10,9 +10,7 @@ import BillingSection from './BillingSection';
 import MenuSummary from './MenuSummary';
 import AdditionalNotesSection from './AdditionalNotesSection';
 import SubmitButton from './SubmitButton';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import BookingSummary from './BookingSummary';
 
 const BookingForm: React.FC<BookingFormProps> = ({ 
   menuSelection, 
@@ -25,49 +23,17 @@ const BookingForm: React.FC<BookingFormProps> = ({
     form,
     isSubmitting,
     submissionComplete,
+    bookingResult,
     onSubmit
   } = useBookingForm(menuSelection);
 
-  // Show success message after successful submission
-  if (submissionComplete) {
+  // Show booking summary after successful submission
+  if (submissionComplete && bookingResult) {
     return (
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <CheckCircle className="h-16 w-16 text-green-500" />
-          </div>
-          <CardTitle className="text-2xl font-serif text-green-700">
-            Booking Submitted Successfully!
-          </CardTitle>
-          <CardDescription className="text-lg">
-            Thank you for your booking request. We have received all your details.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="text-center space-y-4">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <p className="text-green-800 font-medium mb-2">What happens next?</p>
-            <ul className="text-green-700 text-sm space-y-1">
-              <li>• We will review your booking details</li>
-              <li>• You'll receive a confirmation email within 24-48 hours</li>
-              <li>• We'll contact you to finalize the arrangements</li>
-            </ul>
-          </div>
-          
-          <p className="text-muted-foreground">
-            If you have any questions, please contact us at{' '}
-            <a href="mailto:spitbookings@thysgemaak.com" className="text-primary hover:underline">
-              spitbookings@thysgemaak.com
-            </a>
-          </p>
-          
-          <Button 
-            onClick={() => window.location.reload()} 
-            className="mt-6"
-          >
-            Make Another Booking
-          </Button>
-        </CardContent>
-      </Card>
+      <BookingSummary 
+        bookingData={bookingResult.bookingData}
+        bookingId={bookingResult.booking.id}
+      />
     );
   }
 

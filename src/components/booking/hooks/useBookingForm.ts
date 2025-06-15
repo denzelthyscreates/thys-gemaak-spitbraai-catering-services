@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getCurrentSouthAfricaTime } from '@/utils/dateUtils';
 
 const bookingSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
@@ -32,6 +33,7 @@ type BookingFormData = z.infer<typeof bookingSchema>;
 export const useBookingForm = (menuSelection: any) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionComplete, setSubmissionComplete] = useState(false);
+  const [bookingResult, setBookingResult] = useState<any>(null);
   const { toast } = useToast();
 
   const form = useForm<BookingFormData>({
@@ -88,11 +90,15 @@ export const useBookingForm = (menuSelection: any) => {
     try {
       console.log('📝 Preparing booking data for database insertion...');
       
+      // Convert event date to South Africa time before storing
+      const eventDateSouthAfrica = new Date(data.eventDate);
+      eventDateSouthAfrica.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
+      
       const bookingData = {
         contact_name: data.name,
         contact_email: data.email,
         contact_phone: data.phone,
-        event_date: data.eventDate.toISOString(),
+        event_date: eventDateSouthAfrica.toISOString(),
         venue_name: data.venueName,
         venue_street_address: data.venueStreetAddress,
         venue_city: data.venueCity,
@@ -118,8 +124,9 @@ export const useBookingForm = (menuSelection: any) => {
         menu_selection: menuSelection,
         status: 'pending',
         notes: `Travel Fee: R${menuSelection.travelFee || 0}, Area: ${menuSelection.areaName || 'Unknown'}`,
-        // Remove user_id completely - this is now an anonymous booking system
-        user_id: null
+        user_id: null,
+        created_at: getCurrentSouthAfricaTime(),
+        updated_at: getCurrentSouthAfricaTime()
       };
 
       console.log('📤 Booking data prepared for database:', bookingData);
@@ -136,6 +143,7 @@ export const useBookingForm = (menuSelection: any) => {
       }
 
       console.log('✅ Booking created successfully in database:', booking);
+      setBookingResult({ booking, bookingData });
       setSubmissionComplete(true);
       console.log('🎉 Booking submission completed successfully');
 
@@ -172,6 +180,7 @@ export const useBookingForm = (menuSelection: any) => {
     form,
     isSubmitting,
     submissionComplete,
+    bookingResult,
     onSubmit
   };
 };

@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { SyncStatus } from './types';
+import { formatSouthAfricaDateTime } from '@/utils/dateUtils';
 
 /**
  * Service for Google Calendar synchronization
@@ -26,7 +27,7 @@ export class SyncService {
   }
 
   /**
-   * Get sync status
+   * Get sync status with proper South Africa timezone conversion
    */
   static async getSyncStatus(): Promise<SyncStatus | null> {
     const { data, error } = await supabase
@@ -44,7 +45,9 @@ export class SyncService {
       lastSync: data.last_sync,
       status: data.sync_status as 'success' | 'error' | 'pending',
       errorMessage: data.error_message,
-      eventsSynced: data.events_synced
+      eventsSynced: data.events_synced,
+      // Add formatted South Africa time for display
+      lastSyncSouthAfrica: data.last_sync ? formatSouthAfricaDateTime(data.last_sync, 'yyyy-MM-dd HH:mm:ss') : null
     };
   }
 }
