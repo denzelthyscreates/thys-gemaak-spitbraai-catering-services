@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Download, Mail } from 'lucide-react';
+import { Download, Mail, Loader2 } from 'lucide-react';
 import { formatSouthAfricaDateTime } from '@/utils/dateUtils';
-import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface BookingSummaryProps {
   bookingData: {
@@ -39,6 +40,8 @@ interface BookingSummaryProps {
 }
 
 const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId }) => {
+  const [isEmailSending, setIsEmailSending] = useState(false);
+  const { toast } = useToast();
   const menuSelection = bookingData.menu_selection;
   const totalAmount = menuSelection?.travelFee 
     ? (bookingData.total_price * bookingData.number_of_guests) + menuSelection.travelFee
@@ -57,11 +60,35 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
     URL.revokeObjectURL(url);
   };
 
-  const handleEmailSummary = () => {
-    const summaryContent = generateSummaryText();
-    const subject = `Spitbraai Booking Summary - ${bookingId}`;
-    const body = encodeURIComponent(summaryContent);
-    window.open(`mailto:${bookingData.contact_email}?subject=${subject}&body=${body}`);
+  const handleEmailSummary = async () => {
+    setIsEmailSending(true);
+    try {
+      const { error } = await supabase.functions.invoke('send-booking-summary', {
+        body: {
+          bookingData,
+          bookingId
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Email Sent Successfully!",
+        description: `Booking summary has been sent to ${bookingData.contact_email}`,
+        duration: 5000
+      });
+    } catch (error) {
+      console.error('Error sending email:', error);
+      toast({
+        title: "Email Failed",
+        description: "Failed to send booking summary. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsEmailSending(false);
+    }
   };
 
   const generateSummaryText = () => {
@@ -83,6 +110,7 @@ Phone: ${bookingData.contact_phone}
 EVENT DETAILS
 ------------
 Event Type: ${bookingData.event_type || 'Not specified'}
+Menu Package: ${bookingData.menu_package}
 Event Date: ${eventDate}
 Number of Guests: ${bookingData.number_of_guests}
 
@@ -141,7 +169,8 @@ Thank you for choosing Thys Gemaak Spitbraai Catering Services!
           <div>
             <h3 className="text-lg font-semibold mb-3">Event Details</h3>
             <div className="space-y-2 text-sm">
-              {bookingData.event_type && <div><strong>Type:</strong> {bookingData.event_type}</div>}
+              {bookingData.event_type && <div><strong>Event Type:</strong> {bookingData.event_type}</div>}
+              <div><strong>Menu Package:</strong> {bookingData.menu_package}</div>
               <div><strong>Date:</strong> {formatSouthAfricaDateTime(bookingData.event_date, 'EEEE, MMMM do, yyyy')}</div>
               <div><strong>Guests:</strong> {bookingData.number_of_guests}</div>
             </div>
@@ -226,9 +255,23 @@ Thank you for choosing Thys Gemaak Spitbraai Catering Services!
             <Download className="h-4 w-4" />
             Download Summary
           </Button>
-          <Button onClick={handleEmailSummary} variant="outline" className="flex items-center gap-2">
-            <Mail className="h-4 w-4" />
-            Email Summary
+          <Button 
+            onClick={handleEmailSummary} 
+            variant="outline" 
+            className="flex items-center gap-2"
+            disabled={isEmailSending}
+          >
+            {isEmailSending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              <>
+                <Mail className="h-4 w-4" />
+                Email Summary
+              </>
+            )}
           </Button>
         </div>
 
