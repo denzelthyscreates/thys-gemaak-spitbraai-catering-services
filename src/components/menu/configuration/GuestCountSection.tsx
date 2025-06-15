@@ -41,6 +41,7 @@ export const GuestCountSection: React.FC<GuestCountSectionProps> = ({ menuOption
     
     // Allow empty field while typing
     if (value === '') {
+      setNumGuests(minGuests); // Set to minimum instead of leaving empty
       return;
     }
     
@@ -87,10 +88,16 @@ export const GuestCountSection: React.FC<GuestCountSectionProps> = ({ menuOption
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              value={numGuests.toString()}
+              value={numGuests === minGuests && numGuests === 50 ? '' : numGuests.toString()}
               onChange={handleGuestNumberChange}
               placeholder={`Enter number (min: ${minGuests})`}
-              className="max-w-[200px] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              className="max-w-[200px]"
+              onFocus={(e) => {
+                // Clear the field when focused if it's the default value
+                if (numGuests === minGuests && numGuests === 50) {
+                  e.target.select();
+                }
+              }}
             />
           </div>
           

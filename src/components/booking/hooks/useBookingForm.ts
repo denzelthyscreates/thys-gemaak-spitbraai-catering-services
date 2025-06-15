@@ -125,8 +125,7 @@ export const useBookingForm = (menuSelection: any) => {
         status: 'pending',
         notes: `Travel Fee: R${menuSelection.travelFee || 0}, Area: ${menuSelection.areaName || 'Unknown'}`,
         user_id: null,
-        created_at: getCurrentSouthAfricaTime(),
-        updated_at: getCurrentSouthAfricaTime()
+        created_at: getCurrentSouthAfricaTime()
       };
 
       console.log('📤 Booking data prepared for database:', bookingData);
