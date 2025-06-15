@@ -35,3 +35,15 @@ export interface AvailabilityData {
   bookedEvents: number;
   googleCalendarEvents?: ProcessedEvent[];
 }
+
+export interface DateConflictInfo {
+  hasConflict: boolean;
+  conflictType?: 'booking' | 'calendar' | 'none';
+  message: string;
+  canProceed?: boolean;
+  existingBookings?: Array<{
+    id: string;
+    venue_postal_code: string;
+    status: string;
+  }>;
+}
