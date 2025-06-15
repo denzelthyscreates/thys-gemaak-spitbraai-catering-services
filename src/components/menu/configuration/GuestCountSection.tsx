@@ -31,6 +31,13 @@ export const GuestCountSection: React.FC<GuestCountSectionProps> = ({ menuOption
     setIncludeCutlery
   } = useMenu();
   
+  const [displayValue, setDisplayValue] = React.useState(numGuests.toString());
+  
+  // Update display value when numGuests changes from context
+  React.useEffect(() => {
+    setDisplayValue(numGuests.toString());
+  }, [numGuests]);
+  
   if (!selectedMenu) return null;
   
   const selectedMenuOption = menuOptions.find(opt => opt.id === selectedMenu);
@@ -38,6 +45,7 @@ export const GuestCountSection: React.FC<GuestCountSectionProps> = ({ menuOption
   
   const handleGuestNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    setDisplayValue(value);
     
     // Allow empty field while typing
     if (value === '') {
@@ -61,6 +69,7 @@ export const GuestCountSection: React.FC<GuestCountSectionProps> = ({ menuOption
     // If field is empty on blur, set to minimum
     if (value === '' || parseInt(value) < minGuests) {
       setNumGuests(minGuests);
+      setDisplayValue(minGuests.toString());
     }
   };
 
@@ -96,7 +105,7 @@ export const GuestCountSection: React.FC<GuestCountSectionProps> = ({ menuOption
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              value={numGuests.toString()}
+              value={displayValue}
               onChange={handleGuestNumberChange}
               onBlur={handleBlur}
               placeholder={`Enter number (min: ${minGuests})`}
