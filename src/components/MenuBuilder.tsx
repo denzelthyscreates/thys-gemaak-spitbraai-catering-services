@@ -110,28 +110,53 @@ const MenuBuilderContent = ({ onSelectionChange, menuOptions, onNavigateTab }: {
         </Button>
       </div>
 
-      {/* Show the event type selector first */}
-      {!eventType && <EventTypeSelector />}
+      <div className="space-y-8">
+        {/* Step 1: Event Type Selector - Always visible */}
+        <div className={`${eventType ? 'opacity-75' : ''}`}>
+          <div className="flex items-center gap-2 mb-4">
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
+              eventType ? 'bg-green-500 text-white' : 'bg-primary text-primary-foreground'
+            }`}>
+              {eventType ? '✓' : '1'}
+            </span>
+            <h3 className="text-xl font-semibold">What type of event are you planning?</h3>
+          </div>
+          <EventTypeSelector />
+        </div>
 
-      {/* Only show menu packages after event type is selected */}
-      {eventType && !selectedMenu && (
-        <>
-          <h3 className="text-xl font-semibold mb-4">Step 2: Choose Your Menu Package</h3>
-          <MenuPackages menuOptions={menuOptions} />
-        </>
-      )}
+        {/* Step 2: Menu Packages - Show when event type is selected */}
+        {eventType && (
+          <div className={`${selectedMenu ? 'opacity-75' : ''}`}>
+            <div className="flex items-center gap-2 mb-4">
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
+                selectedMenu ? 'bg-green-500 text-white' : 'bg-primary text-primary-foreground'
+              }`}>
+                {selectedMenu ? '✓' : '2'}
+              </span>
+              <h3 className="text-xl font-semibold">Choose Your Menu Package</h3>
+            </div>
+            <MenuPackages menuOptions={menuOptions} />
+          </div>
+        )}
 
-      {/* Only show configuration after menu package is selected */}
-      {eventType && selectedMenu && (
-        <>
-          <h3 className="text-xl font-semibold mt-8 mb-4">Step 3: Configure Your Menu</h3>
-          <MenuConfiguration menuOptions={menuOptions} />
-        </>
-      )}
+        {/* Step 3: Menu Configuration - Show when menu package is selected */}
+        {eventType && selectedMenu && (
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium bg-primary text-primary-foreground">
+                3
+              </span>
+              <h3 className="text-xl font-semibold">Configure Your Menu</h3>
+            </div>
+            <MenuConfiguration menuOptions={menuOptions} />
+          </div>
+        )}
 
-      {selectedMenu && (
-        <MenuSummary menuOptions={menuOptions} onNextStep={handleNextStep} />
-      )}
+        {/* Menu Summary - Always at the bottom when menu is selected */}
+        {selectedMenu && (
+          <MenuSummary menuOptions={menuOptions} onNextStep={handleNextStep} />
+        )}
+      </div>
     </div>
   );
 };
