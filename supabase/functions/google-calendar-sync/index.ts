@@ -13,34 +13,44 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
+  console.log('=== GOOGLE CALENDAR SYNC STARTED ===');
+  console.log('Request method:', req.method);
+  console.log('Request URL:', req.url);
+  console.log('Timestamp:', new Date().toISOString());
+
   try {
-    console.log('Starting Google Calendar sync...');
-    
-    // Update sync status to pending
+    console.log('Step 1: Updating sync status to pending...');
     await DatabaseService.updateSyncStatus('pending');
 
-    // Validate environment variables
+    console.log('Step 2: Validating environment variables...');
     const { calendarId, serviceAccount } = ValidationService.validateEnvironmentVariables();
 
-    // Create JWT and get access token
+    console.log('Step 3: Creating JWT token...');
     const jwt = await GoogleAuthService.createJWT(serviceAccount);
+
+    console.log('Step 4: Getting access token...');
     const accessToken = await GoogleAuthService.getAccessToken(jwt);
 
-    // Fetch and process calendar events
+    console.log('Step 5: Fetching calendar events...');
     const events = await GoogleCalendarService.fetchEvents(accessToken, calendarId);
+
+    console.log('Step 6: Processing events...');
     const dateEventMap = GoogleCalendarService.processEvents(events);
 
-    // Update database with availability
+    console.log('Step 7: Updating database availability...');
     await DatabaseService.updateAvailability(dateEventMap);
 
-    // Update sync status to success
+    console.log('Step 8: Updating sync status to success...');
     await DatabaseService.updateSyncStatus('success', events.length);
 
-    console.log(`Sync completed successfully: ${events.length} events, ${dateEventMap.size} dates updated`);
+    console.log('=== SYNC COMPLETED SUCCESSFULLY ===');
+    console.log(`Total events: ${events.length}`);
+    console.log(`Dates updated: ${dateEventMap.size}`);
 
     const result: SyncResult = {
       success: true,
@@ -53,14 +63,15 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Detailed calendar sync error:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
-    });
+    console.error('=== SYNC FAILED ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    console.error('Error object:', error);
     
     // Log error to sync table
     try {
+      console.log('Logging error to database...');
       await DatabaseService.updateSyncStatus('error', undefined, error.message);
     } catch (dbError) {
       console.error('Failed to log error to database:', dbError);
@@ -68,6 +79,7 @@ serve(async (req) => {
 
     const result: SyncResult = {
       success: false,
+      message: 'Sync failed',
       error: error.message,
       details: error.stack
     };
