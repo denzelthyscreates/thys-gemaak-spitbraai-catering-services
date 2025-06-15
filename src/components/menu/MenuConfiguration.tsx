@@ -105,12 +105,21 @@ export const MenuConfiguration: React.FC<MenuConfigurationProps> = ({ menuOption
   };
   
   const handleGuestNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value) && value >= minGuests) {
-      setNumGuests(value);
-    } else if (!e.target.value) {
-      // Allow empty field while typing
-      setNumGuests(minGuests);
+    const value = e.target.value;
+    
+    // Allow empty field while typing
+    if (value === '') {
+      return;
+    }
+    
+    // Only allow numbers
+    if (!/^\d+$/.test(value)) {
+      return;
+    }
+    
+    const numValue = parseInt(value, 10);
+    if (numValue >= minGuests && numValue <= 1000) {
+      setNumGuests(numValue);
     }
   };
   
@@ -171,12 +180,13 @@ export const MenuConfiguration: React.FC<MenuConfigurationProps> = ({ menuOption
                 </Label>
                 <Input
                   id="guest-number"
-                  type="number"
-                  min={minGuests}
-                  max={1000}
-                  value={numGuests}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={numGuests.toString()}
                   onChange={handleGuestNumberChange}
-                  className="max-w-[200px]"
+                  placeholder={`Enter number (min: ${minGuests})`}
+                  className="max-w-[200px] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
               
