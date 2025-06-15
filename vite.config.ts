@@ -9,6 +9,10 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    watch: {
+      // Exclude supabase functions from file watching to prevent EMFILE errors
+      ignored: ['**/supabase/**', '**/node_modules/**', '**/.git/**']
+    }
   },
   build: {
     outDir: 'dist',
