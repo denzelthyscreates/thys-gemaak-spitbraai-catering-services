@@ -37,6 +37,23 @@ interface BookingData {
   notes?: string;
 }
 
+const getFullEventTypeName = (eventType: string | undefined) => {
+  if (!eventType) return 'Not specified';
+  
+  const eventTypeMap: { [key: string]: string } = {
+    'birthday': 'Birthday Party',
+    'wedding': 'Wedding',
+    'corporate': 'Corporate Event',
+    'yearend': 'Year End Function',
+    'fundraiser': 'Fundraiser',
+    'anniversary': 'Anniversary',
+    'graduation': 'Graduation',
+    'other': 'Other Event'
+  };
+  
+  return eventTypeMap[eventType] || eventType;
+};
+
 const generatePDFContent = (bookingData: BookingData, bookingId: string) => {
   const menuSelection = bookingData.menu_selection;
   const totalAmount = menuSelection?.travelFee 
@@ -49,6 +66,8 @@ const generatePDFContent = (bookingData: BookingData, bookingId: string) => {
     month: 'long',
     day: 'numeric'
   });
+
+  const fullEventType = getFullEventTypeName(bookingData.event_type);
 
   return `
 <!DOCTYPE html>
@@ -84,7 +103,7 @@ const generatePDFContent = (bookingData: BookingData, bookingId: string) => {
 
     <div class="section">
         <div class="section-title">EVENT DETAILS</div>
-        <div class="info-row"><span class="label">Event Type:</span> ${bookingData.event_type || 'Not specified'}</div>
+        <div class="info-row"><span class="label">Event Type:</span> ${fullEventType}</div>
         <div class="info-row"><span class="label">Menu Package:</span> ${bookingData.menu_package}</div>
         <div class="info-row"><span class="label">Event Date:</span> ${eventDate}</div>
         <div class="info-row"><span class="label">Number of Guests:</span> ${bookingData.number_of_guests}</div>
@@ -147,36 +166,71 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { bookingData, bookingId } = await req.json();
 
-    console.log("Generating PDF for booking:", bookingId);
+    console.log("Processing booking summary email for:", bookingId);
+    console.log("Recipient email:", bookingData.contact_email);
 
     const htmlContent = generatePDFContent(bookingData, bookingId);
 
-    // Send email with PDF attachment
+    // Send email with HTML content as PDF attachment
     const emailResponse = await resend.emails.send({
-      from: "Thys Gemaak Spitbraai <spitbookings@thysgemaak.com>",
+      from: "Thys Gemaak Spitbraai <no-reply@thysgemaak.com>",
       to: [bookingData.contact_email],
-      subject: `Spitbraai Booking Summary - ${bookingId}`,
+      subject: `Your Spitbraai Booking Summary - ${bookingId}`,
       html: `
-        <h2>Thank you for your booking!</h2>
-        <p>Dear ${bookingData.contact_name},</p>
-        <p>Please find attached your booking summary for reference: <strong>${bookingId}</strong></p>
-        <p>We will contact you within 24-48 hours to confirm all details.</p>
-        <br>
-        <p>Best regards,<br>Thys Gemaak Spitbraai Catering Services</p>
-        <p>Email: spitbookings@thysgemaak.com<br>Phone: +27 60 461 3766</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #22c55e;">Thank you for your booking!</h2>
+          <p>Dear ${bookingData.contact_name},</p>
+          <p>Your spitbraai booking has been confirmed! Here are the details:</p>
+          
+          <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #22c55e;">Booking Summary</h3>
+            <p><strong>Reference:</strong> ${bookingId}</p>
+            <p><strong>Event Type:</strong> ${getFullEventTypeName(bookingData.event_type)}</p>
+            <p><strong>Package:</strong> ${bookingData.menu_package}</p>
+            <p><strong>Date:</strong> ${new Date(bookingData.event_date).toLocaleDateString('en-ZA', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}</p>
+            <p><strong>Guests:</strong> ${bookingData.number_of_guests}</p>
+            <p><strong>Total Amount:</strong> R${bookingData.menu_selection?.travelFee 
+              ? (bookingData.total_price * bookingData.number_of_guests) + bookingData.menu_selection.travelFee
+              : bookingData.total_price * bookingData.number_of_guests}</p>
+          </div>
+          
+          <p>We will contact you within 24-48 hours to confirm all details and finalize arrangements.</p>
+          
+          <p>If you have any questions, please don't hesitate to contact us:</p>
+          <ul>
+            <li>Email: spitbookings@thysgemaak.com</li>
+            <li>Phone: +27 60 461 3766</li>
+          </ul>
+          
+          <p>Best regards,<br>The Thys Gemaak Spitbraai Team</p>
+        </div>
       `,
       attachments: [
         {
-          filename: `Spitbraai-Booking-${bookingId}.pdf`,
-          content: btoa(htmlContent), // Convert HTML to base64 for simple PDF generation
+          filename: `Spitbraai-Booking-Summary-${bookingId}.html`,
+          content: btoa(htmlContent),
           content_type: "text/html"
         }
       ]
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    if (emailResponse.error) {
+      console.error("Resend API error:", emailResponse.error);
+      throw new Error(`Email sending failed: ${emailResponse.error.message}`);
+    }
 
-    return new Response(JSON.stringify({ success: true, emailResponse }), {
+    console.log("Email sent successfully:", emailResponse.data);
+
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: "Booking summary sent successfully",
+      emailResponse: emailResponse.data 
+    }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
@@ -186,7 +240,10 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-booking-summary function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: "Failed to send booking summary email"
+      }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

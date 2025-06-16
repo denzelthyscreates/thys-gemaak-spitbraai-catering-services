@@ -47,23 +47,49 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
     ? (bookingData.total_price * bookingData.number_of_guests) + menuSelection.travelFee
     : bookingData.total_price * bookingData.number_of_guests;
 
+  // Function to get full event type name
+  const getFullEventTypeName = (eventType: string | undefined) => {
+    if (!eventType) return 'Not specified';
+    
+    const eventTypeMap: { [key: string]: string } = {
+      'birthday': 'Birthday Party',
+      'wedding': 'Wedding',
+      'corporate': 'Corporate Event',
+      'yearend': 'Year End Function',
+      'fundraiser': 'Fundraiser',
+      'anniversary': 'Anniversary',
+      'graduation': 'Graduation',
+      'other': 'Other Event'
+    };
+    
+    return eventTypeMap[eventType] || eventType;
+  };
+
   const handleDownloadSummary = () => {
-    const summaryContent = generateSummaryText();
-    const blob = new Blob([summaryContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Spitbraai-Booking-${bookingId}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const summaryContent = generateSummaryHTML();
+    
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(summaryContent);
+      printWindow.document.close();
+      
+      // Wait for content to load, then print
+      printWindow.onload = () => {
+        printWindow.print();
+        printWindow.close();
+      };
+    }
   };
 
   const handleEmailSummary = async () => {
     setIsEmailSending(true);
     try {
-      const { error } = await supabase.functions.invoke('send-booking-summary', {
+      console.log('Sending email to:', bookingData.contact_email);
+      console.log('Booking data:', bookingData);
+      console.log('Booking ID:', bookingId);
+
+      const { data, error } = await supabase.functions.invoke('send-booking-summary', {
         body: {
           bookingData,
           bookingId
@@ -71,8 +97,11 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
       });
 
       if (error) {
+        console.error('Supabase function error:', error);
         throw error;
       }
+
+      console.log('Email response:', data);
 
       toast({
         title: "Email Sent Successfully!",
@@ -83,64 +112,110 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
       console.error('Error sending email:', error);
       toast({
         title: "Email Failed",
-        description: "Failed to send booking summary. Please try again.",
-        variant: "destructive"
+        description: "Failed to send booking summary. Please try again or contact support.",
+        variant: "destructive",
+        duration: 7000
       });
     } finally {
       setIsEmailSending(false);
     }
   };
 
-  const generateSummaryText = () => {
+  const generateSummaryHTML = () => {
     const eventDate = formatSouthAfricaDateTime(bookingData.event_date, 'EEEE, MMMM do, yyyy');
+    const fullEventType = getFullEventTypeName(bookingData.event_type);
     
     return `
-SPITBRAAI BOOKING SUMMARY
-========================
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Spitbraai Booking Summary</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+        .header { text-align: center; color: #22c55e; margin-bottom: 30px; }
+        .section { margin-bottom: 20px; }
+        .section-title { font-weight: bold; font-size: 16px; margin-bottom: 10px; color: #22c55e; }
+        .info-row { margin-bottom: 5px; }
+        .label { font-weight: bold; }
+        .pricing { background-color: #f9f9f9; padding: 15px; border-radius: 5px; }
+        .total { font-weight: bold; font-size: 18px; color: #22c55e; }
+        .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
+        @media print {
+            body { margin: 0; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>SPITBRAAI BOOKING SUMMARY</h1>
+        <p>Booking Reference: <strong>${bookingId}</strong></p>
+        <p>Booking Date: ${formatSouthAfricaDateTime(new Date(), 'yyyy-MM-dd HH:mm:ss')} (SAST)</p>
+    </div>
 
-Booking Reference: ${bookingId}
-Booking Date: ${formatSouthAfricaDateTime(new Date(), 'yyyy-MM-dd HH:mm:ss')} (SAST)
+    <div class="section">
+        <div class="section-title">CONTACT INFORMATION</div>
+        <div class="info-row"><span class="label">Name:</span> ${bookingData.contact_name}</div>
+        <div class="info-row"><span class="label">Email:</span> ${bookingData.contact_email}</div>
+        <div class="info-row"><span class="label">Phone:</span> ${bookingData.contact_phone}</div>
+    </div>
 
-CONTACT INFORMATION
-------------------
-Name: ${bookingData.contact_name}
-Email: ${bookingData.contact_email}
-Phone: ${bookingData.contact_phone}
+    <div class="section">
+        <div class="section-title">EVENT DETAILS</div>
+        <div class="info-row"><span class="label">Event Type:</span> ${fullEventType}</div>
+        <div class="info-row"><span class="label">Menu Package:</span> ${bookingData.menu_package}</div>
+        <div class="info-row"><span class="label">Event Date:</span> ${eventDate}</div>
+        <div class="info-row"><span class="label">Number of Guests:</span> ${bookingData.number_of_guests}</div>
+    </div>
 
-EVENT DETAILS
-------------
-Event Type: ${bookingData.event_type || 'Not specified'}
-Menu Package: ${bookingData.menu_package}
-Event Date: ${eventDate}
-Number of Guests: ${bookingData.number_of_guests}
+    <div class="section">
+        <div class="section-title">VENUE ADDRESS</div>
+        ${bookingData.venue_name ? `<div class="info-row"><span class="label">Venue Name:</span> ${bookingData.venue_name}</div>` : ''}
+        <div class="info-row">${bookingData.venue_street_address}</div>
+        <div class="info-row">${bookingData.venue_city}, ${bookingData.venue_province} ${bookingData.venue_postal_code}</div>
+    </div>
 
-VENUE ADDRESS
-------------
-${bookingData.venue_name ? `Venue Name: ${bookingData.venue_name}\n` : ''}${bookingData.venue_street_address}
-${bookingData.venue_city}, ${bookingData.venue_province}
-${bookingData.venue_postal_code}
+    <div class="section">
+        <div class="section-title">BILLING ADDRESS</div>
+        <div class="info-row">${bookingData.address_line1}</div>
+        <div class="info-row">${bookingData.city}, ${bookingData.province} ${bookingData.postal_code_address}</div>
+    </div>
 
-BILLING ADDRESS
---------------
-${bookingData.address_line1}
-${bookingData.city}, ${bookingData.province}
-${bookingData.postal_code_address}
+    <div class="section">
+        <div class="section-title">MENU SELECTION</div>
+        <div class="info-row"><span class="label">Package:</span> ${bookingData.menu_package}</div>
+        ${bookingData.season ? `<div class="info-row"><span class="label">Season:</span> ${bookingData.season}</div>` : ''}
+        ${bookingData.starters ? `<div class="info-row"><span class="label">Starters:</span> ${bookingData.starters}</div>` : ''}
+        ${bookingData.sides ? `<div class="info-row"><span class="label">Sides:</span> ${bookingData.sides}</div>` : ''}
+        ${bookingData.desserts ? `<div class="info-row"><span class="label">Desserts:</span> ${bookingData.desserts}</div>` : ''}
+        ${bookingData.extras ? `<div class="info-row"><span class="label">Extras:</span> ${bookingData.extras}</div>` : ''}
+        <div class="info-row"><span class="label">Cutlery & Crockery:</span> ${menuSelection?.includeCutlery ? 'Included' : 'Not included'}</div>
+    </div>
 
-MENU SELECTION
--------------
-Package: ${bookingData.menu_package}
-${bookingData.season ? `Season: ${bookingData.season}\n` : ''}${bookingData.starters ? `Starters: ${bookingData.starters}\n` : ''}${bookingData.sides ? `Sides: ${bookingData.sides}\n` : ''}${bookingData.desserts ? `Desserts: ${bookingData.desserts}\n` : ''}${bookingData.extras ? `Extras: ${bookingData.extras}\n` : ''}
-PRICING
--------
-Price per person: R${bookingData.total_price}
-Subtotal (${bookingData.number_of_guests} guests): R${bookingData.total_price * bookingData.number_of_guests}
-${menuSelection?.travelFee ? `Travel Fee: R${menuSelection.travelFee}\n` : ''}Total Amount: R${totalAmount}
+    <div class="section pricing">
+        <div class="section-title">PRICING SUMMARY</div>
+        <div class="info-row">Price per person: R${bookingData.total_price}</div>
+        <div class="info-row">Subtotal (${bookingData.number_of_guests} guests): R${bookingData.total_price * bookingData.number_of_guests}</div>
+        ${menuSelection?.travelFee ? `<div class="info-row">Travel Fee: R${menuSelection.travelFee}</div>` : ''}
+        <div class="total">Total Amount: R${totalAmount}</div>
+    </div>
 
-${bookingData.additional_notes ? `ADDITIONAL NOTES\n---------------\n${bookingData.additional_notes}\n\n` : ''}
-Contact us at spitbookings@thysgemaak.com or +27 60 461 3766
+    ${bookingData.additional_notes ? `
+    <div class="section">
+        <div class="section-title">ADDITIONAL NOTES</div>
+        <div>${bookingData.additional_notes}</div>
+    </div>
+    ` : ''}
 
-Thank you for choosing Thys Gemaak Spitbraai Catering Services!
-    `.trim();
+    <div class="footer">
+        <p>Thank you for choosing Thys Gemaak Spitbraai Catering Services!</p>
+        <p>We will contact you within 24-48 hours to confirm your booking details.</p>
+        <p>For any queries, contact us at spitbookings@thysgemaak.com or +27 60 461 3766</p>
+    </div>
+</body>
+</html>
+    `;
   };
 
   return (
@@ -169,7 +244,7 @@ Thank you for choosing Thys Gemaak Spitbraai Catering Services!
           <div>
             <h3 className="text-lg font-semibold mb-3">Event Details</h3>
             <div className="space-y-2 text-sm">
-              {bookingData.event_type && <div><strong>Event Type:</strong> {bookingData.event_type}</div>}
+              <div><strong>Event Type:</strong> {getFullEventTypeName(bookingData.event_type)}</div>
               <div><strong>Menu Package:</strong> {bookingData.menu_package}</div>
               <div><strong>Date:</strong> {formatSouthAfricaDateTime(bookingData.event_date, 'EEEE, MMMM do, yyyy')}</div>
               <div><strong>Guests:</strong> {bookingData.number_of_guests}</div>
@@ -253,7 +328,7 @@ Thank you for choosing Thys Gemaak Spitbraai Catering Services!
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button onClick={handleDownloadSummary} variant="outline" className="flex items-center gap-2">
             <Download className="h-4 w-4" />
-            Download Summary
+            Download PDF
           </Button>
           <Button 
             onClick={handleEmailSummary} 
@@ -269,7 +344,7 @@ Thank you for choosing Thys Gemaak Spitbraai Catering Services!
             ) : (
               <>
                 <Mail className="h-4 w-4" />
-                Email Summary
+                Email PDF Summary
               </>
             )}
           </Button>
