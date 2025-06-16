@@ -7,10 +7,7 @@ import { SyncService } from '@/services/calendar/syncService';
 import { ConflictService } from '@/services/calendar/conflictService';
 import CalendarHeader from './CalendarHeader';
 import CalendarLegend from './CalendarLegend';
-import SyncStatusDisplay from './SyncStatusDisplay';
 import SelectedDateInfo from './SelectedDateInfo';
-import BookedDatesDisplay from './BookedDatesDisplay';
-import DateConflictDisplay from './DateConflictDisplay';
 import { cn } from '@/lib/utils';
 import { AvailabilityData, DateConflictInfo } from '@/services/calendar/types';
 
@@ -34,16 +31,13 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   const [blockedDates, setBlockedDates] = useState<Date[]>([]);
   const [googleCalendarEvents, setGoogleCalendarEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [lastSyncStatus, setLastSyncStatus] = useState<any>(null);
   const [dateConflictInfo, setDateConflictInfo] = useState<DateConflictInfo | null>(null);
 
-  // Auto-sync calendar data on mount and periodically
+  // Auto-sync calendar data on mount and periodically (in background)
   useEffect(() => {
     const syncCalendarData = async () => {
       try {
         await SyncService.syncWithGoogleCalendar();
-        const status = await SyncService.getSyncStatus();
-        setLastSyncStatus(status);
       } catch (error) {
         console.error('Background sync failed:', error);
       }
@@ -128,6 +122,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
+    // Only disable past dates, allow all future dates including weekends
     if (date < today) return true;
     
     return unavailableDates.some(unavailableDate => 
@@ -168,9 +163,6 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
         <CardDescription>
           Choose your event date. Unavailable dates are crossed out.
         </CardDescription>
-        {lastSyncStatus && (
-          <SyncStatusDisplay syncStatus={lastSyncStatus} />
-        )}
       </CardHeader>
       <CardContent className="space-y-4">
         <Calendar
@@ -193,11 +185,6 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
             dateConflictInfo={dateConflictInfo}
           />
         )}
-        
-        <BookedDatesDisplay 
-          availability={availability}
-          isVisible={availability.length > 0}
-        />
       </CardContent>
     </Card>
   );

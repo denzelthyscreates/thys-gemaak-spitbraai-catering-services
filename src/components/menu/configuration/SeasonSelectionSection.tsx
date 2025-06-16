@@ -20,9 +20,12 @@ interface SeasonSelectionSectionProps {
 }
 
 export const SeasonSelectionSection: React.FC<SeasonSelectionSectionProps> = ({ needsSeason }) => {
-  const { selectedSeason, setSelectedSeason } = useMenu();
+  const { selectedSeason, setSelectedSeason, eventType, selectedMenu } = useMenu();
   
-  if (!needsSeason) return null;
+  // Show season selection for wedding events (both wedding1 and wedding2) and matric_premium
+  const shouldShowSeason = needsSeason || eventType === 'wedding' || selectedMenu === 'matric_premium';
+  
+  if (!shouldShowSeason) return null;
 
   return (
     <AccordionItem value="season" className="border rounded-lg overflow-hidden">

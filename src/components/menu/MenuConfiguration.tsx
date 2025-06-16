@@ -17,13 +17,21 @@ interface MenuConfigurationProps {
 }
 
 export const MenuConfiguration: React.FC<MenuConfigurationProps> = ({ menuOptions }) => {
-  const { selectedMenu } = useMenu();
+  const { selectedMenu, eventType } = useMenu();
   const [accordionValue, setAccordionValue] = useState<string[]>(['guest-count']);
   
   if (!selectedMenu) return null;
   
   const selectedMenuOption = menuOptions.find(opt => opt.id === selectedMenu);
-  const needsSeason = (selectedMenu === 'wedding1' || (selectedMenu === 'matric_premium' && selectedMenuOption?.seasonOptions));
+  
+  // Updated logic for season selection - include all wedding event types
+  const needsSeason = (
+    selectedMenu === 'wedding1' || 
+    selectedMenu === 'wedding2' ||
+    eventType === 'wedding' ||
+    (selectedMenu === 'matric_premium' && selectedMenuOption?.seasonOptions)
+  );
+  
   const needsStarters = selectedMenu === 'menu3' || selectedMenu === 'business' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium';
   const needsDesserts = selectedMenu === 'menu3' || selectedMenu === 'business' || selectedMenu === 'wedding1' || selectedMenu === 'matric_premium';
 
