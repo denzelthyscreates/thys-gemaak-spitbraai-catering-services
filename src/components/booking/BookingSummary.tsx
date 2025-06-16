@@ -227,7 +227,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
           Reference: <span className="font-mono font-semibold">{bookingId}</span>
         </CardDescription>
         
-        {/* Action Buttons moved directly under reference */}
+        {/* Action Buttons positioned directly under the booking reference */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button onClick={handleDownloadSummary} variant="outline" className="flex items-center gap-2">
             <Download className="h-4 w-4" />

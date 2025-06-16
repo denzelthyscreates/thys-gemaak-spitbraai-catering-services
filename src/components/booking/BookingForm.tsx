@@ -82,18 +82,18 @@ const BookingForm: React.FC<BookingFormProps> = ({
   return (
     <div className="booking-form-wrapper space-y-6">
       <div className="space-y-6">
-        {/* Top - Menu Summary */}
-        <MenuSummary menuSelection={menuSelection} />
+        {/* Always show Menu Summary at the top when menuSelection exists */}
+        {menuSelection && <MenuSummary menuSelection={menuSelection} />}
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Middle - Contact Information and Billing Address side by side */}
+            {/* Contact Information and Billing Address side by side */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <ContactSection form={form} />
               <BillingSection form={form} />
             </div>
 
-            {/* Bottom - Event Details section with Venue and Date */}
+            {/* Event Details section with Venue and Date */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Event Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -19,19 +19,23 @@ const ContactTabs: React.FC<ContactTabsProps> = ({
   // If we have an initial menu selection, start on the booking tab
   useEffect(() => {
     if (initialMenuSelection) {
+      setMenuSelection(initialMenuSelection);
       setActiveTab('book');
     }
   }, [initialMenuSelection]);
 
   const handleMenuSelectionChange = (selection: any) => {
+    console.log('Menu selection changed:', selection);
     setMenuSelection(selection);
   };
 
   const handleTabChange = (value: string) => {
+    console.log('Tab changed to:', value);
     setActiveTab(value);
   };
 
   const handleNavigateTab = (tabValue: string) => {
+    console.log('Navigating to tab:', tabValue);
     setActiveTab(tabValue);
   };
 

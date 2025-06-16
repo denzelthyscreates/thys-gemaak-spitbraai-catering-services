@@ -18,7 +18,8 @@ interface BookingRedirectProps {
 export const BookingRedirect: React.FC<BookingRedirectProps> = ({
   isValid,
   onNextStep,
-  performValidationCheck
+  performValidationCheck,
+  scrollToFirstError
 }) => {
   const handleContinueToBooking = () => {
     console.log('Continue to Booking clicked');
@@ -28,7 +29,8 @@ export const BookingRedirect: React.FC<BookingRedirectProps> = ({
       console.log('Validation passed, navigating to booking form');
       onNextStep();
     } else {
-      console.log('Validation failed');
+      console.log('Validation failed, scrolling to first error');
+      scrollToFirstError();
     }
   };
 
