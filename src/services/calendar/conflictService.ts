@@ -1,9 +1,10 @@
 
 import { supabase } from '@/lib/supabase';
+import { getAreaNameByPostalCode } from '@/data/travelData';
 import { DateConflictInfo } from './types';
 
 export class ConflictService {
-  static async getDateConflicts(date: Date | string | null): Promise<DateConflictInfo | null> {
+  static async getDateConflicts(date: Date | string | null, userPostalCode?: string): Promise<DateConflictInfo | null> {
     if (!date) return null;
     
     try {
@@ -35,19 +36,87 @@ export class ConflictService {
 
       if (bookingError) {
         console.error('Error fetching bookings:', bookingError);
-        return null;
+        return {
+          hasConflict: false,
+          message: 'Unable to check for conflicts. Please contact us to verify availability.',
+          canProceed: true
+        };
       }
 
       if (!bookings || bookings.length === 0) {
         return {
           hasConflict: false,
           conflictType: 'none',
-          message: 'Date is available',
+          message: 'No existing bookings on this date. Your event can be scheduled.',
           canProceed: true,
           existingBookings: []
         };
       }
 
+      // Check if we've reached the maximum of 2 events per day
+      if (bookings.length >= 2) {
+        return {
+          hasConflict: true,
+          conflictType: 'booking',
+          message: 'This date already has 2 bookings (our daily maximum). Please choose another date.',
+          canProceed: false,
+          existingBookings: bookings
+        };
+      }
+
+      // If we have a postal code, check area conflicts
+      if (userPostalCode) {
+        const userArea = getAreaNameByPostalCode(userPostalCode);
+
+        if (!userArea) {
+          return {
+            hasConflict: false,
+            message: 'Unable to determine service area. Please contact us to verify availability.',
+            canProceed: true,
+            existingBookings: bookings
+          };
+        }
+
+        // Check area conflicts using postal codes
+        const existingAreas = bookings
+          .filter(booking => booking.venue_postal_code)
+          .map(booking => getAreaNameByPostalCode(booking.venue_postal_code!))
+          .filter(area => area !== null);
+
+        const bookingsWithoutPostalCode = bookings.filter(booking => !booking.venue_postal_code);
+        
+        if (bookingsWithoutPostalCode.length > 0) {
+          return {
+            hasConflict: true,
+            conflictType: 'booking',
+            message: `This date has ${bookings.length} existing booking(s), some without location details. We will review area compatibility and confirm availability.`,
+            canProceed: true,
+            existingBookings: bookings
+          };
+        }
+
+        const differentAreas = existingAreas.filter(area => area !== userArea);
+
+        if (differentAreas.length > 0) {
+          return {
+            hasConflict: true,
+            conflictType: 'booking',
+            message: `This date has ${bookings.length} existing booking(s) in different service area(s). This may require special coordination. We will review and confirm availability.`,
+            canProceed: true,
+            existingBookings: bookings
+          };
+        }
+
+        return {
+          hasConflict: false,
+          conflictType: 'none',
+          message: `This date has ${bookings.length} existing booking(s) in the same service area (${userArea}). Your event can be accommodated.`,
+          canProceed: true,
+          existingBookings: bookings
+        };
+      }
+
+      // If no postal code provided, just return basic conflict info
       return {
         hasConflict: true,
         conflictType: 'booking',
@@ -58,7 +127,11 @@ export class ConflictService {
 
     } catch (error) {
       console.error('Error checking date conflicts:', error);
-      return null;
+      return {
+        hasConflict: false,
+        message: 'Unable to check for conflicts. Please contact us to verify availability.',
+        canProceed: true
+      };
     }
   }
 }
