@@ -1,5 +1,5 @@
 
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { getAreaNameByPostalCode } from '@/data/travelData';
 import { DateConflictInfo } from './types';
 
