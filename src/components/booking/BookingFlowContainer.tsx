@@ -30,9 +30,12 @@ const BookingFlowContainer: React.FC<BookingFlowContainerProps> = ({
   };
 
   const handleBookingSubmitted = (result: any) => {
-    console.log('Booking submitted successfully:', result);
+    console.log('Booking submitted successfully, transitioning to confirmation:', result);
     setBookingResult(result);
     setCurrentStep('bookingConfirmed');
+    
+    // Scroll to top when showing confirmation
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackToMenu = () => {

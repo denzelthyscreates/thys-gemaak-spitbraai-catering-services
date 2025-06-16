@@ -9,7 +9,6 @@ import VenueSection from './VenueSection';
 import BillingSection from './BillingSection';
 import AdditionalNotesSection from './AdditionalNotesSection';
 import SubmitButton from './SubmitButton';
-import BookingSummary from './BookingSummary';
 
 const BookingForm: React.FC<BookingFormProps> = ({ 
   menuSelection, 
@@ -61,22 +60,13 @@ const BookingForm: React.FC<BookingFormProps> = ({
     return () => subscription.unsubscribe();
   }, [form, onFormDataChange]);
 
-  // Handle successful submission by calling the parent's onFormSubmitted
+  // Handle successful submission by calling the parent's onFormSubmitted immediately
   useEffect(() => {
     if (submissionComplete && bookingResult && onFormSubmitted) {
+      console.log('Booking submission complete, calling onFormSubmitted with:', bookingResult);
       onFormSubmitted(bookingResult);
     }
   }, [submissionComplete, bookingResult, onFormSubmitted]);
-
-  // Show booking summary after successful submission (fallback)
-  if (submissionComplete && bookingResult && !onFormSubmitted) {
-    return (
-      <BookingSummary 
-        bookingData={bookingResult.bookingData}
-        bookingId={bookingResult.booking.id}
-      />
-    );
-  }
 
   return (
     <div className="booking-form-wrapper space-y-6">
