@@ -54,7 +54,7 @@ const BookingFormWithSummary: React.FC<BookingFormWithSummaryProps> = ({
       <MenuSummary menuSelection={menuSelection} />
 
       {/* Booking Form below */}
-      <div id="booking-form-start">
+      <div>
         <BookingForm
           menuSelection={menuSelection}
           savedFormData={bookingFormData}

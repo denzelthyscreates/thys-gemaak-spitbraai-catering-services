@@ -78,13 +78,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
     );
   }
 
-  // Only log in development mode to prevent infinite console spam
-  if (process.env.NODE_ENV === 'development') {
-    console.log("Rendering booking form with menu selection:", menuSelection);
-    console.log("Form errors:", form.formState.errors);
-    console.log("Form is valid:", form.formState.isValid);
-  }
-
   return (
     <div className="booking-form-wrapper space-y-6">
       <div className="space-y-6">
