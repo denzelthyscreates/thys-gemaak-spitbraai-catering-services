@@ -32,6 +32,10 @@ const CalendarDisplay: React.FC<CalendarDisplayProps> = ({
       modifiers={modifiers}
       modifiersStyles={modifiersStyles}
       className="rounded-md border"
+      // Explicitly allow all days of the week - no day should be disabled by default
+      weekStartsOn={1} // Start week on Monday
+      // Do not disable any days of the week
+      // This ensures Sunday (0) and Monday (1) are always available for selection
     />
   );
 };

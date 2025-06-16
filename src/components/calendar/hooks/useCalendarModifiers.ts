@@ -40,11 +40,15 @@ export const useCalendarModifiers = (
     const dateToCheck = new Date(date);
     dateToCheck.setHours(0, 0, 0, 0);
     
-    console.log('Checking date:', dateToCheck.toDateString(), 'vs today:', today.toDateString());
+    // Get day of week for debugging
+    const dayOfWeek = dateToCheck.getDay();
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+    console.log(`Checking date: ${dateToCheck.toDateString()} (${dayNames[dayOfWeek]}) vs today: ${today.toDateString()}`);
     
     // Disable all past dates (dates before today)
     if (dateToCheck < today) {
-      console.log('Date disabled - past date:', dateToCheck.toDateString());
+      console.log(`Date disabled - past date: ${dateToCheck.toDateString()} (${dayNames[dayOfWeek]})`);
       return true;
     }
     
@@ -63,15 +67,22 @@ export const useCalendarModifiers = (
     });
     
     if (isExplicitlyUnavailable) {
-      console.log('Date disabled - explicitly unavailable:', dateToCheck.toDateString());
+      console.log(`Date disabled - explicitly unavailable: ${dateToCheck.toDateString()} (${dayNames[dayOfWeek]})`);
     }
     
     if (isBlocked) {
-      console.log('Date disabled - blocked:', dateToCheck.toDateString());
+      console.log(`Date disabled - blocked: ${dateToCheck.toDateString()} (${dayNames[dayOfWeek]})`);
     }
     
-    // DO NOT disable based on day of week - all days including Sundays (0) and Mondays (1) should be available
-    return isExplicitlyUnavailable || isBlocked;
+    // CRITICAL: DO NOT disable based on day of week
+    // All days including Sundays (0) and Mondays (1) should be available for future dates
+    const shouldDisable = isExplicitlyUnavailable || isBlocked;
+    
+    if (!shouldDisable && (dayOfWeek === 0 || dayOfWeek === 1)) {
+      console.log(`${dayNames[dayOfWeek]} ${dateToCheck.toDateString()} is AVAILABLE for selection`);
+    }
+    
+    return shouldDisable;
   };
 
   return {
