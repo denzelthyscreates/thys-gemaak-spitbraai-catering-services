@@ -32,7 +32,10 @@ export const useAvailabilityData = (month: Date, userPostalCode?: string) => {
       
       availabilityData.forEach(item => {
         const date = new Date(item.date);
-        if (!item.isAvailable) {
+        
+        // Only mark as unavailable if explicitly set to false, not based on day of week
+        if (item.isAvailable === false) {
+          console.log('Marking date as unavailable from DB:', date.toDateString(), 'Day of week:', date.getDay());
           unavailable.push(date);
         }
         if (item.bookedEvents > 0) {
@@ -43,13 +46,16 @@ export const useAvailabilityData = (month: Date, userPostalCode?: string) => {
         }
       });
       
+      console.log('Unavailable dates loaded:', unavailable.map(d => d.toDateString()));
       setUnavailableDates(unavailable);
       setBookedDates(booked);
       setGoogleCalendarEvents(googleEvents);
       
       // Get blocked dates
       const blocked = await CalendarAvailabilityService.getBlockedDates();
-      setBlockedDates(blocked.map(dateStr => new Date(dateStr)));
+      const blockedDateObjects = blocked.map(dateStr => new Date(dateStr));
+      console.log('Blocked dates loaded:', blockedDateObjects.map(d => d.toDateString()));
+      setBlockedDates(blockedDateObjects);
     } catch (error) {
       console.error('Error loading availability data:', error);
     } finally {

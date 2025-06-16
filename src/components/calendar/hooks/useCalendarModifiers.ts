@@ -35,8 +35,11 @@ export const useCalendarModifiers = (
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    // Only disable past dates - all future dates including Sundays and Mondays are available
-    if (date < today) return true;
+    // Only disable past dates
+    if (date < today) {
+      console.log('Date disabled - past date:', date.toDateString());
+      return true;
+    }
     
     // Check if date is in the explicitly unavailable dates list
     const isExplicitlyUnavailable = unavailableDates.some(unavailableDate => 
@@ -48,6 +51,15 @@ export const useCalendarModifiers = (
       blockedDate.toDateString() === date.toDateString()
     );
     
+    if (isExplicitlyUnavailable) {
+      console.log('Date disabled - explicitly unavailable:', date.toDateString());
+    }
+    
+    if (isBlocked) {
+      console.log('Date disabled - blocked:', date.toDateString());
+    }
+    
+    // DO NOT disable based on day of week - all days including Sundays (0) and Mondays (1) should be available
     return isExplicitlyUnavailable || isBlocked;
   };
 
