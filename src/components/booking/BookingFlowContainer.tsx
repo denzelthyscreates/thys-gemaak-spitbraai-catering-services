@@ -8,12 +8,12 @@ export type BookingStep = 'menuBuilder' | 'bookingForm' | 'bookingConfirmed';
 
 interface BookingFlowContainerProps {
   initialMenuSelection?: any;
-  onStepChange?: () => void;
+  onBookingFormReached?: () => void;
 }
 
 const BookingFlowContainer: React.FC<BookingFlowContainerProps> = ({
   initialMenuSelection,
-  onStepChange
+  onBookingFormReached
 }) => {
   const [currentStep, setCurrentStep] = useState<BookingStep>(
     initialMenuSelection ? 'bookingForm' : 'menuBuilder'
@@ -21,12 +21,15 @@ const BookingFlowContainer: React.FC<BookingFlowContainerProps> = ({
   const [menuSelection, setMenuSelection] = useState<any>(initialMenuSelection || null);
   const [bookingResult, setBookingResult] = useState<any>(null);
 
-  // Call onStepChange when step changes (for scrolling)
+  // Only call scroll callback when reaching booking form step
   useEffect(() => {
-    if (onStepChange) {
-      onStepChange();
+    if (currentStep === 'bookingForm' && onBookingFormReached) {
+      // Small delay to ensure the DOM has updated
+      setTimeout(() => {
+        onBookingFormReached();
+      }, 100);
     }
-  }, [currentStep, onStepChange]);
+  }, [currentStep, onBookingFormReached]);
 
   const handleMenuSelectionChange = (selection: any) => {
     console.log('Menu selection changed in flow:', selection);

@@ -7,8 +7,16 @@ import ContactInfo from './ContactInfo';
 const Contact = () => {
   const contactSectionRef = useRef<HTMLElement>(null);
 
-  const scrollToTop = () => {
-    if (contactSectionRef.current) {
+  const scrollToBookingForm = () => {
+    // Only scroll when we're moving to the booking form
+    const bookingFormElement = document.getElementById('booking-form-start');
+    if (bookingFormElement) {
+      bookingFormElement.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    } else if (contactSectionRef.current) {
+      // Fallback to contact section if booking form element not found
       contactSectionRef.current.scrollIntoView({ 
         behavior: 'smooth', 
         block: 'start' 
@@ -21,7 +29,7 @@ const Contact = () => {
       <div className="container-width py-16">
         <ContactHeader />
         
-        <BookingFlowContainer onStepChange={scrollToTop} />
+        <BookingFlowContainer onBookingFormReached={scrollToBookingForm} />
         
         <ContactInfo />
       </div>
