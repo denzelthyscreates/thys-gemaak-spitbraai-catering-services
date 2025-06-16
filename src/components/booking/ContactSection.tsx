@@ -25,6 +25,7 @@ const ContactSection: React.FC<ContactSectionProps> = ({ form }) => {
                 id="contact-name"
                 placeholder="Enter your full name"
                 autoComplete="name"
+                autoFocus={false}
                 {...field}
               />
             </FormControl>
@@ -45,6 +46,7 @@ const ContactSection: React.FC<ContactSectionProps> = ({ form }) => {
                 type="email"
                 placeholder="Enter your email address"
                 autoComplete="email"
+                autoFocus={false}
                 {...field}
               />
             </FormControl>
@@ -65,6 +67,7 @@ const ContactSection: React.FC<ContactSectionProps> = ({ form }) => {
                 type="tel"
                 placeholder="Enter your phone number"
                 autoComplete="tel"
+                autoFocus={false}
                 {...field}
               />
             </FormControl>

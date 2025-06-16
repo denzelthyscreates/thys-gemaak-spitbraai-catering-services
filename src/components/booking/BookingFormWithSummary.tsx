@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import MenuSummary from './MenuSummary';
@@ -18,6 +18,15 @@ const BookingFormWithSummary: React.FC<BookingFormWithSummaryProps> = ({
 }) => {
   const [bookingFormData, setBookingFormData] = useState<any>(null);
 
+  // Ensure we scroll to top when this component mounts
+  useEffect(() => {
+    // Scroll to the top of this component smoothly
+    const element = document.getElementById('booking-form-with-summary');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
+
   const handleFormDataChange = (data: any) => {
     setBookingFormData(data);
   };
@@ -35,7 +44,7 @@ const BookingFormWithSummary: React.FC<BookingFormWithSummaryProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div id="booking-form-with-summary" className="space-y-6">
       {/* Back to Menu Button */}
       <div className="flex justify-start">
         <Button onClick={onBackToMenu} variant="outline" size="sm">
