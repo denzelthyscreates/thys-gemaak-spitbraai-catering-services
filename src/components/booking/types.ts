@@ -31,7 +31,7 @@ export interface BookingFormProps {
   menuSelection: any;
   savedFormData?: BookingFormValues | null;
   onFormDataChange?: (data: BookingFormValues) => void;
-  onFormSubmitted?: () => void;
+  onFormSubmitted?: (result: any) => void;
   onNavigateTab?: (tab: string) => void;
 }
 
