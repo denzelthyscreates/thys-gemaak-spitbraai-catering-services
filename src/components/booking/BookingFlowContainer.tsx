@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MenuBuilder from '../MenuBuilder';
 import BookingFormWithSummary from './BookingFormWithSummary';
 import BookingSummary from './BookingSummary';
@@ -8,16 +8,25 @@ export type BookingStep = 'menuBuilder' | 'bookingForm' | 'bookingConfirmed';
 
 interface BookingFlowContainerProps {
   initialMenuSelection?: any;
+  onStepChange?: () => void;
 }
 
 const BookingFlowContainer: React.FC<BookingFlowContainerProps> = ({
-  initialMenuSelection
+  initialMenuSelection,
+  onStepChange
 }) => {
   const [currentStep, setCurrentStep] = useState<BookingStep>(
     initialMenuSelection ? 'bookingForm' : 'menuBuilder'
   );
   const [menuSelection, setMenuSelection] = useState<any>(initialMenuSelection || null);
   const [bookingResult, setBookingResult] = useState<any>(null);
+
+  // Call onStepChange when step changes (for scrolling)
+  useEffect(() => {
+    if (onStepChange) {
+      onStepChange();
+    }
+  }, [currentStep, onStepChange]);
 
   const handleMenuSelectionChange = (selection: any) => {
     console.log('Menu selection changed in flow:', selection);

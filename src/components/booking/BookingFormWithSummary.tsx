@@ -54,12 +54,14 @@ const BookingFormWithSummary: React.FC<BookingFormWithSummaryProps> = ({
       <MenuSummary menuSelection={menuSelection} />
 
       {/* Booking Form below */}
-      <BookingForm
-        menuSelection={menuSelection}
-        savedFormData={bookingFormData}
-        onFormDataChange={handleFormDataChange}
-        onFormSubmitted={onFormSubmitted}
-      />
+      <div id="booking-form-start">
+        <BookingForm
+          menuSelection={menuSelection}
+          savedFormData={bookingFormData}
+          onFormDataChange={handleFormDataChange}
+          onFormSubmitted={onFormSubmitted}
+        />
+      </div>
     </div>
   );
 };
