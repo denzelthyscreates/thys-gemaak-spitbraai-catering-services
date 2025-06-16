@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Form } from '@/components/ui/form';
 import { BookingFormProps } from './types';
 import { useBookingForm } from './hooks/useBookingForm';
@@ -26,6 +26,41 @@ const BookingForm: React.FC<BookingFormProps> = ({
     bookingResult,
     onSubmit
   } = useBookingForm(menuSelection);
+
+  // Pre-fill postal code from menu selection and restore saved form data
+  useEffect(() => {
+    if (menuSelection?.postalCode) {
+      form.setValue('venuePostalCode', menuSelection.postalCode);
+    }
+    
+    if (menuSelection?.eventType) {
+      form.setValue('eventType', menuSelection.eventType);
+    }
+    
+    if (menuSelection?.numberOfGuests) {
+      form.setValue('numberOfGuests', menuSelection.numberOfGuests);
+    }
+
+    // Restore saved form data if available
+    if (savedFormData) {
+      Object.keys(savedFormData).forEach((key) => {
+        if (savedFormData[key] !== undefined && savedFormData[key] !== null) {
+          form.setValue(key as any, savedFormData[key]);
+        }
+      });
+    }
+  }, [menuSelection, savedFormData, form]);
+
+  // Save form data when form values change
+  useEffect(() => {
+    const subscription = form.watch((data) => {
+      if (onFormDataChange) {
+        onFormDataChange(data);
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form, onFormDataChange]);
 
   // Show booking summary after successful submission
   if (submissionComplete && bookingResult) {
