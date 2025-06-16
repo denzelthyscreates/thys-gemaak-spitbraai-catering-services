@@ -35,14 +35,20 @@ export const useCalendarModifiers = (
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    // Only disable past dates, allow all future dates including weekends (Sundays and Mondays)
+    // Only disable past dates - all future dates including Sundays and Mondays are available
     if (date < today) return true;
     
-    return unavailableDates.some(unavailableDate => 
+    // Check if date is in the explicitly unavailable dates list
+    const isExplicitlyUnavailable = unavailableDates.some(unavailableDate => 
       unavailableDate.toDateString() === date.toDateString()
-    ) || blockedDates.some(blockedDate => 
+    );
+    
+    // Check if date is in the blocked dates list
+    const isBlocked = blockedDates.some(blockedDate => 
       blockedDate.toDateString() === date.toDateString()
     );
+    
+    return isExplicitlyUnavailable || isBlocked;
   };
 
   return {
