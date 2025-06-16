@@ -35,7 +35,7 @@ export const useCalendarModifiers = (
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    // Only disable past dates, allow all future dates including weekends
+    // Only disable past dates, allow all future dates including weekends (Sundays and Mondays)
     if (date < today) return true;
     
     return unavailableDates.some(unavailableDate => 
