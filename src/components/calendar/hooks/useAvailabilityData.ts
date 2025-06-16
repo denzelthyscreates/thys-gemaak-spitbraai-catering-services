@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { CalendarAvailabilityService } from '@/services/CalendarAvailabilityService';
+import { CalendarAvailabilityService } from '@/services/calendar';
 import { AvailabilityData } from '@/services/calendar/types';
 
 export const useAvailabilityData = (month: Date, userPostalCode?: string) => {
