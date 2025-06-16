@@ -32,31 +32,42 @@ export const useCalendarModifiers = (
   };
 
   const isDateUnavailable = (date: Date) => {
+    // Get today's date and normalize to start of day for proper comparison
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    // Only disable past dates
-    if (date < today) {
-      console.log('Date disabled - past date:', date.toDateString());
+    // Normalize the input date to start of day for comparison
+    const dateToCheck = new Date(date);
+    dateToCheck.setHours(0, 0, 0, 0);
+    
+    console.log('Checking date:', dateToCheck.toDateString(), 'vs today:', today.toDateString());
+    
+    // Disable all past dates (dates before today)
+    if (dateToCheck < today) {
+      console.log('Date disabled - past date:', dateToCheck.toDateString());
       return true;
     }
     
     // Check if date is in the explicitly unavailable dates list
-    const isExplicitlyUnavailable = unavailableDates.some(unavailableDate => 
-      unavailableDate.toDateString() === date.toDateString()
-    );
+    const isExplicitlyUnavailable = unavailableDates.some(unavailableDate => {
+      const normalizedUnavailableDate = new Date(unavailableDate);
+      normalizedUnavailableDate.setHours(0, 0, 0, 0);
+      return normalizedUnavailableDate.getTime() === dateToCheck.getTime();
+    });
     
     // Check if date is in the blocked dates list
-    const isBlocked = blockedDates.some(blockedDate => 
-      blockedDate.toDateString() === date.toDateString()
-    );
+    const isBlocked = blockedDates.some(blockedDate => {
+      const normalizedBlockedDate = new Date(blockedDate);
+      normalizedBlockedDate.setHours(0, 0, 0, 0);
+      return normalizedBlockedDate.getTime() === dateToCheck.getTime();
+    });
     
     if (isExplicitlyUnavailable) {
-      console.log('Date disabled - explicitly unavailable:', date.toDateString());
+      console.log('Date disabled - explicitly unavailable:', dateToCheck.toDateString());
     }
     
     if (isBlocked) {
-      console.log('Date disabled - blocked:', date.toDateString());
+      console.log('Date disabled - blocked:', dateToCheck.toDateString());
     }
     
     // DO NOT disable based on day of week - all days including Sundays (0) and Mondays (1) should be available
