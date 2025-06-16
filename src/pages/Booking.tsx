@@ -3,7 +3,7 @@ import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import ContactTabs from '../components/contact/ContactTabs';
+import BookingFlowContainer from '../components/booking/BookingFlowContainer';
 import { Toaster } from '../components/ui/toaster';
 import { MenuProvider } from '../contexts/menu';
 
@@ -56,7 +56,7 @@ const Booking = () => {
                 </p>
               </div>
               
-              <ContactTabs initialMenuSelection={initialMenuSelection} />
+              <BookingFlowContainer initialMenuSelection={initialMenuSelection} />
             </div>
           </div>
         </main>

@@ -7,7 +7,6 @@ import ContactSection from './ContactSection';
 import EventDetailsSection from './EventDetailsSection';
 import VenueSection from './VenueSection';
 import BillingSection from './BillingSection';
-import MenuSummary from './MenuSummary';
 import AdditionalNotesSection from './AdditionalNotesSection';
 import SubmitButton from './SubmitButton';
 import BookingSummary from './BookingSummary';
@@ -27,7 +26,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     onSubmit
   } = useBookingForm(menuSelection);
 
-  // Pre-fill postal code from menu selection and restore saved form data
+  // Pre-fill form data from menu selection and restore saved form data
   useEffect(() => {
     if (menuSelection?.postalCode) {
       form.setValue('venuePostalCode', menuSelection.postalCode);
@@ -62,8 +61,15 @@ const BookingForm: React.FC<BookingFormProps> = ({
     return () => subscription.unsubscribe();
   }, [form, onFormDataChange]);
 
-  // Show booking summary after successful submission
-  if (submissionComplete && bookingResult) {
+  // Handle successful submission by calling the parent's onFormSubmitted
+  useEffect(() => {
+    if (submissionComplete && bookingResult && onFormSubmitted) {
+      onFormSubmitted(bookingResult);
+    }
+  }, [submissionComplete, bookingResult, onFormSubmitted]);
+
+  // Show booking summary after successful submission (fallback)
+  if (submissionComplete && bookingResult && !onFormSubmitted) {
     return (
       <BookingSummary 
         bookingData={bookingResult.bookingData}
@@ -82,9 +88,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
   return (
     <div className="booking-form-wrapper space-y-6">
       <div className="space-y-6">
-        {/* Always show Menu Summary at the top when menuSelection exists */}
-        {menuSelection && <MenuSummary menuSelection={menuSelection} />}
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Contact Information and Billing Address side by side */}

@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import ContactHeader from './ContactHeader';
-import ContactTabs from './ContactTabs';
+import BookingFlowContainer from '../booking/BookingFlowContainer';
 import ContactInfo from './ContactInfo';
 
 const Contact = () => {
@@ -12,7 +12,7 @@ const Contact = () => {
       <div className="container-width py-16">
         <ContactHeader />
         
-        <ContactTabs />
+        <BookingFlowContainer />
         
         <ContactInfo />
       </div>
