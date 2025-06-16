@@ -4,6 +4,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { CalendarAvailabilityService } from '@/services/CalendarAvailabilityService';
 import { SyncService } from '@/services/calendar/syncService';
+import { ConflictService } from '@/services/calendar/conflictService';
 import CalendarHeader from './CalendarHeader';
 import CalendarLegend from './CalendarLegend';
 import SyncStatusDisplay from './SyncStatusDisplay';
@@ -11,6 +12,7 @@ import SelectedDateInfo from './SelectedDateInfo';
 import BookedDatesDisplay from './BookedDatesDisplay';
 import DateConflictDisplay from './DateConflictDisplay';
 import { cn } from '@/lib/utils';
+import { AvailabilityData, DateConflictInfo } from '@/services/calendar/types';
 
 interface AvailabilityCalendarProps {
   selectedDate?: Date;
@@ -26,12 +28,14 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   className
 }) => {
   const [month, setMonth] = useState<Date>(new Date());
+  const [availability, setAvailability] = useState<AvailabilityData[]>([]);
   const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
   const [bookedDates, setBookedDates] = useState<Date[]>([]);
   const [blockedDates, setBlockedDates] = useState<Date[]>([]);
   const [googleCalendarEvents, setGoogleCalendarEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [lastSyncStatus, setLastSyncStatus] = useState<any>(null);
+  const [dateConflictInfo, setDateConflictInfo] = useState<DateConflictInfo | null>(null);
 
   // Auto-sync calendar data on mount and periodically
   useEffect(() => {
@@ -58,19 +62,65 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     loadAvailabilityData();
   }, [month, userPostalCode]);
 
+  // Check for date conflicts when selected date or postal code changes
+  useEffect(() => {
+    if (selectedDate && userPostalCode) {
+      checkDateConflicts();
+    } else {
+      setDateConflictInfo(null);
+    }
+  }, [selectedDate, userPostalCode]);
+
   const loadAvailabilityData = async () => {
     setIsLoading(true);
     try {
-      const availability = await CalendarAvailabilityService.getAvailabilityForMonth(month);
+      // Get start and end of month
+      const startDate = new Date(month.getFullYear(), month.getMonth(), 1);
+      const endDate = new Date(month.getFullYear(), month.getMonth() + 1, 0);
       
-      setUnavailableDates(availability.unavailableDates);
-      setBookedDates(availability.bookedDates);
-      setBlockedDates(availability.blockedDates);
-      setGoogleCalendarEvents(availability.googleCalendarEvents);
+      const availabilityData = await CalendarAvailabilityService.getAvailability(startDate, endDate);
+      setAvailability(availabilityData);
+      
+      // Process the data to extract dates for calendar modifiers
+      const unavailable: Date[] = [];
+      const booked: Date[] = [];
+      const googleEvents: any[] = [];
+      
+      availabilityData.forEach(item => {
+        const date = new Date(item.date);
+        if (!item.isAvailable) {
+          unavailable.push(date);
+        }
+        if (item.bookedEvents > 0) {
+          booked.push(date);
+        }
+        if (item.googleCalendarEvents && item.googleCalendarEvents.length > 0) {
+          googleEvents.push(...item.googleCalendarEvents);
+        }
+      });
+      
+      setUnavailableDates(unavailable);
+      setBookedDates(booked);
+      setGoogleCalendarEvents(googleEvents);
+      
+      // Get blocked dates
+      const blocked = await CalendarAvailabilityService.getBlockedDates();
+      setBlockedDates(blocked.map(dateStr => new Date(dateStr)));
     } catch (error) {
       console.error('Error loading availability data:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const checkDateConflicts = async () => {
+    if (!selectedDate || !userPostalCode) return;
+    
+    try {
+      const conflictInfo = await ConflictService.getDateConflicts(selectedDate, userPostalCode);
+      setDateConflictInfo(conflictInfo);
+    } catch (error) {
+      console.error('Error checking date conflicts:', error);
     }
   };
 
@@ -85,26 +135,6 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     ) || blockedDates.some(blockedDate => 
       blockedDate.toDateString() === date.toDateString()
     );
-  };
-
-  const isDateBooked = (date: Date) => {
-    return bookedDates.some(bookedDate => 
-      bookedDate.toDateString() === date.toDateString()
-    );
-  };
-
-  const hasGoogleCalendarEvent = (date: Date) => {
-    return googleCalendarEvents.some(event => {
-      const eventDate = new Date(event.start);
-      return eventDate.toDateString() === date.toDateString();
-    });
-  };
-
-  const getEventsForDate = (date: Date) => {
-    return googleCalendarEvents.filter(event => {
-      const eventDate = new Date(event.start);
-      return eventDate.toDateString() === date.toDateString();
-    });
   };
 
   const modifiers = {
@@ -160,20 +190,13 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
         {selectedDate && (
           <SelectedDateInfo 
             selectedDate={selectedDate}
-            isBooked={isDateBooked(selectedDate)}
-            hasGoogleEvent={hasGoogleCalendarEvent(selectedDate)}
-            events={getEventsForDate(selectedDate)}
+            dateConflictInfo={dateConflictInfo}
           />
         )}
         
         <BookedDatesDisplay 
-          bookedDates={bookedDates}
-          month={month}
-        />
-        
-        <DateConflictDisplay 
-          selectedDate={selectedDate}
-          googleCalendarEvents={googleCalendarEvents}
+          availability={availability}
+          isVisible={availability.length > 0}
         />
       </CardContent>
     </Card>
