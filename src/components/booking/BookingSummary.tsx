@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -224,9 +223,35 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
         <CardTitle className="text-2xl font-serif text-green-700">
           Booking Confirmed!
         </CardTitle>
-        <CardDescription className="text-lg">
+        <CardDescription className="text-lg mb-4">
           Reference: <span className="font-mono font-semibold">{bookingId}</span>
         </CardDescription>
+        
+        {/* Action Buttons moved directly under reference */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button onClick={handleDownloadSummary} variant="outline" className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Download PDF
+          </Button>
+          <Button 
+            onClick={handleEmailSummary} 
+            variant="outline" 
+            className="flex items-center gap-2"
+            disabled={isEmailSending}
+          >
+            {isEmailSending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              <>
+                <Mail className="h-4 w-4" />
+                Email PDF Summary
+              </>
+            )}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6">
@@ -323,32 +348,6 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
         )}
 
         <Separator />
-
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button onClick={handleDownloadSummary} variant="outline" className="flex items-center gap-2">
-            <Download className="h-4 w-4" />
-            Download PDF
-          </Button>
-          <Button 
-            onClick={handleEmailSummary} 
-            variant="outline" 
-            className="flex items-center gap-2"
-            disabled={isEmailSending}
-          >
-            {isEmailSending ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Sending...
-              </>
-            ) : (
-              <>
-                <Mail className="h-4 w-4" />
-                Email PDF Summary
-              </>
-            )}
-          </Button>
-        </div>
 
         <div className="text-center text-sm text-muted-foreground">
           <p>Thank you for choosing Thys Gemaak Spitbraai Catering Services!</p>

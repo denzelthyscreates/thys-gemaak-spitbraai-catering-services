@@ -25,10 +25,10 @@ export const BookingRedirect: React.FC<BookingRedirectProps> = ({
     const validationPassed = performValidationCheck();
     
     if (validationPassed && onNextStep) {
-      console.log('Validation passed, calling onNextStep');
+      console.log('Validation passed, navigating to booking form');
       onNextStep();
     } else {
-      console.log('Validation failed or no onNextStep function');
+      console.log('Validation failed');
     }
   };
 
