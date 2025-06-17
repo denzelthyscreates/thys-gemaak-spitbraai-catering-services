@@ -38,9 +38,14 @@ const BookingFlowContainer: React.FC<BookingFlowContainerProps> = ({
     
     console.log('Set step to bookingConfirmed, result:', result);
     
-    // Scroll to top when showing confirmation
+    // Ensure we scroll to the top of the confirmation section smoothly
     setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const confirmationElement = document.getElementById('booking-confirmation');
+      if (confirmationElement) {
+        confirmationElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }, 100);
   };
 
@@ -79,10 +84,12 @@ const BookingFlowContainer: React.FC<BookingFlowContainerProps> = ({
       case 'bookingConfirmed':
         console.log('Rendering BookingSummary with:', bookingResult);
         return bookingResult ? (
-          <BookingSummary
-            bookingData={bookingResult.bookingData}
-            bookingId={bookingResult.booking.id}
-          />
+          <div id="booking-confirmation">
+            <BookingSummary
+              bookingData={bookingResult.bookingData}
+              bookingId={bookingResult.booking.id}
+            />
+          </div>
         ) : (
           <div>Loading confirmation...</div>
         );

@@ -64,6 +64,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
   useEffect(() => {
     if (submissionComplete && bookingResult && onFormSubmitted) {
       console.log('Booking submission complete, calling onFormSubmitted with:', bookingResult);
+      // Call the callback to navigate to confirmation
       onFormSubmitted(bookingResult);
     }
   }, [submissionComplete, bookingResult, onFormSubmitted]);
