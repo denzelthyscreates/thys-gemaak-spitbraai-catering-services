@@ -84,7 +84,7 @@ export const useBookingForm = (menuSelection: any) => {
 
       const { data: insertedData, error } = await supabase
         .from('bookings')
-        .insert([bookingData])
+        .insert(bookingData)
         .select()
         .single();
 
