@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { CreditCard, ExternalLink } from "lucide-react";
@@ -60,10 +59,10 @@ const PayNowButton: React.FC<PayNowButtonProps> = ({
       
       console.log('Secure PayNow form generated');
       
-      // Always open in new tab and use the production URL
+      // Always open in new tab and use the correct PayNow URL
       const form = document.createElement('form');
       form.method = 'post';
-      form.action = 'https://www.payfast.co.za/eng/process'; // Use production environment
+      form.action = 'https://payment.payfast.io/eng/process'; // Correct PayNow URL
       form.target = '_blank'; // Always open in new tab
       
       // Add all form fields

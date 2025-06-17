@@ -114,7 +114,7 @@ serve(async (req) => {
     const response = {
       success: true, 
       formData,
-      paymentUrl: 'https://www.payfast.co.za/eng/process' // Production URL
+      paymentUrl: 'https://payment.payfast.io/eng/process' // Correct PayNow URL
     };
 
     return new Response(
