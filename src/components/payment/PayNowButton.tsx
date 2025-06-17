@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { CreditCard, ExternalLink } from "lucide-react";
@@ -28,7 +29,7 @@ const PayNowButton: React.FC<PayNowButtonProps> = ({
   paymentType = 'full',
   buttonText,
   variant = 'default',
-  openInNewTab = false,
+  openInNewTab = true, // Changed default to true
   disabled = false
 }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +59,25 @@ const PayNowButton: React.FC<PayNowButtonProps> = ({
       }
       
       console.log('Secure PayNow form generated');
-      submitSecurePaymentForm(response.formData, response.paymentUrl, openInNewTab);
+      
+      // Always open in new tab and use the sandbox URL for testing
+      const form = document.createElement('form');
+      form.method = 'post';
+      form.action = 'https://sandbox.payfast.co.za/eng/process'; // Use sandbox for testing
+      form.target = '_blank'; // Always open in new tab
+      
+      // Add all form fields
+      Object.entries(response.formData).forEach(([key, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      });
+      
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
       
     } catch (error) {
       console.error('Error submitting PayNow form:', error);
@@ -93,7 +112,7 @@ const PayNowButton: React.FC<PayNowButtonProps> = ({
     >
       <CreditCard className="h-4 w-4" />
       {isLoading ? 'Processing...' : getDefaultButtonText()}
-      {openInNewTab && <ExternalLink className="h-4 w-4" />}
+      <ExternalLink className="h-4 w-4" />
     </Button>
   );
 };

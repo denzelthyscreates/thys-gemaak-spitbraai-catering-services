@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Download, Mail, Loader2, CreditCard } from 'lucide-react';
+import { Mail, Loader2, CreditCard } from 'lucide-react';
 import { formatSouthAfricaDateTime } from '@/utils/dateUtils';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,7 +42,6 @@ interface BookingSummaryProps {
 
 const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId }) => {
   const [isEmailSending, setIsEmailSending] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
   const { toast } = useToast();
   const menuSelection = bookingData.menu_selection;
   const totalAmount = menuSelection?.travelFee 
@@ -83,54 +82,6 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
     }
     
     return inclusions;
-  };
-
-  const handleDownloadSummary = async () => {
-    setIsDownloading(true);
-    try {
-      console.log('Generating enhanced PDF download');
-      
-      const { data, error } = await supabase.functions.invoke('generate-booking-pdf', {
-        body: {
-          bookingData,
-          bookingId
-        }
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      // Create a blob and download
-      const blob = new Blob([data], { type: 'text/html;charset=utf-8' });
-      const url = window.URL.createObjectURL(blob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Spitbraai-Booking-Summary-${bookingId}.html`;
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      window.URL.revokeObjectURL(url);
-      
-      toast({
-        title: "Download Started",
-        description: "Your enhanced booking summary is downloading.",
-        duration: 3000
-      });
-    } catch (error) {
-      console.error('Download error:', error);
-      toast({
-        title: "Download Failed",
-        description: "Failed to download the booking summary. Please try again.",
-        variant: "destructive",
-        duration: 5000
-      });
-    } finally {
-      setIsDownloading(false);
-    }
   };
 
   const handleEmailSummary = async () => {
@@ -194,21 +145,8 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
           Reference: <span className="font-mono font-semibold">{bookingId}</span>
         </CardDescription>
         
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button 
-            onClick={handleDownloadSummary} 
-            variant="outline" 
-            className="flex items-center gap-2"
-            disabled={isDownloading}
-          >
-            {isDownloading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Download className="h-4 w-4" />
-            )}
-            {isDownloading ? 'Generating...' : 'Download Summary'}
-          </Button>
+        {/* Action Button - Only Email Summary */}
+        <div className="flex justify-center">
           <Button 
             onClick={handleEmailSummary} 
             variant="outline" 
@@ -248,6 +186,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
                 bookingData={paymentBookingData}
                 paymentType="deposit"
                 variant="outline"
+                openInNewTab={true}
               />
             </div>
             <div className="space-y-2">
@@ -258,6 +197,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
                 amount={totalAmount}
                 bookingData={paymentBookingData}
                 paymentType="full"
+                openInNewTab={true}
               />
             </div>
           </div>

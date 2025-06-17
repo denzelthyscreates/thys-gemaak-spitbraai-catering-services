@@ -71,65 +71,60 @@ const getMenuInclusions = (menuPackage: string, includeCutlery: boolean) => {
   return inclusions;
 };
 
-const generatePayFastPaymentSection = (bookingData: BookingData, bookingId: string, totalAmount: number) => {
-  const baseUrl = 'https://pcvmdyhzufupgckszrdy.supabase.co/functions/v1/payfast-paynow';
+const generatePaymentSection = (bookingData: BookingData, bookingId: string, totalAmount: number) => {
+  // Create payment links that work in email clients
+  const baseUrl = 'https://sandbox.payfast.co.za/eng/process';
+  const receiverId = Deno.env.get('PAYFAST_RECEIVER_ID') || '29885651';
   
-  // Generate deposit payment form data
-  const depositFormData = {
-    amount: 500,
-    item_name: `Booking Deposit - ${bookingData.event_date}`,
-    item_description: `Non-refundable booking deposit for ${bookingId}`,
-    custom_str1: 'deposit',
-    custom_str2: bookingId,
-    name_first: bookingData.contact_name.split(' ')[0],
-    name_last: bookingData.contact_name.split(' ').slice(1).join(' '),
-    email_address: bookingData.contact_email,
-    cell_number: bookingData.contact_phone
-  };
+  // Create deposit payment URL
+  const depositParams = new URLSearchParams({
+    cmd: '_paynow',
+    receiver: receiverId,
+    amount: '500.00',
+    item_name: 'Booking Deposit',
+    item_description: 'Deposit to secure your Spitbraai catering booking.',
+    return_url: 'https://spitbraai.thysgemaak.com/payment-success',
+    cancel_url: 'https://spitbraai.thysgemaak.com/payment-cancelled'
+  });
+  
+  // Create full payment URL
+  const fullPaymentParams = new URLSearchParams({
+    cmd: '_paynow',
+    receiver: receiverId,
+    amount: totalAmount.toFixed(2),
+    item_name: 'Full Payment - Spitbraai Catering',
+    item_description: 'Full payment for Spitbraai catering services',
+    return_url: 'https://spitbraai.thysgemaak.com/payment-success',
+    cancel_url: 'https://spitbraai.thysgemaak.com/payment-cancelled'
+  });
 
-  // Generate full payment form data  
-  const fullPaymentFormData = {
-    amount: totalAmount,
-    item_name: `Full Payment - ${bookingData.event_date}`,
-    item_description: `Full payment for booking ${bookingId}`,
-    custom_str1: 'full',
-    custom_str2: bookingId,
-    name_first: bookingData.contact_name.split(' ')[0],
-    name_last: bookingData.contact_name.split(' ').slice(1).join(' '),
-    email_address: bookingData.contact_email,
-    cell_number: bookingData.contact_phone
-  };
+  const depositUrl = `${baseUrl}?${depositParams.toString()}`;
+  const fullPaymentUrl = `${baseUrl}?${fullPaymentParams.toString()}`;
 
   return `
     <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #0ea5e9;">
       <h3 style="color: #0369a1; margin-top: 0;">💳 Secure Payment Options</h3>
       <p style="margin-bottom: 15px;">You can secure your booking by making a payment using one of the options below:</p>
       
-      <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-        <div style="flex: 1; background: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb;">
-          <h4 style="color: #22c55e; margin: 0 0 10px 0;">Option 1: Booking Deposit</h4>
-          <p style="margin: 0 0 10px 0; font-size: 14px;">Secure your date with a R500 deposit</p>
-          <form action="${baseUrl}" method="post" style="margin: 0;">
-            ${Object.entries(depositFormData).map(([key, value]) => 
-              `<input type="hidden" name="${key}" value="${value}" />`
-            ).join('')}
-            <button type="submit" style="background-color: #22c55e; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-              Pay R500 Deposit
-            </button>
-          </form>
+      <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+        <div style="flex: 1; background: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb; min-width: 250px;">
+          <h4 style="color: #22c55e; margin: 0 0 10px 0;">Option 1: Booking Deposit (R500)</h4>
+          <p style="margin: 0 0 15px 0; font-size: 14px;">Secure your date with a R500 deposit</p>
+          <a href="${depositUrl}" 
+             style="display: inline-block; background-color: #22c55e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; text-align: center; width: 100%; box-sizing: border-box;"
+             target="_blank">
+            Pay R500 Deposit
+          </a>
         </div>
         
-        <div style="flex: 1; background: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb;">
-          <h4 style="color: #22c55e; margin: 0 0 10px 0;">Option 2: Full Payment</h4>
-          <p style="margin: 0 0 10px 0; font-size: 14px;">Pay the full amount now (R${totalAmount})</p>
-          <form action="${baseUrl}" method="post" style="margin: 0;">
-            ${Object.entries(fullPaymentFormData).map(([key, value]) => 
-              `<input type="hidden" name="${key}" value="${value}" />`
-            ).join('')}
-            <button type="submit" style="background-color: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-              Pay Full Amount
-            </button>
-          </form>
+        <div style="flex: 1; background: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb; min-width: 250px;">
+          <h4 style="color: #22c55e; margin: 0 0 10px 0;">Option 2: Full Payment (R${totalAmount})</h4>
+          <p style="margin: 0 0 15px 0; font-size: 14px;">Pay the full amount now</p>
+          <a href="${fullPaymentUrl}" 
+             style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; text-align: center; width: 100%; box-sizing: border-box;"
+             target="_blank">
+            Pay Full Amount
+          </a>
         </div>
       </div>
       
@@ -406,9 +401,9 @@ const handler = async (req: Request): Promise<Response> => {
       ? (bookingData.total_price * bookingData.number_of_guests) + bookingData.menu_selection.travelFee
       : bookingData.total_price * bookingData.number_of_guests;
 
-    const paymentSection = generatePayFastPaymentSection(bookingData, bookingId, totalAmount);
+    const paymentSection = generatePaymentSection(bookingData, bookingId, totalAmount);
 
-    // Send email with enhanced content including payment options
+    // Send email with enhanced content including working payment links
     const emailResponse = await resend.emails.send({
       from: "Thys Gemaak Spitbraai <no-reply@spitbraai.thysgemaak.com>",
       to: [bookingData.contact_email],
