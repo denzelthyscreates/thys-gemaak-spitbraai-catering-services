@@ -35,6 +35,7 @@ export type Database = {
           additional_notes: string | null
           address_line1: string | null
           address_line2: string | null
+          booking_reference: string | null
           city: string | null
           contact_email: string
           contact_name: string
@@ -69,6 +70,7 @@ export type Database = {
           additional_notes?: string | null
           address_line1?: string | null
           address_line2?: string | null
+          booking_reference?: string | null
           city?: string | null
           contact_email: string
           contact_name: string
@@ -103,6 +105,7 @@ export type Database = {
           additional_notes?: string | null
           address_line1?: string | null
           address_line2?: string | null
+          booking_reference?: string | null
           city?: string | null
           contact_email?: string
           contact_name?: string
