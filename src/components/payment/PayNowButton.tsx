@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { CreditCard, ExternalLink } from "lucide-react";
@@ -15,7 +14,7 @@ interface PayNowButtonProps {
     event_date?: string;
     booking_id?: number;
   };
-  paymentType?: 'full' | 'balance';
+  paymentType?: 'full' | 'balance' | 'deposit';
   buttonText?: string;
   variant?: 'default' | 'outline' | 'secondary';
   openInNewTab?: boolean;
