@@ -19,10 +19,9 @@ const ContactSection: React.FC<ContactSectionProps> = ({ form }) => {
         name="name"
         render={({ field }) => (
           <FormItem>
-            <FormLabel htmlFor="contact-name">Full Name</FormLabel>
+            <FormLabel>Full Name</FormLabel>
             <FormControl>
               <Input
-                id="contact-name"
                 placeholder="Enter your full name"
                 autoComplete="name"
                 autoFocus={false}
@@ -39,10 +38,9 @@ const ContactSection: React.FC<ContactSectionProps> = ({ form }) => {
         name="email"
         render={({ field }) => (
           <FormItem>
-            <FormLabel htmlFor="contact-email">Email Address</FormLabel>
+            <FormLabel>Email Address</FormLabel>
             <FormControl>
               <Input
-                id="contact-email"
                 type="email"
                 placeholder="Enter your email address"
                 autoComplete="email"
@@ -60,10 +58,9 @@ const ContactSection: React.FC<ContactSectionProps> = ({ form }) => {
         name="phone"
         render={({ field }) => (
           <FormItem>
-            <FormLabel htmlFor="contact-phone">Phone Number</FormLabel>
+            <FormLabel>Phone Number</FormLabel>
             <FormControl>
               <Input
-                id="contact-phone"
                 type="tel"
                 placeholder="Enter your phone number"
                 autoComplete="tel"
