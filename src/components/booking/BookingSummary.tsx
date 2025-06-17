@@ -1,11 +1,13 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Download, Mail, Loader2 } from 'lucide-react';
+import { Download, Mail, Loader2, CreditCard } from 'lucide-react';
 import { formatSouthAfricaDateTime } from '@/utils/dateUtils';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import PayNowButton from '@/components/payment/PayNowButton';
 
 interface BookingSummaryProps {
   bookingData: {
@@ -40,6 +42,7 @@ interface BookingSummaryProps {
 
 const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId }) => {
   const [isEmailSending, setIsEmailSending] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const { toast } = useToast();
   const menuSelection = bookingData.menu_selection;
   const totalAmount = menuSelection?.travelFee 
@@ -64,31 +67,57 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
     return eventTypeMap[eventType] || eventType;
   };
 
-  const handleDownloadSummary = () => {
-    console.log('Download PDF clicked');
+  const getMenuInclusions = () => {
+    const inclusions: string[] = [];
+    
+    if (menuSelection?.includeCutlery) {
+      inclusions.push('Cutlery & Crockery (R20/person)');
+    }
+    
+    if (bookingData.menu_package.includes('Basic') || bookingData.menu_package.includes('Standard')) {
+      inclusions.push('All Equipment');
+    } else if (bookingData.menu_package.includes('Premium') || bookingData.menu_package.includes('Business')) {
+      inclusions.push('All Equipment', 'Friendly Staff', 'Jugs & Glasses', 'Setup & Serving');
+    } else if (bookingData.menu_package.includes('Wedding')) {
+      inclusions.push('Jugs & Glasses', 'Juice + 1 Refill', 'All Equipment + Setup of Serving Table');
+    }
+    
+    return inclusions;
+  };
+
+  const handleDownloadSummary = async () => {
+    setIsDownloading(true);
     try {
-      const summaryContent = generateSummaryHTML();
+      console.log('Generating enhanced PDF download');
       
-      // Create a blob with the HTML content
-      const blob = new Blob([summaryContent], { type: 'text/html;charset=utf-8' });
+      const { data, error } = await supabase.functions.invoke('generate-booking-pdf', {
+        body: {
+          bookingData,
+          bookingId
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Create a blob and download
+      const blob = new Blob([data], { type: 'text/html;charset=utf-8' });
       const url = window.URL.createObjectURL(blob);
       
-      // Create a download link
       const link = document.createElement('a');
       link.href = url;
       link.download = `Spitbraai-Booking-Summary-${bookingId}.html`;
       
-      // Append to body, click, and remove
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
-      // Clean up the URL object
       window.URL.revokeObjectURL(url);
       
       toast({
         title: "Download Started",
-        description: "Your booking summary is downloading as an HTML file.",
+        description: "Your enhanced booking summary is downloading.",
         duration: 3000
       });
     } catch (error) {
@@ -99,15 +128,15 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
         variant: "destructive",
         duration: 5000
       });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
   const handleEmailSummary = async () => {
     setIsEmailSending(true);
     try {
-      console.log('Sending email to:', bookingData.contact_email);
-      console.log('Booking data:', bookingData);
-      console.log('Booking ID:', bookingId);
+      console.log('Sending enhanced email to:', bookingData.contact_email);
 
       const { data, error } = await supabase.functions.invoke('send-booking-summary', {
         body: {
@@ -121,17 +150,16 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
         throw error;
       }
 
-      console.log('Email response:', data);
+      console.log('Enhanced email response:', data);
 
       toast({
         title: "Email Sent Successfully!",
-        description: `Booking summary has been sent to ${bookingData.contact_email}`,
+        description: `Enhanced booking summary with payment options sent to ${bookingData.contact_email}`,
         duration: 5000
       });
     } catch (error) {
       console.error('Error sending email:', error);
       
-      // Check if it's a domain verification error
       const errorMessage = error?.message || 'Unknown error';
       const isDomainError = errorMessage.includes('domain is not verified') || errorMessage.includes('thysgemaak.com');
       
@@ -148,118 +176,38 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
     }
   };
 
-  const generateSummaryHTML = () => {
-    const eventDate = formatSouthAfricaDateTime(bookingData.event_date, 'EEEE, MMMM do, yyyy');
-    const fullEventType = getFullEventTypeName(bookingData.event_type);
-    
-    return `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Spitbraai Booking Summary</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
-        .header { text-align: center; color: #22c55e; margin-bottom: 30px; }
-        .section { margin-bottom: 20px; }
-        .section-title { font-weight: bold; font-size: 16px; margin-bottom: 10px; color: #22c55e; }
-        .info-row { margin-bottom: 5px; }
-        .label { font-weight: bold; }
-        .pricing { background-color: #f9f9f9; padding: 15px; border-radius: 5px; }
-        .total { font-weight: bold; font-size: 18px; color: #22c55e; }
-        .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
-        @media print {
-            body { margin: 0; }
-            .no-print { display: none; }
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>SPITBRAAI BOOKING SUMMARY</h1>
-        <p>Booking Reference: <strong>${bookingId}</strong></p>
-        <p>Booking Date: ${formatSouthAfricaDateTime(new Date(), 'yyyy-MM-dd HH:mm:ss')} (SAST)</p>
-    </div>
-
-    <div class="section">
-        <div class="section-title">CONTACT INFORMATION</div>
-        <div class="info-row"><span class="label">Name:</span> ${bookingData.contact_name}</div>
-        <div class="info-row"><span class="label">Email:</span> ${bookingData.contact_email}</div>
-        <div class="info-row"><span class="label">Phone:</span> ${bookingData.contact_phone}</div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">EVENT DETAILS</div>
-        <div class="info-row"><span class="label">Event Type:</span> ${fullEventType}</div>
-        <div class="info-row"><span class="label">Menu Package:</span> ${bookingData.menu_package}</div>
-        <div class="info-row"><span class="label">Event Date:</span> ${eventDate}</div>
-        <div class="info-row"><span class="label">Number of Guests:</span> ${bookingData.number_of_guests}</div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">VENUE ADDRESS</div>
-        ${bookingData.venue_name ? `<div class="info-row"><span class="label">Venue Name:</span> ${bookingData.venue_name}</div>` : ''}
-        <div class="info-row">${bookingData.venue_street_address}</div>
-        <div class="info-row">${bookingData.venue_city}, ${bookingData.venue_province} ${bookingData.venue_postal_code}</div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">BILLING ADDRESS</div>
-        <div class="info-row">${bookingData.address_line1}</div>
-        <div class="info-row">${bookingData.city}, ${bookingData.province} ${bookingData.postal_code_address}</div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">MENU SELECTION</div>
-        <div class="info-row"><span class="label">Package:</span> ${bookingData.menu_package}</div>
-        ${bookingData.season ? `<div class="info-row"><span class="label">Season:</span> ${bookingData.season}</div>` : ''}
-        ${bookingData.starters ? `<div class="info-row"><span class="label">Starters:</span> ${bookingData.starters}</div>` : ''}
-        ${bookingData.sides ? `<div class="info-row"><span class="label">Sides:</span> ${bookingData.sides}</div>` : ''}
-        ${bookingData.desserts ? `<div class="info-row"><span class="label">Desserts:</span> ${bookingData.desserts}</div>` : ''}
-        ${bookingData.extras ? `<div class="info-row"><span class="label">Extras:</span> ${bookingData.extras}</div>` : ''}
-        <div class="info-row"><span class="label">Cutlery & Crockery:</span> ${menuSelection?.includeCutlery ? 'Included' : 'Not included'}</div>
-    </div>
-
-    <div class="section pricing">
-        <div class="section-title">PRICING SUMMARY</div>
-        <div class="info-row">Price per person: R${bookingData.total_price}</div>
-        <div class="info-row">Subtotal (${bookingData.number_of_guests} guests): R${bookingData.total_price * bookingData.number_of_guests}</div>
-        ${menuSelection?.travelFee ? `<div class="info-row">Travel Fee: R${menuSelection.travelFee}</div>` : ''}
-        <div class="total">Total Amount: R${totalAmount}</div>
-    </div>
-
-    ${bookingData.additional_notes ? `
-    <div class="section">
-        <div class="section-title">ADDITIONAL NOTES</div>
-        <div>${bookingData.additional_notes}</div>
-    </div>
-    ` : ''}
-
-    <div class="footer">
-        <p>Thank you for choosing Thys Gemaak Spitbraai Catering Services!</p>
-        <p>We will contact you within 24-48 hours to confirm your booking details.</p>
-        <p>For any queries, contact us at spitbookings@thysgemaak.com or +27 60 461 3766</p>
-    </div>
-</body>
-</html>
-    `;
+  const paymentBookingData = {
+    client_name: bookingData.contact_name,
+    client_email: bookingData.contact_email,
+    client_phone: bookingData.contact_phone,
+    event_date: bookingData.event_date,
+    booking_id: parseInt(bookingId, 10) || 0
   };
 
   return (
     <Card className="max-w-4xl mx-auto">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl font-serif text-green-700">
-          Booking Confirmed!
+          Booking Received!
         </CardTitle>
         <CardDescription className="text-lg mb-4">
           Reference: <span className="font-mono font-semibold">{bookingId}</span>
         </CardDescription>
         
-        {/* Action Buttons positioned directly under the booking reference */}
+        {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button onClick={handleDownloadSummary} variant="outline" className="flex items-center gap-2">
-            <Download className="h-4 w-4" />
-            Download PDF
+          <Button 
+            onClick={handleDownloadSummary} 
+            variant="outline" 
+            className="flex items-center gap-2"
+            disabled={isDownloading}
+          >
+            {isDownloading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            {isDownloading ? 'Generating...' : 'Download Summary'}
           </Button>
           <Button 
             onClick={handleEmailSummary} 
@@ -275,13 +223,46 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
             ) : (
               <>
                 <Mail className="h-4 w-4" />
-                Email PDF Summary
+                Email Summary
               </>
             )}
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Payment Options Section */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-blue-600" />
+            Secure Your Booking with Payment
+          </h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Complete your booking by making a secure payment. Choose from the options below:
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <h4 className="font-medium text-green-700">Booking Deposit (R500)</h4>
+              <p className="text-sm text-gray-600">Secure your date with a deposit</p>
+              <PayNowButton 
+                type="simple"
+                bookingData={paymentBookingData}
+                paymentType="deposit"
+                variant="outline"
+              />
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-medium text-blue-700">Full Payment (R{totalAmount})</h4>
+              <p className="text-sm text-gray-600">Pay the complete amount now</p>
+              <PayNowButton 
+                type="dynamic"
+                amount={totalAmount}
+                bookingData={paymentBookingData}
+                paymentType="full"
+              />
+            </div>
+          </div>
+        </div>
+
         <div className="grid md:grid-cols-2 gap-6">
           {/* Contact Information */}
           <div>
@@ -307,32 +288,49 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
 
         <Separator />
 
-        {/* Venue Address */}
+        {/* Enhanced Venue Details */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">Venue Address</h3>
-          <div className="text-sm">
-            {bookingData.venue_name && <div className="font-medium">{bookingData.venue_name}</div>}
-            <div>{bookingData.venue_street_address}</div>
-            <div>{bookingData.venue_city}, {bookingData.venue_province} {bookingData.venue_postal_code}</div>
+          <h3 className="text-lg font-semibold mb-3">Venue Details</h3>
+          <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-sm">
+            {bookingData.venue_name && <div className="font-medium text-green-700">{bookingData.venue_name}</div>}
+            <div><strong>Address:</strong> {bookingData.venue_street_address}</div>
+            <div><strong>City:</strong> {bookingData.venue_city}</div>
+            <div><strong>Province:</strong> {bookingData.venue_province}</div>
+            <div><strong>Postal Code:</strong> {bookingData.venue_postal_code}</div>
           </div>
         </div>
 
         <Separator />
 
-        {/* Menu Selection */}
+        {/* Enhanced Menu Selection */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">Menu Selection</h3>
-          <div className="grid md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <div><strong>Package:</strong> {bookingData.menu_package}</div>
-              {bookingData.season && <div><strong>Season:</strong> {bookingData.season}</div>}
-              {bookingData.starters && <div><strong>Starters:</strong> {bookingData.starters}</div>}
-              {bookingData.sides && <div><strong>Sides:</strong> {bookingData.sides}</div>}
+          <h3 className="text-lg font-semibold mb-3">Detailed Menu Selection</h3>
+          <div className="bg-green-50 p-4 rounded-lg">
+            <div className="grid md:grid-cols-2 gap-4 text-sm mb-4">
+              <div>
+                <div><strong>Package:</strong> {bookingData.menu_package}</div>
+                {bookingData.season && <div><strong>Season:</strong> {bookingData.season}</div>}
+                {bookingData.starters && <div><strong>Starters:</strong> {bookingData.starters}</div>}
+                {bookingData.sides && <div><strong>Sides:</strong> {bookingData.sides}</div>}
+              </div>
+              <div>
+                {bookingData.desserts && <div><strong>Desserts:</strong> {bookingData.desserts}</div>}
+                {bookingData.extras && <div><strong>Extras:</strong> {bookingData.extras}</div>}
+                <div><strong>Cutlery:</strong> {menuSelection?.includeCutlery ? 'Included' : 'Not included'}</div>
+              </div>
             </div>
-            <div>
-              {bookingData.desserts && <div><strong>Desserts:</strong> {bookingData.desserts}</div>}
-              {bookingData.extras && <div><strong>Extras:</strong> {bookingData.extras}</div>}
-              <div><strong>Cutlery:</strong> {menuSelection?.includeCutlery ? 'Included' : 'Not included'}</div>
+            
+            {/* What's Included Section */}
+            <div className="bg-white p-3 rounded border">
+              <h4 className="font-medium text-green-700 mb-2">What's Included in Your Package:</h4>
+              <ul className="text-sm space-y-1">
+                {getMenuInclusions().map((inclusion, index) => (
+                  <li key={index} className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    {inclusion}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
@@ -376,6 +374,17 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
         )}
 
         <Separator />
+
+        {/* Next Steps */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h3 className="text-lg font-semibold mb-3 text-blue-800">📋 Next Steps</h3>
+          <ol className="text-sm space-y-2 text-blue-700">
+            <li><strong>1. Confirmation Call:</strong> We'll contact you within 24-48 hours to confirm details</li>
+            <li><strong>2. Secure Your Date:</strong> Use the payment options above to guarantee your booking</li>
+            <li><strong>3. Final Planning:</strong> We'll finalize menu and setup details closer to your event</li>
+            <li><strong>4. Event Day:</strong> Our team arrives early to set up everything perfectly</li>
+          </ol>
+        </div>
 
         <div className="text-center text-sm text-muted-foreground">
           <p>Thank you for choosing Thys Gemaak Spitbraai Catering Services!</p>

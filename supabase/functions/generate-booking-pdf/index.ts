@@ -1,7 +1,6 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -60,6 +59,7 @@ const getMenuInclusions = (menuPackage: string, includeCutlery: boolean) => {
     inclusions.push('Cutlery & Crockery (R20/person)');
   }
   
+  // Based on menu package, add specific inclusions
   if (menuPackage.includes('Basic') || menuPackage.includes('Standard')) {
     inclusions.push('All Equipment');
   } else if (menuPackage.includes('Premium') || menuPackage.includes('Business')) {
@@ -71,76 +71,7 @@ const getMenuInclusions = (menuPackage: string, includeCutlery: boolean) => {
   return inclusions;
 };
 
-const generatePayFastPaymentSection = (bookingData: BookingData, bookingId: string, totalAmount: number) => {
-  const baseUrl = 'https://pcvmdyhzufupgckszrdy.supabase.co/functions/v1/payfast-paynow';
-  
-  // Generate deposit payment form data
-  const depositFormData = {
-    amount: 500,
-    item_name: `Booking Deposit - ${bookingData.event_date}`,
-    item_description: `Non-refundable booking deposit for ${bookingId}`,
-    custom_str1: 'deposit',
-    custom_str2: bookingId,
-    name_first: bookingData.contact_name.split(' ')[0],
-    name_last: bookingData.contact_name.split(' ').slice(1).join(' '),
-    email_address: bookingData.contact_email,
-    cell_number: bookingData.contact_phone
-  };
-
-  // Generate full payment form data  
-  const fullPaymentFormData = {
-    amount: totalAmount,
-    item_name: `Full Payment - ${bookingData.event_date}`,
-    item_description: `Full payment for booking ${bookingId}`,
-    custom_str1: 'full',
-    custom_str2: bookingId,
-    name_first: bookingData.contact_name.split(' ')[0],
-    name_last: bookingData.contact_name.split(' ').slice(1).join(' '),
-    email_address: bookingData.contact_email,
-    cell_number: bookingData.contact_phone
-  };
-
-  return `
-    <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #0ea5e9;">
-      <h3 style="color: #0369a1; margin-top: 0;">💳 Secure Payment Options</h3>
-      <p style="margin-bottom: 15px;">You can secure your booking by making a payment using one of the options below:</p>
-      
-      <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-        <div style="flex: 1; background: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb;">
-          <h4 style="color: #22c55e; margin: 0 0 10px 0;">Option 1: Booking Deposit</h4>
-          <p style="margin: 0 0 10px 0; font-size: 14px;">Secure your date with a R500 deposit</p>
-          <form action="${baseUrl}" method="post" style="margin: 0;">
-            ${Object.entries(depositFormData).map(([key, value]) => 
-              `<input type="hidden" name="${key}" value="${value}" />`
-            ).join('')}
-            <button type="submit" style="background-color: #22c55e; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-              Pay R500 Deposit
-            </button>
-          </form>
-        </div>
-        
-        <div style="flex: 1; background: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb;">
-          <h4 style="color: #22c55e; margin: 0 0 10px 0;">Option 2: Full Payment</h4>
-          <p style="margin: 0 0 10px 0; font-size: 14px;">Pay the full amount now (R${totalAmount})</p>
-          <form action="${baseUrl}" method="post" style="margin: 0;">
-            ${Object.entries(fullPaymentFormData).map(([key, value]) => 
-              `<input type="hidden" name="${key}" value="${value}" />`
-            ).join('')}
-            <button type="submit" style="background-color: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-              Pay Full Amount
-            </button>
-          </form>
-        </div>
-      </div>
-      
-      <p style="font-size: 12px; color: #6b7280; margin: 0;">
-        🔒 Secure payments powered by PayFast. You will be redirected to a secure payment page.
-      </p>
-    </div>
-  `;
-};
-
-const generatePDFContent = (bookingData: BookingData, bookingId: string) => {
+const generateEnhancedPDFContent = (bookingData: BookingData, bookingId: string) => {
   const menuSelection = bookingData.menu_selection;
   const totalAmount = menuSelection?.travelFee 
     ? (bookingData.total_price * bookingData.number_of_guests) + menuSelection.travelFee
@@ -178,6 +109,7 @@ const generatePDFContent = (bookingData: BookingData, bookingId: string) => {
         }
         .section { 
             margin-bottom: 25px; 
+            page-break-inside: avoid;
         }
         .section-title { 
             font-weight: bold; 
@@ -214,11 +146,17 @@ const generatePDFContent = (bookingData: BookingData, bookingId: string) => {
             padding-top: 10px;
             margin-top: 10px;
         }
-        .venue-details, .menu-details {
+        .venue-details {
             background-color: #f8fafc;
             padding: 15px;
             border-radius: 6px;
             border-left: 4px solid #22c55e;
+        }
+        .menu-details {
+            background-color: #fefefe;
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
         }
         .inclusions {
             background-color: #ecfdf5;
@@ -237,6 +175,10 @@ const generatePDFContent = (bookingData: BookingData, bookingId: string) => {
             color: #666;
             border-top: 1px solid #e5e7eb;
             padding-top: 20px;
+        }
+        @media print {
+            body { margin: 0; }
+            .no-print { display: none; }
         }
     </style>
 </head>
@@ -398,118 +340,26 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { bookingData, bookingId } = await req.json();
 
-    console.log("Processing booking summary email for:", bookingId);
-    console.log("Recipient email:", bookingData.contact_email);
+    console.log("Generating enhanced PDF for booking:", bookingId);
 
-    const htmlContent = generatePDFContent(bookingData, bookingId);
-    const totalAmount = bookingData.menu_selection?.travelFee 
-      ? (bookingData.total_price * bookingData.number_of_guests) + bookingData.menu_selection.travelFee
-      : bookingData.total_price * bookingData.number_of_guests;
+    const htmlContent = generateEnhancedPDFContent(bookingData, bookingId);
 
-    const paymentSection = generatePayFastPaymentSection(bookingData, bookingId, totalAmount);
-
-    // Send email with enhanced content including payment options
-    const emailResponse = await resend.emails.send({
-      from: "Thys Gemaak Spitbraai <no-reply@spitbraai.thysgemaak.com>",
-      to: [bookingData.contact_email],
-      subject: `We have received your spitbraai booking! - ${bookingId}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-          <div style="background-color: #22c55e; color: white; padding: 20px; text-align: center;">
-            <h2 style="margin: 0;">We have received your spitbraai booking!</h2>
-          </div>
-          
-          <div style="padding: 20px;">
-            <p>Dear ${bookingData.contact_name},</p>
-            <p>Thank you for choosing Thys Gemaak Spitbraai! We have successfully received your booking request and are excited to cater your special event.</p>
-            
-            <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="margin-top: 0; color: #22c55e;">📋 Booking Summary</h3>
-              <p><strong>Reference:</strong> ${bookingId}</p>
-              <p><strong>Event Type:</strong> ${getFullEventTypeName(bookingData.event_type)}</p>
-              <p><strong>Package:</strong> ${bookingData.menu_package}</p>
-              <p><strong>Date:</strong> ${new Date(bookingData.event_date).toLocaleDateString('en-ZA', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}</p>
-              <p><strong>Guests:</strong> ${bookingData.number_of_guests}</p>
-              <p><strong>Venue:</strong> ${bookingData.venue_street_address}, ${bookingData.venue_city}</p>
-              <p style="font-size: 18px; color: #22c55e;"><strong>Total Amount: R${totalAmount}</strong></p>
-            </div>
-
-            ${paymentSection}
-            
-            <div style="background-color: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0ea5e9;">
-              <h3 style="color: #0369a1; margin-top: 0;">📋 Next Steps</h3>
-              <ol style="margin: 0; padding-left: 20px;">
-                <li style="margin-bottom: 8px;"><strong>Confirmation Call:</strong> We will contact you within 24-48 hours to confirm all booking details and discuss any special requirements.</li>
-                <li style="margin-bottom: 8px;"><strong>Payment:</strong> You can secure your booking using the payment options above. A minimum R500 deposit is required to guarantee your date.</li>
-                <li style="margin-bottom: 8px;"><strong>Final Details:</strong> We'll confirm menu selections, setup requirements, and arrival times closer to your event date.</li>
-                <li style="margin-bottom: 8px;"><strong>Event Day:</strong> Our team will arrive early to set up and ensure everything is perfect for your special day.</li>
-              </ol>
-            </div>
-            
-            <div style="background-color: #fef3c7; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #f59e0b;">
-              <h4 style="color: #92400e; margin: 0 0 10px 0;">⚠️ Important Notes</h4>
-              <ul style="margin: 0; padding-left: 20px; color: #92400e;">
-                <li>Your booking is not confirmed until we speak with you personally</li>
-                <li>Popular dates fill up quickly - payment secures your preferred date</li>
-                <li>Final guest numbers can be adjusted up to 7 days before your event</li>
-              </ul>
-            </div>
-            
-            <p>If you have any questions before we call, please don't hesitate to contact us:</p>
-            <ul>
-              <li><strong>Email:</strong> spitbookings@thysgemaak.com</li>
-              <li><strong>Phone:</strong> +27 60 461 3766</li>
-              <li><strong>Booking Reference:</strong> ${bookingId}</li>
-            </ul>
-            
-            <p>We look forward to making your event memorable!</p>
-            <p>Best regards,<br><strong>The Thys Gemaak Spitbraai Team</strong></p>
-          </div>
-          
-          <div style="background-color: #f3f4f6; padding: 20px; text-align: center; font-size: 12px; color: #6b7280;">
-            <p style="margin: 0;">Thys Gemaak Spitbraai | Professional Catering Services</p>
-            <p style="margin: 5px 0 0 0;">Making your special occasions unforgettable since 2015</p>
-          </div>
-        </div>
-      `,
-      attachments: [
-        {
-          filename: `Spitbraai-Booking-Summary-${bookingId}.html`,
-          content: btoa(htmlContent),
-          content_type: "text/html"
-        }
-      ]
-    });
-
-    if (emailResponse.error) {
-      console.error("Resend API error:", emailResponse.error);
-      throw new Error(`Email sending failed: ${emailResponse.error.message}`);
-    }
-
-    console.log("Email sent successfully:", emailResponse.data);
-
-    return new Response(JSON.stringify({ 
-      success: true, 
-      message: "Enhanced booking summary sent successfully",
-      emailResponse: emailResponse.data 
-    }), {
+    // For now, return HTML content. In a production environment, 
+    // you would use a service like Puppeteer to convert to actual PDF
+    return new Response(htmlContent, {
       status: 200,
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "text/html",
+        "Content-Disposition": `attachment; filename="Spitbraai-Booking-Summary-${bookingId}.html"`,
         ...corsHeaders,
       },
     });
   } catch (error: any) {
-    console.error("Error in send-booking-summary function:", error);
+    console.error("Error in generate-booking-pdf function:", error);
     return new Response(
       JSON.stringify({ 
         error: error.message,
-        details: "Failed to send booking summary email"
+        details: "Failed to generate booking PDF"
       }),
       {
         status: 500,
