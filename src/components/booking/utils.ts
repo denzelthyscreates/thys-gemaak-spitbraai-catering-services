@@ -1,5 +1,6 @@
 
 export const generateBookingReference = () => {
-  const random = Math.random().toString(36).substr(2, 4).toUpperCase(); // 4 random chars
-  return `TG${random}`; // Format: TGABCD (6 characters total)
+  const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp
+  const random = Math.random().toString(36).substr(2, 3).toUpperCase(); // 3 random chars
+  return `TG${timestamp}${random}`; // Format: TG123456ABC (11 characters total)
 };

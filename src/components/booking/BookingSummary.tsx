@@ -117,7 +117,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
           Booking Received!
         </CardTitle>
         <CardDescription className="text-lg mb-4">
-          Reference: <span className="font-mono font-semibold">{bookingId}</span>
+          Reference: <span className="font-mono font-semibold text-lg">{bookingId}</span>
         </CardDescription>
         
         {/* Information about automatic email */}
@@ -188,7 +188,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
                 <p><strong>Account Type:</strong> Transact Account</p>
                 <p><strong>Account Number:</strong> 1051789869</p>
                 <p><strong>Branch Code:</strong> 470010</p>
-                <p><strong>Reference:</strong> {bookingId} - {bookingData.contact_name}</p>
+                <p><strong>Reference:</strong> <span className="font-mono bg-yellow-100 px-2 py-1 rounded">{bookingId}</span></p>
               </div>
               
               <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md flex items-start gap-2">
@@ -196,7 +196,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
                 <div className="text-sm text-amber-800">
                   <p className="font-medium">Important:</p>
                   <p>Please email proof of payment to wade@thysgemaak.com or WhatsApp to +27 60 461 3766</p>
-                  <p>Use reference: <strong>{bookingId} - {bookingData.contact_name}</strong></p>
+                  <p>Use reference: <strong className="font-mono">{bookingId}</strong></p>
                 </div>
               </div>
             </div>

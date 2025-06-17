@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -53,6 +52,10 @@ export const useBookingForm = (menuSelection: any) => {
     setIsSubmitting(true);
 
     try {
+      // Generate a shorter booking reference
+      const bookingReference = generateBookingReference();
+      console.log("Generated booking reference:", bookingReference);
+
       // Prepare booking data with detailed logging
       const bookingData = {
         contact_name: data.name,
@@ -83,7 +86,8 @@ export const useBookingForm = (menuSelection: any) => {
         menu_selection: menuSelection,
         notes: data.additionalNotes || '',
         status: 'pending',
-        user_id: null // Explicitly set to null for anonymous bookings
+        user_id: null, // Explicitly set to null for anonymous bookings
+        booking_reference: bookingReference // Add the custom reference
       };
 
       console.log("=== ATTEMPTING SUPABASE INSERT ===");
@@ -137,7 +141,11 @@ export const useBookingForm = (menuSelection: any) => {
 
       console.log("=== BOOKING CREATED SUCCESSFULLY ===");
       console.log("Booking ID:", insertedData.id);
+      console.log("Booking Reference:", insertedData.booking_reference || bookingReference);
       console.log("Created booking:", insertedData);
+
+      // Use the custom reference from the inserted data or fallback to generated one
+      const finalBookingReference = insertedData.booking_reference || bookingReference;
 
       // Automatically send the summary email
       try {
@@ -147,7 +155,7 @@ export const useBookingForm = (menuSelection: any) => {
         const { data: emailData, error: emailError } = await supabase.functions.invoke('send-booking-summary', {
           body: {
             bookingData: insertedData,
-            bookingId: insertedData.id
+            bookingId: finalBookingReference
           }
         });
 
@@ -179,10 +187,17 @@ export const useBookingForm = (menuSelection: any) => {
         });
       }
 
-      // Prepare the result data
+      // Prepare the result data with the custom reference
       const result = {
-        bookingData: insertedData,
-        booking: insertedData
+        bookingData: {
+          ...insertedData,
+          booking_reference: finalBookingReference
+        },
+        booking: {
+          ...insertedData,
+          booking_reference: finalBookingReference
+        },
+        bookingReference: finalBookingReference
       };
 
       console.log("=== BOOKING PROCESS COMPLETED ===");
