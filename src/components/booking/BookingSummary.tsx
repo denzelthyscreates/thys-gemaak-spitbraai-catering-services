@@ -33,6 +33,7 @@ interface BookingSummaryProps {
     extras?: string;
     menu_selection: any;
     notes?: string;
+    booking_reference?: string;
   };
   bookingId: string;
 }
@@ -43,6 +44,9 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
   const totalAmount = menuSelection?.travelFee 
     ? (bookingData.total_price * bookingData.number_of_guests) + menuSelection.travelFee
     : bookingData.total_price * bookingData.number_of_guests;
+
+  // Use the booking_reference from bookingData if available, otherwise fall back to bookingId
+  const displayReference = bookingData.booking_reference || bookingId;
 
   // Function to get full event type name
   const getFullEventTypeName = (eventType: string | undefined) => {
@@ -117,7 +121,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
           Booking Received!
         </CardTitle>
         <CardDescription className="text-lg mb-4">
-          Reference: <span className="font-mono font-semibold text-lg">{bookingId}</span>
+          Reference: <span className="font-mono font-semibold text-lg">{displayReference}</span>
         </CardDescription>
         
         {/* Information about automatic email */}
@@ -188,15 +192,15 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
                 <p><strong>Account Type:</strong> Transact Account</p>
                 <p><strong>Account Number:</strong> 1051789869</p>
                 <p><strong>Branch Code:</strong> 470010</p>
-                <p><strong>Reference:</strong> <span className="font-mono bg-yellow-100 px-2 py-1 rounded">{bookingId}</span></p>
+                <p><strong>Reference:</strong> <span className="font-mono bg-yellow-100 px-2 py-1 rounded">{displayReference}</span></p>
               </div>
               
               <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md flex items-start gap-2">
                 <AlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
                 <div className="text-sm text-amber-800">
                   <p className="font-medium">Important:</p>
-                  <p>Please email proof of payment to wade@thysgemaak.com or WhatsApp to +27 60 461 3766</p>
-                  <p>Use reference: <strong className="font-mono">{bookingId}</strong></p>
+                  <p>Please email proof of payment to spitbookings@thysgemaak.com or WhatsApp to +27 67 456 7784</p>
+                  <p>Use reference: <strong className="font-mono">{displayReference}</strong></p>
                 </div>
               </div>
             </div>
@@ -331,7 +335,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
         <div className="text-center text-sm text-muted-foreground">
           <p>Thank you for choosing Thys Gemaak Spitbraai Catering Services!</p>
           <p>We will contact you within 24-48 hours to confirm your booking details.</p>
-          <p>For any queries, contact us at spitbookings@thysgemaak.com or +27 60 461 3766</p>
+          <p>For any queries, contact us at spitbookings@thysgemaak.com or +27 67 456 7784</p>
         </div>
       </CardContent>
     </Card>

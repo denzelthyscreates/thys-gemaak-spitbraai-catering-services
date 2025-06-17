@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -31,6 +32,7 @@ export const useBookingForm = (menuSelection: any) => {
       city: '',
       province: '',
       postalCodeAddress: '',
+      referralSource: '',
       additionalNotes: '',
     },
   });
@@ -86,6 +88,7 @@ export const useBookingForm = (menuSelection: any) => {
         extra_salad_type: menuSelection.extraSaladType || null,
         menu_selection: menuSelection,
         notes: data.additionalNotes || '',
+        referral_source: data.referralSource || null,
         status: 'pending',
         user_id: null, // Explicitly set to null for anonymous bookings
         booking_reference: bookingReference // Add the custom reference
