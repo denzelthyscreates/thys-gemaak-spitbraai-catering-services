@@ -5,7 +5,7 @@ export const bookingFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
   email: z.string().email({ message: 'Please enter a valid email address' }),
   phone: z.string().min(10, { message: 'Please enter a valid phone number' }),
-  eventDate: z.date().optional(),
+  eventDate: z.string().min(1, { message: 'Event date is required' }),
   eventType: z.string().min(1, { message: 'Please select an event type' }),
   numberOfGuests: z.number().min(1, { message: 'Please enter the number of guests' }),
   // Event venue details

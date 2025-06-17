@@ -4,10 +4,30 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 import { Home } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
-import { BookingFormValues } from './types';
+
+// Define the form type to match useBookingForm schema
+type BillingFormData = {
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+  eventType: string;
+  numberOfGuests: number;
+  eventDate: string;
+  venueName?: string;
+  venueStreetAddress: string;
+  venueCity: string;
+  venueProvince: string;
+  venuePostalCode: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  province: string;
+  postalCodeAddress: string;
+  additionalNotes?: string;
+};
 
 interface BillingSectionProps {
-  form: UseFormReturn<BookingFormValues>;
+  form: UseFormReturn<BillingFormData>;
 }
 
 const BillingSection: React.FC<BillingSectionProps> = ({ form }) => {

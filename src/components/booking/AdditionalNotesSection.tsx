@@ -3,10 +3,30 @@ import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { UseFormReturn } from 'react-hook-form';
-import { BookingFormValues } from './types';
+
+// Define the form type to match useBookingForm schema
+type AdditionalNotesFormData = {
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+  eventType: string;
+  numberOfGuests: number;
+  eventDate: string;
+  venueName?: string;
+  venueStreetAddress: string;
+  venueCity: string;
+  venueProvince: string;
+  venuePostalCode: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  province: string;
+  postalCodeAddress: string;
+  additionalNotes?: string;
+};
 
 interface AdditionalNotesSectionProps {
-  form: UseFormReturn<BookingFormValues>;
+  form: UseFormReturn<AdditionalNotesFormData>;
 }
 
 const AdditionalNotesSection: React.FC<AdditionalNotesSectionProps> = ({ form }) => {
