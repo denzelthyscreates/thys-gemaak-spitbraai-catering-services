@@ -173,7 +173,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email with HTML content as PDF attachment
     const emailResponse = await resend.emails.send({
-      from: "Thys Gemaak Spitbraai <no-reply@thysgemaak.com>",
+      from: "Thys Gemaak Spitbraai <no-reply@spitbraai.thysgemaak.com>",
       to: [bookingData.contact_email],
       subject: `Your Spitbraai Booking Summary - ${bookingId}`,
       html: `
