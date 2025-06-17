@@ -31,18 +31,32 @@ const BookingFlowContainer: React.FC<BookingFlowContainerProps> = ({
 
   const handleBookingSubmitted = (result: any) => {
     console.log('Booking submitted successfully, transitioning to confirmation:', result);
+    console.log('Current step before transition:', currentStep);
+    
     setBookingResult(result);
     setCurrentStep('bookingConfirmed');
     
+    console.log('Set step to bookingConfirmed, result:', result);
+    
     // Scroll to top when showing confirmation
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
   };
 
   const handleBackToMenu = () => {
     setCurrentStep('menuBuilder');
   };
 
+  // Debug logging for step changes
+  useEffect(() => {
+    console.log('BookingFlowContainer step changed to:', currentStep);
+    console.log('Booking result available:', !!bookingResult);
+  }, [currentStep, bookingResult]);
+
   const renderCurrentStep = () => {
+    console.log('Rendering step:', currentStep, 'with booking result:', !!bookingResult);
+    
     switch (currentStep) {
       case 'menuBuilder':
         return (
@@ -63,20 +77,24 @@ const BookingFlowContainer: React.FC<BookingFlowContainerProps> = ({
         );
       
       case 'bookingConfirmed':
+        console.log('Rendering BookingSummary with:', bookingResult);
         return bookingResult ? (
           <BookingSummary
             bookingData={bookingResult.bookingData}
             bookingId={bookingResult.booking.id}
           />
-        ) : null;
+        ) : (
+          <div>Loading confirmation...</div>
+        );
       
       default:
-        return null;
+        return <div>Unknown step: {currentStep}</div>;
     }
   };
 
   return (
     <div className="booking-flow-container">
+      <div style={{ display: 'none' }}>Debug: {currentStep}</div>
       {renderCurrentStep()}
     </div>
   );

@@ -65,19 +65,40 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
   };
 
   const handleDownloadSummary = () => {
-    const summaryContent = generateSummaryHTML();
-    
-    // Create a new window for printing
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(summaryContent);
-      printWindow.document.close();
+    console.log('Download PDF clicked');
+    try {
+      const summaryContent = generateSummaryHTML();
       
-      // Wait for content to load, then print
-      printWindow.onload = () => {
-        printWindow.print();
-        printWindow.close();
-      };
+      // Create a blob with the HTML content
+      const blob = new Blob([summaryContent], { type: 'text/html;charset=utf-8' });
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a download link
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Spitbraai-Booking-Summary-${bookingId}.html`;
+      
+      // Append to body, click, and remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the URL object
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Download Started",
+        description: "Your booking summary is downloading as an HTML file.",
+        duration: 3000
+      });
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        title: "Download Failed",
+        description: "Failed to download the booking summary. Please try again.",
+        variant: "destructive",
+        duration: 5000
+      });
     }
   };
 
@@ -109,9 +130,16 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
       });
     } catch (error) {
       console.error('Error sending email:', error);
+      
+      // Check if it's a domain verification error
+      const errorMessage = error?.message || 'Unknown error';
+      const isDomainError = errorMessage.includes('domain is not verified') || errorMessage.includes('thysgemaak.com');
+      
       toast({
         title: "Email Failed",
-        description: "Failed to send booking summary. Please try again or contact support.",
+        description: isDomainError 
+          ? "Email service configuration issue. Please contact support." 
+          : "Failed to send booking summary. Please try again or contact support.",
         variant: "destructive",
         duration: 7000
       });
