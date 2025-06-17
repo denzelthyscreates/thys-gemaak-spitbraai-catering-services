@@ -20,23 +20,16 @@ const BookingFlowContainer: React.FC<BookingFlowContainerProps> = ({
   const [bookingResult, setBookingResult] = useState<any>(null);
 
   const handleMenuSelectionChange = (selection: any) => {
-    console.log('Menu selection changed in flow:', selection);
     setMenuSelection(selection);
   };
 
   const handleContinueToBooking = () => {
-    console.log('Continuing to booking form with menu selection:', menuSelection);
     setCurrentStep('bookingForm');
   };
 
   const handleBookingSubmitted = (result: any) => {
-    console.log('Booking submitted successfully, transitioning to confirmation:', result);
-    console.log('Current step before transition:', currentStep);
-    
     setBookingResult(result);
     setCurrentStep('bookingConfirmed');
-    
-    console.log('Set step to bookingConfirmed, result:', result);
     
     // Ensure we scroll to the top of the confirmation section smoothly
     setTimeout(() => {
@@ -53,15 +46,7 @@ const BookingFlowContainer: React.FC<BookingFlowContainerProps> = ({
     setCurrentStep('menuBuilder');
   };
 
-  // Debug logging for step changes
-  useEffect(() => {
-    console.log('BookingFlowContainer step changed to:', currentStep);
-    console.log('Booking result available:', !!bookingResult);
-  }, [currentStep, bookingResult]);
-
   const renderCurrentStep = () => {
-    console.log('Rendering step:', currentStep, 'with booking result:', !!bookingResult);
-    
     switch (currentStep) {
       case 'menuBuilder':
         return (
@@ -82,7 +67,6 @@ const BookingFlowContainer: React.FC<BookingFlowContainerProps> = ({
         );
       
       case 'bookingConfirmed':
-        console.log('Rendering BookingSummary with:', bookingResult);
         return bookingResult ? (
           <div id="booking-confirmation">
             <BookingSummary
@@ -101,7 +85,6 @@ const BookingFlowContainer: React.FC<BookingFlowContainerProps> = ({
 
   return (
     <div className="booking-flow-container">
-      <div style={{ display: 'none' }}>Debug: {currentStep}</div>
       {renderCurrentStep()}
     </div>
   );
