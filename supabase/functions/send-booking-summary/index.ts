@@ -467,6 +467,88 @@ const generatePDFContent = (bookingData: BookingData, bookingId: string) => {
   `;
 };
 
+const generateStaffNotificationEmail = (bookingData: BookingData, bookingId: string) => {
+  const menuSelection = bookingData.menu_selection;
+  const totalAmount = menuSelection?.travelFee 
+    ? (bookingData.total_price * bookingData.number_of_guests) + menuSelection.travelFee
+    : bookingData.total_price * bookingData.number_of_guests;
+
+  // Format extras with specific salad name for email display
+  const formattedExtras = formatExtrasWithSaladName(bookingData.extras || '', bookingData.menu_selection);
+
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+      <div style="background-color: #dc2626; color: white; padding: 20px; text-align: center;">
+        <h2 style="margin: 0;">🚨 NEW BOOKING ENQUIRY RECEIVED 🚨</h2>
+      </div>
+      
+      <div style="padding: 20px;">
+        <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin-bottom: 20px;">
+          <h3 style="margin: 0 0 10px 0; color: #dc2626;">URGENT: New Booking Requires Attention</h3>
+          <p style="margin: 0; font-weight: bold;">A new booking enquiry has been submitted and requires follow-up within 24-48 hours.</p>
+        </div>
+        
+        <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #22c55e;">📋 Complete Booking Summary</h3>
+          <p><strong>Reference:</strong> ${bookingId}</p>
+          <p><strong>Client Name:</strong> ${bookingData.contact_name}</p>
+          <p><strong>Client Email:</strong> ${bookingData.contact_email}</p>
+          <p><strong>Client Phone:</strong> ${bookingData.contact_phone}</p>
+          <p><strong>Event Type:</strong> ${getFullEventTypeName(bookingData.event_type)}</p>
+          <p><strong>Package:</strong> ${bookingData.menu_package}</p>
+          ${bookingData.season ? `<p><strong>Season:</strong> ${bookingData.season}</p>` : ''}
+          ${bookingData.starters ? `<p><strong>Starters:</strong> ${bookingData.starters}</p>` : ''}
+          ${bookingData.sides ? `<p><strong>Sides:</strong> ${bookingData.sides}</p>` : ''}
+          ${bookingData.desserts ? `<p><strong>Desserts:</strong> ${bookingData.desserts}</p>` : ''}
+          ${formattedExtras ? `<p><strong>Extras:</strong> ${formattedExtras}</p>` : ''}
+          <p><strong>Cutlery & Crockery:</strong> ${bookingData.menu_selection?.includeCutlery ? 'Included' : 'Not included'}</p>
+          <p><strong>Date:</strong> ${new Date(bookingData.event_date).toLocaleDateString('en-ZA', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })}</p>
+          <p><strong>Guests:</strong> ${bookingData.number_of_guests}</p>
+          <p><strong>Venue:</strong> ${bookingData.venue_street_address}, ${bookingData.venue_city}</p>
+          <p style="font-size: 18px; color: #22c55e;"><strong>Total Amount: R${totalAmount}</strong></p>
+          ${bookingData.additional_notes ? `<p><strong>Additional Notes:</strong> ${bookingData.additional_notes}</p>` : ''}
+        </div>
+        
+        <div style="background-color: #fef3c7; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+          <h4 style="color: #92400e; margin: 0 0 10px 0;">⚠️ Action Required</h4>
+          <ul style="margin: 0; padding-left: 20px; color: #92400e;">
+            <li>Contact client within 24-48 hours to confirm booking details</li>
+            <li>Check calendar availability for the requested date</li>
+            <li>Confirm menu selections and any special requirements</li>
+            <li>Follow up on payment to secure the booking</li>
+          </ul>
+        </div>
+        
+        <div style="background-color: #f0f9ff; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #0ea5e9;">
+          <h4 style="color: #0369a1; margin: 0 0 10px 0;">📞 Contact Information</h4>
+          <p style="margin: 5px 0;"><strong>Name:</strong> ${bookingData.contact_name}</p>
+          <p style="margin: 5px 0;"><strong>Email:</strong> ${bookingData.contact_email}</p>
+          <p style="margin: 5px 0;"><strong>Phone:</strong> ${bookingData.contact_phone}</p>
+        </div>
+        
+        <div style="background-color: #ecfdf5; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #22c55e;">
+          <h4 style="color: #166534; margin: 0 0 10px 0;">🏢 Venue Details</h4>
+          ${bookingData.venue_name ? `<p style="margin: 5px 0;"><strong>Venue Name:</strong> ${bookingData.venue_name}</p>` : ''}
+          <p style="margin: 5px 0;"><strong>Address:</strong> ${bookingData.venue_street_address}</p>
+          <p style="margin: 5px 0;"><strong>City:</strong> ${bookingData.venue_city}</p>
+          <p style="margin: 5px 0;"><strong>Province:</strong> ${bookingData.venue_province}</p>
+          <p style="margin: 5px 0;"><strong>Postal Code:</strong> ${bookingData.venue_postal_code}</p>
+        </div>
+      </div>
+      
+      <div style="background-color: #f3f4f6; padding: 20px; text-align: center; font-size: 12px; color: #6b7280;">
+        <p style="margin: 0;">Automated notification from Thys Gemaak Spitbraai booking system</p>
+        <p style="margin: 5px 0 0 0;">This email was sent automatically when booking ${bookingId} was submitted</p>
+      </div>
+    </div>
+  `;
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -543,7 +625,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <li>Your booking is not confirmed until we speak with you personally</li>
                 <li>Popular dates fill up quickly - payment secures your preferred date</li>
                 <li>Final guest numbers can be adjusted up to 7 days before your event</li>
-                <li>For bank transfers, please email proof of payment to wade@thysgemaak.com</li>
+                <li>For bank transfers, please email proof of payment to spitbookings@thysgemaak.com</li>
               </ul>
             </div>
             
@@ -560,7 +642,7 @@ const handler = async (req: Request): Promise<Response> => {
           
           <div style="background-color: #f3f4f6; padding: 20px; text-align: center; font-size: 12px; color: #6b7280;">
             <p style="margin: 0;">Thys Gemaak Spitbraai | Professional Catering Services</p>
-            <p style="margin: 5px 0 0 0;">Making your special occasions unforgettable since 2015</p>
+            <p style="margin: 5px 0 0 0;">Making your special occasions unforgettable since 2024</p>
           </div>
         </div>
       `,
@@ -578,7 +660,34 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Email sending failed: ${emailResponse.error.message}`);
     }
 
-    console.log("Email sent successfully:", emailResponse.data);
+    console.log("Customer email sent successfully:", emailResponse.data);
+
+    // Send staff notification email
+    try {
+      console.log("Sending staff notification email...");
+      
+      const staffEmailResponse = await resend.emails.send({
+        from: "Thys Gemaak Booking System <no-reply@spitbraai.thysgemaak.com>",
+        to: ["spitbookings@thysgemaak.com"],
+        subject: `🚨 NEW BOOKING ENQUIRY - ${bookingId} - ${bookingData.contact_name}`,
+        html: generateStaffNotificationEmail(bookingData, bookingId)
+      });
+
+      if (staffEmailResponse.error) {
+        console.error("Staff notification email error:", staffEmailResponse.error);
+      } else {
+        console.log("Staff notification email sent successfully:", staffEmailResponse.data);
+      }
+    } catch (staffEmailError) {
+      console.error("Staff email sending exception:", staffEmailError);
+    }
+
+    // Show success toast to customer
+    toast({
+      title: "Booking Successful!",
+      description: `Your booking has been created and a confirmation email has been sent to ${bookingData.contact_email}`,
+      duration: 5000
+    });
 
     return new Response(JSON.stringify({ 
       success: true, 
