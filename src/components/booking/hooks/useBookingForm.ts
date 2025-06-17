@@ -2,35 +2,9 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-
-const formSchema = z.object({
-  contactName: z.string().min(2, 'Name must be at least 2 characters'),
-  contactEmail: z.string().email('Please enter a valid email address'),
-  contactPhone: z.string().min(10, 'Phone number must be at least 10 digits'),
-  
-  eventType: z.string().min(1, 'Please select an event type'),
-  numberOfGuests: z.number().min(1, 'Number of guests is required'),
-  eventDate: z.string().min(1, 'Event date is required'),
-  
-  venueName: z.string().optional(),
-  venueStreetAddress: z.string().min(1, 'Venue address is required'),
-  venueCity: z.string().min(1, 'Venue city is required'),
-  venueProvince: z.string().min(1, 'Venue province is required'),
-  venuePostalCode: z.string().min(1, 'Venue postal code is required'),
-  
-  addressLine1: z.string().min(1, 'Billing address is required'),
-  addressLine2: z.string().optional(),
-  city: z.string().min(1, 'City is required'),
-  province: z.string().min(1, 'Province is required'),
-  postalCodeAddress: z.string().min(1, 'Postal code is required'),
-  
-  additionalNotes: z.string().optional(),
-});
-
-type FormData = z.infer<typeof formSchema>;
+import { bookingFormSchema, BookingFormValues } from '../types';
 
 export const useBookingForm = (menuSelection: any) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,12 +12,12 @@ export const useBookingForm = (menuSelection: any) => {
   const [bookingResult, setBookingResult] = useState<any>(null);
   const { toast } = useToast();
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<BookingFormValues>({
+    resolver: zodResolver(bookingFormSchema),
     defaultValues: {
-      contactName: '',
-      contactEmail: '',
-      contactPhone: '',
+      name: '',
+      email: '',
+      phone: '',
       eventType: menuSelection?.eventType || '',
       numberOfGuests: menuSelection?.numberOfGuests || 50,
       eventDate: '',
@@ -61,7 +35,7 @@ export const useBookingForm = (menuSelection: any) => {
     },
   });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: BookingFormValues) => {
     if (!menuSelection) {
       toast({
         title: "Error",
@@ -78,9 +52,9 @@ export const useBookingForm = (menuSelection: any) => {
       console.log('Menu selection:', menuSelection);
 
       const bookingData = {
-        contact_name: data.contactName,
-        contact_email: data.contactEmail,
-        contact_phone: data.contactPhone,
+        contact_name: data.name,
+        contact_email: data.email,
+        contact_phone: data.phone,
         event_date: data.eventDate,
         venue_name: data.venueName || null,
         venue_street_address: data.venueStreetAddress,

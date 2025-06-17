@@ -3,30 +3,10 @@ import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-
-// Define the form type to match useBookingForm schema
-type ContactFormData = {
-  contactName: string;
-  contactEmail: string;
-  contactPhone: string;
-  eventType: string;
-  numberOfGuests: number;
-  eventDate: string;
-  venueName?: string;
-  venueStreetAddress: string;
-  venueCity: string;
-  venueProvince: string;
-  venuePostalCode: string;
-  addressLine1: string;
-  addressLine2?: string;
-  city: string;
-  province: string;
-  postalCodeAddress: string;
-  additionalNotes?: string;
-};
+import { BookingFormValues } from './types';
 
 interface ContactSectionProps {
-  form: UseFormReturn<ContactFormData>;
+  form: UseFormReturn<BookingFormValues>;
 }
 
 const ContactSection: React.FC<ContactSectionProps> = ({ form }) => {
@@ -36,7 +16,7 @@ const ContactSection: React.FC<ContactSectionProps> = ({ form }) => {
       
       <FormField
         control={form.control}
-        name="contactName"
+        name="name"
         render={({ field }) => (
           <FormItem>
             <FormLabel htmlFor="contact-name">Full Name</FormLabel>
@@ -56,7 +36,7 @@ const ContactSection: React.FC<ContactSectionProps> = ({ form }) => {
       
       <FormField
         control={form.control}
-        name="contactEmail"
+        name="email"
         render={({ field }) => (
           <FormItem>
             <FormLabel htmlFor="contact-email">Email Address</FormLabel>
@@ -77,7 +57,7 @@ const ContactSection: React.FC<ContactSectionProps> = ({ form }) => {
       
       <FormField
         control={form.control}
-        name="contactPhone"
+        name="phone"
         render={({ field }) => (
           <FormItem>
             <FormLabel htmlFor="contact-phone">Phone Number</FormLabel>

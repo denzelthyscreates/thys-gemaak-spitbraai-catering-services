@@ -4,30 +4,10 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import { CalendarDays } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import AvailabilityCalendar from '../calendar/AvailabilityCalendar';
-
-// Define the form type to match useBookingForm schema
-type EventDetailsFormData = {
-  contactName: string;
-  contactEmail: string;
-  contactPhone: string;
-  eventType: string;
-  numberOfGuests: number;
-  eventDate: string;
-  venueName?: string;
-  venueStreetAddress: string;
-  venueCity: string;
-  venueProvince: string;
-  venuePostalCode: string;
-  addressLine1: string;
-  addressLine2?: string;
-  city: string;
-  province: string;
-  postalCodeAddress: string;
-  additionalNotes?: string;
-};
+import { BookingFormValues } from './types';
 
 interface EventDetailsSectionProps {
-  form: UseFormReturn<EventDetailsFormData>;
+  form: UseFormReturn<BookingFormValues>;
   menuSelection: any;
 }
 
