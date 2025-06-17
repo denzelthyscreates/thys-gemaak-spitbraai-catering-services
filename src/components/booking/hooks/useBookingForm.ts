@@ -132,7 +132,13 @@ export const useBookingForm = (menuSelection: any) => {
         });
       }
 
-      setBookingResult(insertedData);
+      // Prepare the result data in the expected format
+      const result = {
+        bookingData: insertedData,
+        booking: insertedData
+      };
+
+      setBookingResult(result);
       setSubmissionComplete(true);
 
     } catch (error) {
