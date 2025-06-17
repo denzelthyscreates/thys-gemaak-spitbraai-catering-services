@@ -183,7 +183,7 @@ serve(async (req) => {
     const response = {
       success: true, 
       formData,
-      paymentUrl: 'https://www.payfast.co.za/eng/process'
+      paymentUrl: 'https://www.payfast.co.za/eng/process' // Production URL
     };
 
     return new Response(

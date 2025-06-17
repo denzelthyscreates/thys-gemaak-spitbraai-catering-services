@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface PayNowRequest {
+interface PaymentRequest {
   amount: number;
   paymentType: 'deposit' | 'full' | 'balance';
   bookingData: {
@@ -25,17 +25,48 @@ serve(async (req) => {
   }
 
   try {
-    // Get PayFast receiver ID from secrets
-    const receiverId = Deno.env.get('PAYFAST_RECEIVER_ID') || '29885651';
+    console.log('PayFast PayNow function called');
+    
+    // Get PayFast credentials from secrets
+    const receiverId = Deno.env.get('PAYFAST_RECEIVER_ID');
 
-    const { amount, paymentType, bookingData }: PayNowRequest = await req.json();
+    console.log('PayFast credentials check:', {
+      receiverId: receiverId ? 'Present' : 'Missing'
+    });
+
+    if (!receiverId) {
+      console.error('PayFast receiver ID not configured');
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: 'Payment service not configured',
+          formData: {},
+          paymentUrl: ''
+        }),
+        { 
+          status: 200, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    const requestBody = await req.json();
+    console.log('Request body:', requestBody);
+    
+    const { amount, paymentType, bookingData }: PaymentRequest = requestBody;
 
     // Validate input
     if (!amount || amount < 5 || !paymentType || !bookingData) {
+      console.error('Invalid payment request:', { amount, paymentType, bookingData });
       return new Response(
-        JSON.stringify({ error: 'Invalid PayNow request' }),
+        JSON.stringify({ 
+          success: false,
+          error: 'Invalid payment request',
+          formData: {},
+          paymentUrl: ''
+        }),
         { 
-          status: 400, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
@@ -66,8 +97,8 @@ serve(async (req) => {
         itemDescription = 'Payment for Spitbraai catering services';
     }
 
-    // Build PayNow form data
-    const formData = {
+    // Build form data for PayFast PayNow
+    const formData: Record<string, string> = {
       cmd: '_paynow',
       receiver: receiverId,
       return_url: `${baseUrl}/payment-success`,
@@ -80,12 +111,14 @@ serve(async (req) => {
 
     console.log('Generated secure PayNow form for amount:', amount, 'type:', paymentType);
 
+    const response = {
+      success: true, 
+      formData,
+      paymentUrl: 'https://www.payfast.co.za/eng/process' // Production URL
+    };
+
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        formData,
-        paymentUrl: 'https://payment.payfast.io/eng/process'
-      }),
+      JSON.stringify(response),
       { 
         status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -93,11 +126,16 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('PayNow processing error:', error);
+    console.error('Payment processing error:', error);
     return new Response(
-      JSON.stringify({ error: 'PayNow processing failed' }),
+      JSON.stringify({ 
+        success: false,
+        error: 'Payment processing failed',
+        formData: {},
+        paymentUrl: ''
+      }),
       { 
-        status: 500, 
+        status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );

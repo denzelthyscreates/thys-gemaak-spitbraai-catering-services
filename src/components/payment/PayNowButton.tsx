@@ -29,7 +29,7 @@ const PayNowButton: React.FC<PayNowButtonProps> = ({
   paymentType = 'full',
   buttonText,
   variant = 'default',
-  openInNewTab = true, // Changed default to true
+  openInNewTab = true,
   disabled = false
 }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -60,10 +60,10 @@ const PayNowButton: React.FC<PayNowButtonProps> = ({
       
       console.log('Secure PayNow form generated');
       
-      // Always open in new tab and use the sandbox URL for testing
+      // Always open in new tab and use the production URL
       const form = document.createElement('form');
       form.method = 'post';
-      form.action = 'https://sandbox.payfast.co.za/eng/process'; // Use sandbox for testing
+      form.action = 'https://www.payfast.co.za/eng/process'; // Use production environment
       form.target = '_blank'; // Always open in new tab
       
       // Add all form fields
