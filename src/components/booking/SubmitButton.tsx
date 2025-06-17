@@ -9,16 +9,20 @@ interface SubmitButtonProps {
 
 const SubmitButton: React.FC<SubmitButtonProps> = ({ isSubmitting, menuSelection }) => {
   const handleClick = (e: React.MouseEvent) => {
-    console.log("Submit button clicked!", { isSubmitting, menuSelection });
+    console.log("=== SUBMIT BUTTON CLICKED ===");
+    console.log("Button state - isSubmitting:", isSubmitting);
+    console.log("Menu selection available:", !!menuSelection);
+    console.log("Menu selection details:", menuSelection);
+    console.log("Event type:", e.type);
+    console.log("Event target:", e.target);
     
     if (!menuSelection) {
-      console.warn("No menu selection available");
+      console.error("ERROR: Submit clicked but no menu selection available");
       e.preventDefault();
       return;
     }
     
-    console.log("Form submission proceeding...");
-    // Let the form handle the actual submission
+    console.log("Submit button click - proceeding to form submission");
   };
 
   return (

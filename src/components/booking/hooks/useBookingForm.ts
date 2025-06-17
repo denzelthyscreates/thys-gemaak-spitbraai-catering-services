@@ -36,7 +36,12 @@ export const useBookingForm = (menuSelection: any) => {
   });
 
   const onSubmit = async (data: BookingFormValues) => {
+    console.log("=== BOOKING SUBMISSION STARTED ===");
+    console.log("Form data received:", data);
+    console.log("Menu selection:", menuSelection);
+
     if (!menuSelection) {
+      console.error("ERROR: No menu selection provided");
       toast({
         title: "Error",
         description: "Menu selection is required to complete booking",
@@ -48,9 +53,7 @@ export const useBookingForm = (menuSelection: any) => {
     setIsSubmitting(true);
 
     try {
-      console.log('Submitting booking with data:', data);
-      console.log('Menu selection:', menuSelection);
-
+      // Prepare booking data with detailed logging
       const bookingData = {
         contact_name: data.name,
         contact_email: data.email,
@@ -79,8 +82,19 @@ export const useBookingForm = (menuSelection: any) => {
         extra_salad_type: menuSelection.extraSaladType || null,
         menu_selection: menuSelection,
         notes: data.additionalNotes || '',
-        status: 'pending'
+        status: 'pending',
+        user_id: null // Explicitly set to null for anonymous bookings
       };
+
+      console.log("=== ATTEMPTING SUPABASE INSERT ===");
+      console.log("Booking data to insert:", bookingData);
+
+      // Check if Supabase client is available
+      if (!supabase) {
+        throw new Error("Supabase client not available");
+      }
+
+      console.log("Supabase client available, attempting insert...");
 
       const { data: insertedData, error } = await supabase
         .from('bookings')
@@ -88,16 +102,47 @@ export const useBookingForm = (menuSelection: any) => {
         .select()
         .single();
 
+      console.log("=== SUPABASE INSERT RESPONSE ===");
+      console.log("Inserted data:", insertedData);
+      console.log("Error:", error);
+
       if (error) {
-        console.error('Supabase insert error:', error);
-        throw error;
+        console.error("=== SUPABASE INSERT ERROR DETAILS ===");
+        console.error("Error code:", error.code);
+        console.error("Error message:", error.message);
+        console.error("Error details:", error.details);
+        console.error("Error hint:", error.hint);
+        console.error("Full error object:", error);
+        
+        // Provide more specific error messages based on error type
+        let errorMessage = "Failed to create booking. ";
+        
+        if (error.code === '42501') {
+          errorMessage += "Permission denied - this might be a database policy issue.";
+        } else if (error.code === '23502') {
+          errorMessage += "Required field missing.";
+        } else if (error.code === '23505') {
+          errorMessage += "Duplicate booking detected.";
+        } else {
+          errorMessage += `Database error: ${error.message}`;
+        }
+        
+        throw new Error(errorMessage);
       }
 
-      console.log('Booking inserted successfully:', insertedData);
+      if (!insertedData) {
+        console.error("No data returned from insert operation");
+        throw new Error("No booking data returned from database");
+      }
+
+      console.log("=== BOOKING CREATED SUCCESSFULLY ===");
+      console.log("Booking ID:", insertedData.id);
+      console.log("Created booking:", insertedData);
 
       // Automatically send the summary email
       try {
-        console.log('Sending automatic booking summary email to:', insertedData.contact_email);
+        console.log("=== ATTEMPTING TO SEND EMAIL ===");
+        console.log("Sending email to:", insertedData.contact_email);
         
         const { data: emailData, error: emailError } = await supabase.functions.invoke('send-booking-summary', {
           body: {
@@ -106,16 +151,19 @@ export const useBookingForm = (menuSelection: any) => {
           }
         });
 
+        console.log("=== EMAIL SEND RESPONSE ===");
+        console.log("Email data:", emailData);
+        console.log("Email error:", emailError);
+
         if (emailError) {
-          console.error('Email sending error:', emailError);
-          // Don't throw error here - booking was successful, just email failed
+          console.error("Email sending failed:", emailError);
           toast({
             title: "Booking Successful!",
             description: "Your booking was created successfully, but there was an issue sending the confirmation email. You can still access your booking details below.",
             duration: 7000
           });
         } else {
-          console.log('Automatic email sent successfully:', emailData);
+          console.log("Email sent successfully");
           toast({
             title: "Booking Successful!",
             description: `Your booking has been created and a confirmation email has been sent to ${insertedData.contact_email}`,
@@ -123,8 +171,7 @@ export const useBookingForm = (menuSelection: any) => {
           });
         }
       } catch (emailError) {
-        console.error('Error sending automatic email:', emailError);
-        // Don't fail the booking if email fails
+        console.error("Email sending exception:", emailError);
         toast({
           title: "Booking Successful!",
           description: "Your booking was created successfully, but there was an issue sending the confirmation email. You can still access your booking details below.",
@@ -132,24 +179,34 @@ export const useBookingForm = (menuSelection: any) => {
         });
       }
 
-      // Prepare the result data in the expected format
+      // Prepare the result data
       const result = {
         bookingData: insertedData,
         booking: insertedData
       };
 
+      console.log("=== BOOKING PROCESS COMPLETED ===");
+      console.log("Final result:", result);
+
       setBookingResult(result);
       setSubmissionComplete(true);
 
     } catch (error) {
-      console.error('Error submitting booking:', error);
+      console.error("=== BOOKING SUBMISSION ERROR ===");
+      console.error("Error type:", typeof error);
+      console.error("Error instance:", error instanceof Error);
+      console.error("Error message:", error?.message || "Unknown error");
+      console.error("Error stack:", error?.stack);
+      console.error("Full error object:", error);
+      
       toast({
         title: "Booking Failed",
-        description: "There was an error creating your booking. Please try again or contact support.",
+        description: error?.message || "There was an error creating your booking. Please try again or contact support.",
         variant: "destructive",
-        duration: 7000
+        duration: 10000
       });
     } finally {
+      console.log("=== BOOKING SUBMISSION CLEANUP ===");
       setIsSubmitting(false);
     }
   };
