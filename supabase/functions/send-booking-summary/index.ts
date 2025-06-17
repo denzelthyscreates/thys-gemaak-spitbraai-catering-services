@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
@@ -71,9 +72,31 @@ const getMenuInclusions = (menuPackage: string, includeCutlery: boolean) => {
   return inclusions;
 };
 
+// Function to format extras with exact salad name
+const formatExtrasWithSaladName = (extras: string, menuSelection: any) => {
+  if (!extras || !menuSelection) return extras;
+  
+  // If extras contains "Extra Salad" and we have extraSaladType, replace it with the specific salad name
+  if (extras.includes('Extra Salad') && menuSelection.extraSaladType) {
+    // Map salad type IDs to names
+    const saladTypeMap: { [key: string]: string } = {
+      'greek_salad': 'Greek Salad',
+      'potato_salad': 'Potato Salad',
+      'coleslaw': 'Coleslaw',
+      'beetroot_salad': 'Beetroot Salad',
+      'three_bean_salad': 'Three Bean Salad'
+    };
+    
+    const saladName = saladTypeMap[menuSelection.extraSaladType] || menuSelection.extraSaladType;
+    return extras.replace('Extra Salad', `Extra Salad: ${saladName}`);
+  }
+  
+  return extras;
+};
+
 const generatePaymentSection = (bookingData: BookingData, bookingId: string, totalAmount: number) => {
   // Create payment links that work in email clients
-  const baseUrl = 'https://sandbox.payfast.co.za/eng/process';
+  const baseUrl = 'https://payment.payfast.io/eng/process';
   const receiverId = Deno.env.get('PAYFAST_RECEIVER_ID') || '29885651';
   
   // Create deposit payment URL
@@ -150,6 +173,9 @@ const generatePDFContent = (bookingData: BookingData, bookingId: string) => {
 
   const fullEventType = getFullEventTypeName(bookingData.event_type);
   const menuInclusions = getMenuInclusions(bookingData.menu_package, menuSelection?.includeCutlery);
+  
+  // Format extras with specific salad name
+  const formattedExtras = formatExtrasWithSaladName(bookingData.extras || '', menuSelection);
 
   return `
 <!DOCTYPE html>
@@ -332,7 +358,7 @@ const generatePDFContent = (bookingData: BookingData, bookingId: string) => {
             ${bookingData.starters ? `<div class="info-row"><span class="label">Starters:</span><span class="value">${bookingData.starters}</span></div>` : ''}
             ${bookingData.sides ? `<div class="info-row"><span class="label">Sides:</span><span class="value">${bookingData.sides}</span></div>` : ''}
             ${bookingData.desserts ? `<div class="info-row"><span class="label">Desserts:</span><span class="value">${bookingData.desserts}</span></div>` : ''}
-            ${bookingData.extras ? `<div class="info-row"><span class="label">Extras:</span><span class="value">${bookingData.extras}</span></div>` : ''}
+            ${formattedExtras ? `<div class="info-row"><span class="label">Extras:</span><span class="value">${formattedExtras}</span></div>` : ''}
             <div class="info-row">
                 <span class="label">Cutlery & Crockery:</span>
                 <span class="value">${menuSelection?.includeCutlery ? 'Included' : 'Not included'}</span>
@@ -402,6 +428,9 @@ const handler = async (req: Request): Promise<Response> => {
       : bookingData.total_price * bookingData.number_of_guests;
 
     const paymentSection = generatePaymentSection(bookingData, bookingId, totalAmount);
+    
+    // Format extras with specific salad name for email display
+    const formattedExtras = formatExtrasWithSaladName(bookingData.extras || '', bookingData.menu_selection);
 
     // Send email with enhanced content including working payment links
     const emailResponse = await resend.emails.send({
@@ -419,10 +448,16 @@ const handler = async (req: Request): Promise<Response> => {
             <p>Thank you for choosing Thys Gemaak Spitbraai! We have successfully received your booking request and are excited to cater your special event.</p>
             
             <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="margin-top: 0; color: #22c55e;">📋 Booking Summary</h3>
+              <h3 style="margin-top: 0; color: #22c55e;">📋 Complete Booking Summary</h3>
               <p><strong>Reference:</strong> ${bookingId}</p>
               <p><strong>Event Type:</strong> ${getFullEventTypeName(bookingData.event_type)}</p>
               <p><strong>Package:</strong> ${bookingData.menu_package}</p>
+              ${bookingData.season ? `<p><strong>Season:</strong> ${bookingData.season}</p>` : ''}
+              ${bookingData.starters ? `<p><strong>Starters:</strong> ${bookingData.starters}</p>` : ''}
+              ${bookingData.sides ? `<p><strong>Sides:</strong> ${bookingData.sides}</p>` : ''}
+              ${bookingData.desserts ? `<p><strong>Desserts:</strong> ${bookingData.desserts}</p>` : ''}
+              ${formattedExtras ? `<p><strong>Extras:</strong> ${formattedExtras}</p>` : ''}
+              <p><strong>Cutlery & Crockery:</strong> ${bookingData.menu_selection?.includeCutlery ? 'Included' : 'Not included'}</p>
               <p><strong>Date:</strong> ${new Date(bookingData.event_date).toLocaleDateString('en-ZA', {
                 weekday: 'long',
                 year: 'numeric',

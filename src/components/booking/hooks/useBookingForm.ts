@@ -3,32 +3,34 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { getCurrentSouthAfricaTime } from '@/utils/dateUtils';
+import { supabase } from '@/integrations/supabase/client';
 
-const bookingSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
-  email: z.string().email({ message: 'Please enter a valid email address' }),
-  phone: z.string().min(10, { message: 'Please enter a valid phone number' }),
-  eventDate: z.date().optional(),
-  eventType: z.string().optional(),
-  numberOfGuests: z.number().optional(),
+const formSchema = z.object({
+  contactName: z.string().min(2, 'Name must be at least 2 characters'),
+  contactEmail: z.string().email('Please enter a valid email address'),
+  contactPhone: z.string().min(10, 'Phone number must be at least 10 digits'),
+  
+  eventType: z.string().min(1, 'Please select an event type'),
+  numberOfGuests: z.number().min(1, 'Number of guests is required'),
+  eventDate: z.string().min(1, 'Event date is required'),
+  
   venueName: z.string().optional(),
-  venueStreetAddress: z.string().min(2, { message: 'Please enter the venue street address' }),
-  venueCity: z.string().min(2, { message: 'Please enter the venue city' }),
-  venueProvince: z.string().min(2, { message: 'Please enter the venue province' }),
-  venuePostalCode: z.string().min(4, { message: 'Please enter the venue postal code' }),
-  addressLine1: z.string().min(2, { message: 'Please enter your street address' }),
+  venueStreetAddress: z.string().min(1, 'Venue address is required'),
+  venueCity: z.string().min(1, 'Venue city is required'),
+  venueProvince: z.string().min(1, 'Venue province is required'),
+  venuePostalCode: z.string().min(1, 'Venue postal code is required'),
+  
+  addressLine1: z.string().min(1, 'Billing address is required'),
   addressLine2: z.string().optional(),
-  city: z.string().min(2, { message: 'Please enter your city' }),
-  province: z.string().min(2, { message: 'Please enter your province' }),
-  postalCodeAddress: z.string().min(4, { message: 'Please enter your postal code' }),
+  city: z.string().min(1, 'City is required'),
+  province: z.string().min(1, 'Province is required'),
+  postalCodeAddress: z.string().min(1, 'Postal code is required'),
+  
   additionalNotes: z.string().optional(),
-  referralSource: z.string().optional(),
 });
 
-type BookingFormData = z.infer<typeof bookingSchema>;
+type FormData = z.infer<typeof formSchema>;
 
 export const useBookingForm = (menuSelection: any) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,71 +38,51 @@ export const useBookingForm = (menuSelection: any) => {
   const [bookingResult, setBookingResult] = useState<any>(null);
   const { toast } = useToast();
 
-  const form = useForm<BookingFormData>({
-    resolver: zodResolver(bookingSchema),
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      email: '',
-      phone: '',
-      eventDate: undefined,
+      contactName: '',
+      contactEmail: '',
+      contactPhone: '',
+      eventType: menuSelection?.eventType || '',
+      numberOfGuests: menuSelection?.numberOfGuests || 50,
+      eventDate: '',
       venueName: '',
       venueStreetAddress: '',
       venueCity: '',
-      venueProvince: 'Western Cape',
+      venueProvince: '',
       venuePostalCode: menuSelection?.postalCode || '',
       addressLine1: '',
       addressLine2: '',
       city: '',
-      province: 'Western Cape',
+      province: '',
       postalCodeAddress: '',
       additionalNotes: '',
-      eventType: menuSelection?.eventType || '',
-      numberOfGuests: menuSelection?.numberOfGuests || undefined,
-      referralSource: '',
     },
   });
 
-  const onSubmit = async (data: BookingFormData) => {
-    console.log('=== BOOKING FORM SUBMISSION STARTED ===');
-    console.log('Form submission started with data:', data);
-    console.log('Menu selection:', menuSelection);
-    
+  const onSubmit = async (data: FormData) => {
     if (!menuSelection) {
-      console.error('❌ No menu selection provided');
       toast({
         title: "Error",
-        description: "Please select a menu package before submitting.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!data.eventDate) {
-      console.error('❌ No event date provided');
-      toast({
-        title: "Error",
-        description: "Please select an event date.",
-        variant: "destructive"
+        description: "Menu selection is required to complete booking",
+        variant: "destructive",
       });
       return;
     }
 
     setIsSubmitting(true);
-    console.log('🔄 Setting isSubmitting to true');
 
     try {
-      console.log('📝 Preparing booking data for database insertion...');
-      
-      // Convert event date to South Africa time before storing
-      const eventDateSouthAfrica = new Date(data.eventDate);
-      eventDateSouthAfrica.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
-      
+      console.log('Submitting booking with data:', data);
+      console.log('Menu selection:', menuSelection);
+
       const bookingData = {
-        contact_name: data.name,
-        contact_email: data.email,
-        contact_phone: data.phone,
-        event_date: eventDateSouthAfrica.toISOString(),
-        venue_name: data.venueName,
+        contact_name: data.contactName,
+        contact_email: data.contactEmail,
+        contact_phone: data.contactPhone,
+        event_date: data.eventDate,
+        venue_name: data.venueName || null,
         venue_street_address: data.venueStreetAddress,
         venue_city: data.venueCity,
         venue_province: data.venueProvince,
@@ -111,10 +93,9 @@ export const useBookingForm = (menuSelection: any) => {
         province: data.province,
         postal_code_address: data.postalCodeAddress,
         additional_notes: data.additionalNotes || null,
-        event_type: data.eventType || menuSelection.eventType || null,
-        referral_source: data.referralSource || null,
+        event_type: data.eventType,
         menu_package: menuSelection.menuPackage,
-        number_of_guests: menuSelection.numberOfGuests,
+        number_of_guests: data.numberOfGuests,
         total_price: menuSelection.totalPrice,
         season: menuSelection.season || null,
         starters: menuSelection.starters || null,
@@ -123,56 +104,73 @@ export const useBookingForm = (menuSelection: any) => {
         extras: menuSelection.extras || null,
         extra_salad_type: menuSelection.extraSaladType || null,
         menu_selection: menuSelection,
-        status: 'pending',
-        notes: `Travel Fee: R${menuSelection.travelFee || 0}, Area: ${menuSelection.areaName || 'Unknown'}`,
-        user_id: null,
-        created_at: getCurrentSouthAfricaTime()
+        notes: data.additionalNotes || '',
+        status: 'pending'
       };
 
-      console.log('📤 Booking data prepared for database:', bookingData);
-
-      const { data: booking, error } = await supabase
+      const { data: insertedData, error } = await supabase
         .from('bookings')
         .insert([bookingData])
         .select()
         .single();
 
       if (error) {
-        console.error('❌ Database insertion error:', error);
+        console.error('Supabase insert error:', error);
         throw error;
       }
 
-      console.log('✅ Booking created successfully in database:', booking);
-      setBookingResult({ booking, bookingData });
+      console.log('Booking inserted successfully:', insertedData);
+
+      // Automatically send the summary email
+      try {
+        console.log('Sending automatic booking summary email to:', insertedData.contact_email);
+        
+        const { data: emailData, error: emailError } = await supabase.functions.invoke('send-booking-summary', {
+          body: {
+            bookingData: insertedData,
+            bookingId: insertedData.id
+          }
+        });
+
+        if (emailError) {
+          console.error('Email sending error:', emailError);
+          // Don't throw error here - booking was successful, just email failed
+          toast({
+            title: "Booking Successful!",
+            description: "Your booking was created successfully, but there was an issue sending the confirmation email. You can still access your booking details below.",
+            duration: 7000
+          });
+        } else {
+          console.log('Automatic email sent successfully:', emailData);
+          toast({
+            title: "Booking Successful!",
+            description: `Your booking has been created and a confirmation email has been sent to ${insertedData.contact_email}`,
+            duration: 5000
+          });
+        }
+      } catch (emailError) {
+        console.error('Error sending automatic email:', emailError);
+        // Don't fail the booking if email fails
+        toast({
+          title: "Booking Successful!",
+          description: "Your booking was created successfully, but there was an issue sending the confirmation email. You can still access your booking details below.",
+          duration: 7000
+        });
+      }
+
+      setBookingResult(insertedData);
       setSubmissionComplete(true);
-      console.log('🎉 Booking submission completed successfully');
-
-      toast({
-        title: "Booking Submitted Successfully!",
-        description: "Thank you for your booking. We will contact you soon to confirm the details.",
-        duration: 5000
-      });
-
-      // Reset form after successful submission
-      form.reset();
 
     } catch (error) {
-      console.error('❌ BOOKING SUBMISSION ERROR:', error);
-      console.error('Error details:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined,
-        error
-      });
-      
+      console.error('Error submitting booking:', error);
       toast({
-        title: "Submission Failed",
-        description: error instanceof Error ? error.message : "Failed to submit booking. Please try again.",
-        variant: "destructive"
+        title: "Booking Failed",
+        description: "There was an error creating your booking. Please try again or contact support.",
+        variant: "destructive",
+        duration: 7000
       });
     } finally {
-      console.log('🔄 Setting isSubmitting to false');
       setIsSubmitting(false);
-      console.log('=== BOOKING FORM SUBMISSION ENDED ===');
     }
   };
 
@@ -181,6 +179,6 @@ export const useBookingForm = (menuSelection: any) => {
     isSubmitting,
     submissionComplete,
     bookingResult,
-    onSubmit
+    onSubmit,
   };
 };

@@ -3,10 +3,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Mail, Loader2, CreditCard } from 'lucide-react';
+import { CreditCard } from 'lucide-react';
 import { formatSouthAfricaDateTime } from '@/utils/dateUtils';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import PayNowButton from '@/components/payment/PayNowButton';
 
 interface BookingSummaryProps {
@@ -41,8 +39,6 @@ interface BookingSummaryProps {
 }
 
 const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId }) => {
-  const [isEmailSending, setIsEmailSending] = useState(false);
-  const { toast } = useToast();
   const menuSelection = bookingData.menu_selection;
   const totalAmount = menuSelection?.travelFee 
     ? (bookingData.total_price * bookingData.number_of_guests) + menuSelection.travelFee
@@ -84,47 +80,26 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
     return inclusions;
   };
 
-  const handleEmailSummary = async () => {
-    setIsEmailSending(true);
-    try {
-      console.log('Sending enhanced email to:', bookingData.contact_email);
-
-      const { data, error } = await supabase.functions.invoke('send-booking-summary', {
-        body: {
-          bookingData,
-          bookingId
-        }
-      });
-
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw error;
-      }
-
-      console.log('Enhanced email response:', data);
-
-      toast({
-        title: "Email Sent Successfully!",
-        description: `Enhanced booking summary with payment options sent to ${bookingData.contact_email}`,
-        duration: 5000
-      });
-    } catch (error) {
-      console.error('Error sending email:', error);
+  // Function to format extras with exact salad name
+  const formatExtrasWithSaladName = (extras: string, menuSelection: any) => {
+    if (!extras || !menuSelection) return extras;
+    
+    // If extras contains "Extra Salad" and we have extraSaladType, replace it with the specific salad name
+    if (extras.includes('Extra Salad') && menuSelection.extraSaladType) {
+      // Map salad type IDs to names
+      const saladTypeMap: { [key: string]: string } = {
+        'greek_salad': 'Greek Salad',
+        'potato_salad': 'Potato Salad',
+        'coleslaw': 'Coleslaw',
+        'beetroot_salad': 'Beetroot Salad',
+        'three_bean_salad': 'Three Bean Salad'
+      };
       
-      const errorMessage = error?.message || 'Unknown error';
-      const isDomainError = errorMessage.includes('domain is not verified') || errorMessage.includes('thysgemaak.com');
-      
-      toast({
-        title: "Email Failed",
-        description: isDomainError 
-          ? "Email service configuration issue. Please contact support." 
-          : "Failed to send booking summary. Please try again or contact support.",
-        variant: "destructive",
-        duration: 7000
-      });
-    } finally {
-      setIsEmailSending(false);
+      const saladName = saladTypeMap[menuSelection.extraSaladType] || menuSelection.extraSaladType;
+      return extras.replace('Extra Salad', `Extra Salad: ${saladName}`);
     }
+    
+    return extras;
   };
 
   const paymentBookingData = {
@@ -145,26 +120,12 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
           Reference: <span className="font-mono font-semibold">{bookingId}</span>
         </CardDescription>
         
-        {/* Action Button - Only Email Summary */}
-        <div className="flex justify-center">
-          <Button 
-            onClick={handleEmailSummary} 
-            variant="outline" 
-            className="flex items-center gap-2"
-            disabled={isEmailSending}
-          >
-            {isEmailSending ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Sending...
-              </>
-            ) : (
-              <>
-                <Mail className="h-4 w-4" />
-                Email Summary
-              </>
-            )}
-          </Button>
+        {/* Information about automatic email */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+          <p className="text-sm text-blue-800">
+            📧 <strong>Email Confirmation Sent:</strong> A detailed booking summary has been automatically sent to <strong>{bookingData.contact_email}</strong>. 
+            Please check your inbox (and spam folder) for the confirmation email with complete booking details and payment options.
+          </p>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -255,7 +216,9 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
               </div>
               <div>
                 {bookingData.desserts && <div><strong>Desserts:</strong> {bookingData.desserts}</div>}
-                {bookingData.extras && <div><strong>Extras:</strong> {bookingData.extras}</div>}
+                {bookingData.extras && (
+                  <div><strong>Extras:</strong> {formatExtrasWithSaladName(bookingData.extras, menuSelection)}</div>
+                )}
                 <div><strong>Cutlery:</strong> {menuSelection?.includeCutlery ? 'Included' : 'Not included'}</div>
               </div>
             </div>
