@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { CreditCard } from 'lucide-react';
+import { CreditCard, BanknoteIcon, AlertCircle } from 'lucide-react';
 import { formatSouthAfricaDateTime } from '@/utils/dateUtils';
 import PayNowButton from '@/components/payment/PayNowButton';
 
@@ -39,6 +38,7 @@ interface BookingSummaryProps {
 }
 
 const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId }) => {
+  const [showBankDetails, setShowBankDetails] = useState(false);
   const menuSelection = bookingData.menu_selection;
   const totalAmount = menuSelection?.travelFee 
     ? (bookingData.total_price * bookingData.number_of_guests) + menuSelection.travelFee
@@ -138,7 +138,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
           <p className="text-sm text-gray-600 mb-4">
             Complete your booking by making a secure payment. Choose from the options below:
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <h4 className="font-medium text-green-700">Booking Deposit (R500)</h4>
               <p className="text-sm text-gray-600">Secure your date with a deposit</p>
@@ -161,7 +161,46 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ bookingData, bookingId 
                 openInNewTab={true}
               />
             </div>
+            <div className="space-y-2">
+              <h4 className="font-medium text-purple-700">Manual Bank Transfer</h4>
+              <p className="text-sm text-gray-600">Pay via direct bank transfer</p>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => setShowBankDetails(!showBankDetails)}
+              >
+                <BanknoteIcon className="h-4 w-4 mr-2" />
+                {showBankDetails ? 'Hide' : 'Show'} Bank Details
+              </Button>
+            </div>
           </div>
+          
+          {/* Bank Details Section */}
+          {showBankDetails && (
+            <div className="mt-6 p-4 border border-gray-300 rounded-lg bg-gray-50">
+              <h4 className="font-semibold mb-2 flex items-center gap-2">
+                <BanknoteIcon className="h-5 w-5 text-purple-600" />
+                Bank Payment Details
+              </h4>
+              <div className="space-y-2 text-sm">
+                <p><strong>Bank:</strong> Capitec Business Bank</p>
+                <p><strong>Account Name:</strong> Thys Gemaak SDC</p>
+                <p><strong>Account Type:</strong> Transact Account</p>
+                <p><strong>Account Number:</strong> 1051789869</p>
+                <p><strong>Branch Code:</strong> 470010</p>
+                <p><strong>Reference:</strong> {bookingId} - {bookingData.contact_name}</p>
+              </div>
+              
+              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md flex items-start gap-2">
+                <AlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                <div className="text-sm text-amber-800">
+                  <p className="font-medium">Important:</p>
+                  <p>Please email proof of payment to wade@thysgemaak.com or WhatsApp to +27 60 461 3766</p>
+                  <p>Use reference: <strong>{bookingId} - {bookingData.contact_name}</strong></p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">

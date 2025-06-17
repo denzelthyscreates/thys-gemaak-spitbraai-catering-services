@@ -15,6 +15,23 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({ form, menuSel
   const selectedDate = form.watch('eventDate');
   const venuePostalCode = form.watch('venuePostalCode');
 
+  // Convert string to Date for calendar, and Date back to string for form
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      form.setValue('eventDate', date.toISOString().split('T')[0]);
+    } else {
+      form.setValue('eventDate', '');
+    }
+  };
+
+  // Convert string back to Date for calendar display
+  const getSelectedDateForCalendar = () => {
+    if (selectedDate && typeof selectedDate === 'string') {
+      return new Date(selectedDate);
+    }
+    return undefined;
+  };
+
   return (
     <div className="space-y-4">
       <FormField
@@ -29,8 +46,8 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({ form, menuSel
             <FormControl>
               <div className="space-y-3">
                 <AvailabilityCalendar
-                  selectedDate={field.value}
-                  onDateSelect={field.onChange}
+                  selectedDate={getSelectedDateForCalendar()}
+                  onDateSelect={handleDateSelect}
                   userPostalCode={venuePostalCode || menuSelection?.postalCode}
                   className="w-full"
                 />

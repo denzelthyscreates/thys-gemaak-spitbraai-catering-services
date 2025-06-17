@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
@@ -130,7 +129,7 @@ const generatePaymentSection = (bookingData: BookingData, bookingId: string, tot
       <p style="margin-bottom: 15px;">You can secure your booking by making a payment using one of the options below:</p>
       
       <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
-        <div style="flex: 1; background: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb; min-width: 250px;">
+        <div style="flex: 1; background: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb; min-width: 200px;">
           <h4 style="color: #22c55e; margin: 0 0 10px 0;">Option 1: Booking Deposit (R500)</h4>
           <p style="margin: 0 0 15px 0; font-size: 14px;">Secure your date with a R500 deposit</p>
           <a href="${depositUrl}" 
@@ -140,7 +139,7 @@ const generatePaymentSection = (bookingData: BookingData, bookingId: string, tot
           </a>
         </div>
         
-        <div style="flex: 1; background: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb; min-width: 250px;">
+        <div style="flex: 1; background: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb; min-width: 200px;">
           <h4 style="color: #22c55e; margin: 0 0 10px 0;">Option 2: Full Payment (R${totalAmount})</h4>
           <p style="margin: 0 0 15px 0; font-size: 14px;">Pay the full amount now</p>
           <a href="${fullPaymentUrl}" 
@@ -149,10 +148,24 @@ const generatePaymentSection = (bookingData: BookingData, bookingId: string, tot
             Pay Full Amount
           </a>
         </div>
+        
+        <div style="flex: 1; background: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb; min-width: 200px;">
+          <h4 style="color: #9333ea; margin: 0 0 10px 0;">Option 3: Manual Bank Transfer</h4>
+          <p style="margin: 0 0 15px 0; font-size: 14px;">Pay via direct bank transfer</p>
+          <div style="background-color: #f8fafc; padding: 10px; border-radius: 4px; border: 1px solid #e5e7eb;">
+            <p style="margin: 0; font-size: 12px; font-weight: bold;">Bank Details:</p>
+            <p style="margin: 2px 0; font-size: 12px;">Bank: Capitec Business Bank</p>
+            <p style="margin: 2px 0; font-size: 12px;">Account: Thys Gemaak SDC</p>
+            <p style="margin: 2px 0; font-size: 12px;">Account No: 1051789869</p>
+            <p style="margin: 2px 0; font-size: 12px;">Branch Code: 470010</p>
+            <p style="margin: 2px 0; font-size: 12px;">Reference: ${bookingId} - ${bookingData.contact_name}</p>
+          </div>
+          <p style="margin: 10px 0 0 0; font-size: 11px; color: #dc2626;">⚠️ Email proof of payment to wade@thysgemaak.com</p>
+        </div>
       </div>
       
       <p style="font-size: 12px; color: #6b7280; margin: 0;">
-        🔒 Secure payments powered by PayFast. You will be redirected to a secure payment page.
+        🔒 Secure payments powered by PayFast. Bank transfers require proof of payment.
       </p>
     </div>
   `;
@@ -250,6 +263,13 @@ const generatePDFContent = (bookingData: BookingData, bookingId: string) => {
         .inclusions ul {
             margin: 0;
             padding-left: 20px;
+        }
+        .bank-details {
+            background-color: #faf5ff;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #9333ea;
+            margin-top: 15px;
         }
         .footer { 
             margin-top: 40px; 
@@ -392,6 +412,42 @@ const generatePDFContent = (bookingData: BookingData, bookingId: string) => {
         </div>
     </div>
 
+    <div class="section">
+        <div class="section-title">PAYMENT OPTIONS</div>
+        <p>You can secure your booking using any of these payment methods:</p>
+        
+        <div class="bank-details">
+            <h4 style="margin: 0 0 10px 0; color: #9333ea;">Bank Transfer Details:</h4>
+            <div class="info-row">
+                <span class="label">Bank:</span>
+                <span class="value">Capitec Business Bank</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Account Name:</span>
+                <span class="value">Thys Gemaak SDC</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Account Type:</span>
+                <span class="value">Transact Account</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Account Number:</span>
+                <span class="value">1051789869</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Branch Code:</span>
+                <span class="value">470010</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Reference:</span>
+                <span class="value">${bookingId} - ${bookingData.contact_name}</span>
+            </div>
+        </div>
+        
+        <p style="margin-top: 15px; font-size: 14px; color: #dc2626;"><strong>Important:</strong> Please email proof of payment to wade@thysgemaak.com or WhatsApp to +27 60 461 3766</p>
+        <p style="margin-top: 10px; font-size: 14px;">Alternatively, you can pay online using the secure PayFast links provided in the email.</p>
+    </div>
+
     ${bookingData.additional_notes ? `
     <div class="section">
         <div class="section-title">ADDITIONAL NOTES</div>
@@ -432,7 +488,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Format extras with specific salad name for email display
     const formattedExtras = formatExtrasWithSaladName(bookingData.extras || '', bookingData.menu_selection);
 
-    // Send email with enhanced content including working payment links
+    // Send email with enhanced content including working payment links and bank details
     const emailResponse = await resend.emails.send({
       from: "Thys Gemaak Spitbraai <no-reply@spitbraai.thysgemaak.com>",
       to: [bookingData.contact_email],
@@ -475,7 +531,7 @@ const handler = async (req: Request): Promise<Response> => {
               <h3 style="color: #0369a1; margin-top: 0;">📋 Next Steps</h3>
               <ol style="margin: 0; padding-left: 20px;">
                 <li style="margin-bottom: 8px;"><strong>Confirmation Call:</strong> We will contact you within 24-48 hours to confirm all booking details and discuss any special requirements.</li>
-                <li style="margin-bottom: 8px;"><strong>Payment:</strong> You can secure your booking using the payment options above. A minimum R500 deposit is required to guarantee your date.</li>
+                <li style="margin-bottom: 8px;"><strong>Payment:</strong> You can secure your booking using any of the payment options above. A minimum R500 deposit is required to guarantee your date.</li>
                 <li style="margin-bottom: 8px;"><strong>Final Details:</strong> We'll confirm menu selections, setup requirements, and arrival times closer to your event date.</li>
                 <li style="margin-bottom: 8px;"><strong>Event Day:</strong> Our team will arrive early to set up and ensure everything is perfect for your special day.</li>
               </ol>
@@ -487,6 +543,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <li>Your booking is not confirmed until we speak with you personally</li>
                 <li>Popular dates fill up quickly - payment secures your preferred date</li>
                 <li>Final guest numbers can be adjusted up to 7 days before your event</li>
+                <li>For bank transfers, please email proof of payment to wade@thysgemaak.com</li>
               </ul>
             </div>
             
