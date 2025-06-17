@@ -42,14 +42,12 @@ const DesktopNav = ({ isScrolled }: DesktopNavProps) => {
         ))}
       </ul>
       
-      <NavLink 
-        to="/"
-        isHashLink={true}
-        hashTarget="contact"
+      <Link 
+        to="/booking"
         className="button-primary"
       >
         Book Now
-      </NavLink>
+      </Link>
     </nav>
   );
 };

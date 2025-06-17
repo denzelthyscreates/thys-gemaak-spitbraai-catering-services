@@ -57,15 +57,13 @@ const MobileNav = ({ isMenuOpen, toggleMenu }: MobileNavProps) => {
             ))}
             
             <li className="w-full mt-4 slide-in-bottom delay-600">
-              <NavLink
-                to="/"
-                isHashLink={true}
-                hashTarget="contact"
+              <Link
+                to="/booking"
                 onClick={toggleMenu}
                 className="block w-full text-center button-primary"
               >
                 Book Now
-              </NavLink>
+              </Link>
             </li>
           </ul>
         </div>
