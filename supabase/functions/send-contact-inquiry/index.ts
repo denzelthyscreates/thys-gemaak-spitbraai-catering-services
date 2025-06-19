@@ -64,7 +64,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Sending notification email to business");
     const businessEmailResponse = await resend.emails.send({
       from: "Thysgemaak Website <noreply@spitbraai.thysgemaak.com>",
-      to: ["spitbookings@spitbraai.thysgemaak.com"],
+      to: ["spitbookings@thysgemaak.com"],
       subject: `New Contact Inquiry: ${inquiryType} - ${name}`,
       html: `
         <h2>New Contact Inquiry Received</h2>
