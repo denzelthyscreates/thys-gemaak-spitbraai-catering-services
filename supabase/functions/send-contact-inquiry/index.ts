@@ -34,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send confirmation email to customer
     console.log("Sending confirmation email to customer:", email);
     const customerEmailResponse = await resend.emails.send({
-      from: "Thysgemaak Spitbraai <spitbookings@thysgemaak.com>",
+      from: "Thysgemaak Spitbraai <spitbraai@thysgemaak.com>",
       to: [email],
       subject: "Thank you for your inquiry - Thysgemaak Spitbraai",
       html: `
@@ -63,7 +63,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send notification email to business
     console.log("Sending notification email to business");
     const businessEmailResponse = await resend.emails.send({
-      from: "Thysgemaak Website <spitbookings@thysgemaak.com>",
+      from: "Thysgemaak Website <spitbraai@thysgemaak.com>",
       to: ["spitbookings@thysgemaak.com"],
       subject: `New Contact Inquiry: ${inquiryType} - ${name}`,
       html: `
