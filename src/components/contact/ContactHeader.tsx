@@ -11,8 +11,8 @@ const ContactHeader = () => {
         Ready to Experience Premium Spitbraai Catering?
       </h2>
       <p className="text-lg text-muted-foreground">
-        Let us help you plan the perfect menu for your next event. Build your custom spitbraai package 
-        below and submit your enquiry.
+        Plan your perfect event with our custom spitbraai packages, or get in touch with any questions 
+        about our services. We're here to help make your occasion unforgettable.
       </p>
     </div>
   );
