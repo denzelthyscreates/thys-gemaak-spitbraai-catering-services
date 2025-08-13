@@ -14,6 +14,7 @@ import TermsOfService from './pages/TermsOfService';
 import CookiePolicy from './pages/CookiePolicy';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentCancelled from './pages/PaymentCancelled';
+import ZohoSetup from './pages/ZohoSetup';
 import CookieConsent from './components/CookieConsent';
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => {
             <Route path="/cookie-policy" element={<CookiePolicy />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-cancelled" element={<PaymentCancelled />} />
+            <Route path="/zoho-setup" element={<ZohoSetup />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <CookieConsent />
