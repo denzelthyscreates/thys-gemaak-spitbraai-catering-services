@@ -64,7 +64,7 @@ export type Database = {
           starters: string | null
           status: string
           total_price: number
-          user_id: string | null
+          user_id: string
           venue_city: string | null
           venue_name: string | null
           venue_postal_code: string | null
@@ -99,7 +99,7 @@ export type Database = {
           starters?: string | null
           status?: string
           total_price: number
-          user_id?: string | null
+          user_id?: string
           venue_city?: string | null
           venue_name?: string | null
           venue_postal_code?: string | null
@@ -134,7 +134,7 @@ export type Database = {
           starters?: string | null
           status?: string
           total_price?: number
-          user_id?: string | null
+          user_id?: string
           venue_city?: string | null
           venue_name?: string | null
           venue_postal_code?: string | null
