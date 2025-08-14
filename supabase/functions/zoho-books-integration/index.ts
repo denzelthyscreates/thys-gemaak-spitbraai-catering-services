@@ -44,13 +44,64 @@ interface ZohoTokenResponse {
 }
 
 async function getZohoAccessToken(): Promise<string> {
-  // For now, we'll need to implement OAuth flow
-  // This is a simplified version - in production you'd store refresh tokens
-  const authUrl = `https://accounts.zoho.com/oauth/v2/auth?scope=ZohoBooks.fullaccess.all&client_id=${zohoClientId}&response_type=code&redirect_uri=https://spitbraai.thysgemaak.com/auth/callback&access_type=offline`;
+  // Try to get stored access token from database first
+  const { data: tokens, error } = await supabase
+    .from('zoho_tokens')
+    .select('access_token, refresh_token, expires_at')
+    .single();
+
+  if (!error && tokens && new Date(tokens.expires_at) > new Date()) {
+    return tokens.access_token;
+  }
+
+  // If no valid token, throw error indicating OAuth setup needed
+  throw new Error('No valid Zoho access token found. Please complete OAuth setup first.');
+}
+
+async function exchangeCodeForTokens(code: string, redirectUri: string) {
+  const tokenUrl = 'https://accounts.zoho.com/oauth/v2/token';
   
-  // This would be handled through proper OAuth flow
-  // For now, return empty string to indicate setup needed
-  throw new Error('OAuth flow needs to be completed. Please implement the authorization flow.');
+  const params = new URLSearchParams({
+    grant_type: 'authorization_code',
+    client_id: zohoClientId,
+    client_secret: zohoClientSecret,
+    redirect_uri: redirectUri,
+    code: code
+  });
+
+  const response = await fetch(tokenUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: params.toString(),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to exchange code for tokens: ${response.status} - ${errorText}`);
+  }
+
+  const tokenData = await response.json();
+  
+  // Store tokens in database
+  const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000);
+  
+  const { error } = await supabase
+    .from('zoho_tokens')
+    .upsert({
+      access_token: tokenData.access_token,
+      refresh_token: tokenData.refresh_token,
+      expires_at: expiresAt.toISOString(),
+      updated_at: new Date().toISOString()
+    });
+
+  if (error) {
+    console.error('Error storing tokens:', error);
+    throw new Error('Failed to store access tokens');
+  }
+
+  return tokenData;
 }
 
 async function createZohoEstimate(bookingData: BookingData, accessToken: string) {
@@ -204,6 +255,27 @@ const handler = async (req: Request): Promise<Response> => {
         authUrl,
         redirectUri,
         message: 'Use this URL to complete Zoho Books OAuth setup. Make sure this redirect URI is configured in your Zoho app settings.'
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+
+    } else if (action === 'exchange-code') {
+      const { code, redirectUri } = await req.json();
+      
+      if (!code) {
+        throw new Error('Authorization code is required');
+      }
+
+      const tokenData = await exchangeCodeForTokens(code, redirectUri);
+      
+      return new Response(JSON.stringify({ 
+        success: true, 
+        message: 'OAuth setup completed successfully! Tokens have been stored securely.',
+        tokenData: {
+          expires_in: tokenData.expires_in,
+          token_type: tokenData.token_type
+        }
       }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
