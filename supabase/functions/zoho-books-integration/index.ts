@@ -182,13 +182,28 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
     } else if (action === 'setup-oauth') {
-      // Return OAuth URL for setup
-      const authUrl = `https://accounts.zoho.com/oauth/v2/auth?scope=ZohoBooks.fullaccess.all&client_id=${zohoClientId}&response_type=code&redirect_uri=https://spitbraai.thysgemaak.com/auth/callback&access_type=offline&prompt=consent`;
+      // Check if we have the required environment variables
+      if (!zohoClientId || !zohoClientSecret) {
+        return new Response(JSON.stringify({ 
+          success: false,
+          error: 'Zoho Client ID and Secret must be configured in environment variables'
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Use your actual domain for the redirect URI
+      const redirectUri = 'https://preview--thys-gemaak-spitbraai-catering-services.lovable.app/zoho-setup';
+      
+      // Return OAuth URL for setup with proper encoding
+      const authUrl = `https://accounts.zoho.com/oauth/v2/auth?scope=ZohoBooks.fullaccess.all&client_id=${encodeURIComponent(zohoClientId)}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&access_type=offline&prompt=consent`;
       
       return new Response(JSON.stringify({ 
         success: true, 
         authUrl,
-        message: 'Use this URL to complete Zoho Books OAuth setup'
+        redirectUri,
+        message: 'Use this URL to complete Zoho Books OAuth setup. Make sure this redirect URI is configured in your Zoho app settings.'
       }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
