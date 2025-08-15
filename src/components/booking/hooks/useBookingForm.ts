@@ -155,15 +155,38 @@ export const useBookingForm = (menuSelection: any) => {
       // Use the custom reference from the inserted data or fallback to generated one
       const finalBookingReference = insertedData.booking_reference || bookingReference;
 
-      // Automatically send the summary email
+      // Create Zoho estimate first, then send email
       try {
+        console.log("=== ATTEMPTING TO CREATE ZOHO QUOTE ===");
+        
+        const { data: zohoData, error: zohoError } = await supabase.functions.invoke('zoho-books-integration', {
+          body: {
+            action: 'create-estimate',
+            bookingId: insertedData.id
+          }
+        });
+
+        console.log("=== ZOHO QUOTE RESPONSE ===");
+        console.log("Zoho data:", zohoData);
+        console.log("Zoho error:", zohoError);
+
+        let zohoEstimate = null;
+        if (zohoError) {
+          console.error("Zoho quote creation failed:", zohoError);
+        } else {
+          console.log("Zoho quote created successfully");
+          zohoEstimate = zohoData;
+        }
+
+        // Send the summary email (with or without Zoho data)
         console.log("=== ATTEMPTING TO SEND EMAIL ===");
         console.log("Sending email to:", insertedData.contact_email);
         
         const { data: emailData, error: emailError } = await supabase.functions.invoke('send-booking-summary', {
           body: {
             bookingData: insertedData,
-            bookingId: finalBookingReference
+            bookingId: finalBookingReference,
+            zohoEstimate: zohoEstimate
           }
         });
 
@@ -180,17 +203,21 @@ export const useBookingForm = (menuSelection: any) => {
           });
         } else {
           console.log("Email sent successfully");
+          const message = zohoEstimate 
+            ? `Your booking and professional quote have been created. Confirmation email sent to ${insertedData.contact_email}`
+            : `Your booking has been created and a confirmation email has been sent to ${insertedData.contact_email}`;
+          
           toast({
             title: "Booking Successful!",
-            description: `Your booking has been created and a confirmation email has been sent to ${insertedData.contact_email}`,
+            description: message,
             duration: 5000
           });
         }
-      } catch (emailError) {
-        console.error("Email sending exception:", emailError);
+      } catch (error) {
+        console.error("Email/Zoho processing exception:", error);
         toast({
           title: "Booking Successful!",
-          description: "Your booking was created successfully, but there was an issue sending the confirmation email. You can still access your booking details below.",
+          description: "Your booking was created successfully, but there was an issue with additional processing. You can still access your booking details below.",
           duration: 7000
         });
       }

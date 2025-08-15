@@ -555,7 +555,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { bookingData, bookingId } = await req.json();
+    const { bookingData, bookingId, zohoEstimate } = await req.json();
 
     console.log("Processing booking summary email for:", bookingId);
     console.log("Recipient email:", bookingData.contact_email);
@@ -606,6 +606,20 @@ const handler = async (req: Request): Promise<Response> => {
               <p><strong>Venue:</strong> ${bookingData.venue_street_address}, ${bookingData.venue_city}</p>
               <p style="font-size: 18px; color: #22c55e;"><strong>Total Amount: R${totalAmount}</strong></p>
             </div>
+
+            ${zohoEstimate ? `
+            <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #22c55e;">
+              <h3 style="color: #166534; margin-top: 0;">📋 Professional Quote Generated</h3>
+              <p>We've automatically generated a professional quote for your booking in our system:</p>
+              <div style="background-color: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb;">
+                <p><strong>Quote Number:</strong> ${zohoEstimate.estimate_number || 'Pending'}</p>
+                <p><strong>Quote Total:</strong> R${zohoEstimate.total || totalAmount}</p>
+                <p><strong>Status:</strong> ${zohoEstimate.status || 'Draft'}</p>
+                ${zohoEstimate.estimate_url ? `<p><a href="${zohoEstimate.estimate_url}" style="color: #22c55e; text-decoration: none;" target="_blank">🔗 View Professional Quote</a></p>` : ''}
+              </div>
+              <p style="font-size: 14px; color: #166534; margin-bottom: 0;">This quote will be finalized after we confirm all details with you.</p>
+            </div>
+            ` : ''}
 
             ${paymentSection}
             
