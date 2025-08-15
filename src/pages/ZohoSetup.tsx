@@ -63,7 +63,10 @@ export default function ZohoSetup() {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('zoho-books-integration', {
-        body: { action: 'setup-oauth' }
+        body: { 
+          action: 'setup-oauth',
+          redirectUri: window.location.origin + '/zoho-setup'
+        }
       });
 
       if (error) throw error;
