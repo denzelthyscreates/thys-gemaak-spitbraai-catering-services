@@ -183,7 +183,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { action, bookingId, estimateId } = await req.json();
+    const { action, bookingId, estimateId, redirectUri, code } = await req.json();
 
     if (action === 'create-estimate') {
       // Fetch booking data
@@ -233,8 +233,6 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
     } else if (action === 'setup-oauth') {
-      const { redirectUri } = await req.json();
-      
       // Check if we have the required environment variables
       if (!zohoClientId || !zohoClientSecret) {
         return new Response(JSON.stringify({ 
@@ -270,8 +268,6 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
     } else if (action === 'exchange-code') {
-      const { code, redirectUri } = await req.json();
-      
       if (!code) {
         throw new Error('Authorization code is required');
       }
