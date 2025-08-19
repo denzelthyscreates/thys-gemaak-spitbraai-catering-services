@@ -696,12 +696,8 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("Staff email sending exception:", staffEmailError);
     }
 
-    // Show success toast to customer
-    toast({
-      title: "Booking Successful!",
-      description: `Your booking has been created and a confirmation email has been sent to ${bookingData.contact_email}`,
-      duration: 5000
-    });
+    // Log success message (toast not available in edge functions)
+    console.log("Booking confirmation emails sent successfully to both customer and staff");
 
     return new Response(JSON.stringify({ 
       success: true, 
