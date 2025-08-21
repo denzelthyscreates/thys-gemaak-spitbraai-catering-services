@@ -35,7 +35,7 @@ export default function ZohoSetup() {
         body: { 
           action: 'exchange-code',
           code: code,
-          redirectUri: window.location.origin + '/zoho-setup'
+          redirectUri: window.location.origin + '/auth/callback'
         }
       });
 
@@ -65,7 +65,7 @@ export default function ZohoSetup() {
       const { data, error } = await supabase.functions.invoke('zoho-books-integration', {
         body: { 
           action: 'setup-oauth',
-          redirectUri: window.location.origin + '/zoho-setup'
+          redirectUri: window.location.origin + '/auth/callback'
         }
       });
 
@@ -183,7 +183,7 @@ export default function ZohoSetup() {
             <AlertDescription>
               <strong>Important:</strong> Make sure you have the redirect URI 
               <code className="mx-1 px-1 bg-muted rounded text-sm">
-                {window.location.origin}/zoho-setup
+                {window.location.origin}/auth/callback
               </code>
               configured in your Zoho app settings.
             </AlertDescription>

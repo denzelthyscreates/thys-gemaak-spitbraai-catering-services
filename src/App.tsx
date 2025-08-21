@@ -14,6 +14,7 @@ import TermsOfService from './pages/TermsOfService';
 import CookiePolicy from './pages/CookiePolicy';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentCancelled from './pages/PaymentCancelled';
+import AuthCallback from './pages/AuthCallback';
 import ZohoSetup from './pages/ZohoSetup';
 import CookieConsent from './components/CookieConsent';
 
@@ -40,6 +41,7 @@ const App = () => {
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-cancelled" element={<PaymentCancelled />} />
             <Route path="/zoho-setup" element={<ZohoSetup />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <CookieConsent />
