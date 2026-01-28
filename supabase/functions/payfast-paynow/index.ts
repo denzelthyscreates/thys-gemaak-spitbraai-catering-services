@@ -1,5 +1,23 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+
+// ============= Input Validation Utilities =============
+
+function isValidPaymentType(type: unknown): type is 'deposit' | 'full' | 'balance' {
+  return type === 'deposit' || type === 'full' || type === 'balance';
+}
+
+function isPositiveNumber(value: unknown): value is number {
+  return typeof value === 'number' && value > 0 && isFinite(value);
+}
+
+class ValidationError extends Error {
+  constructor(message: string, public field?: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+
+// ============= End Validation Utilities =============
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -51,26 +69,34 @@ serve(async (req) => {
     }
 
     const requestBody = await req.json();
-    console.log('Request body:', requestBody);
-    
     const { amount, paymentType, bookingData }: PaymentRequest = requestBody;
 
-    // Validate input
-    if (!amount || amount < 5 || !paymentType || !bookingData) {
-      console.error('Invalid payment request:', { amount, paymentType, bookingData });
-      return new Response(
-        JSON.stringify({ 
-          success: false,
-          error: 'Invalid payment request',
-          formData: {},
-          paymentUrl: ''
-        }),
-        { 
-          status: 200, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+    // ============= Input Validation =============
+
+    // Validate amount
+    if (!isPositiveNumber(amount)) {
+      throw new ValidationError('Amount must be a positive number', 'amount');
     }
+    if (amount < 5) {
+      throw new ValidationError('Minimum payment amount is R5', 'amount');
+    }
+    if (amount > 1000000) {
+      throw new ValidationError('Amount exceeds maximum allowed', 'amount');
+    }
+
+    // Validate payment type
+    if (!isValidPaymentType(paymentType)) {
+      throw new ValidationError('Invalid payment type. Must be deposit, full, or balance', 'paymentType');
+    }
+
+    // Validate bookingData exists
+    if (!bookingData || typeof bookingData !== 'object') {
+      throw new ValidationError('Booking data is required', 'bookingData');
+    }
+
+    // ============= End Validation =============
+
+    console.log('PayNow request validated for amount:', amount, 'type:', paymentType);
 
     // Get base URL for return URLs
     const baseUrl = req.headers.get('origin') || 'https://spitbraai.thysgemaak.com';
@@ -125,12 +151,15 @@ serve(async (req) => {
       }
     );
 
-  } catch (error) {
-    console.error('Payment processing error:', error);
+  } catch (error: any) {
+    console.error('PayNow processing error:', error.name, error.message);
+    
+    const isValidationError = error instanceof ValidationError;
+    
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: 'Payment processing failed',
+        error: isValidationError ? error.message : 'PayNow processing failed',
         formData: {},
         paymentUrl: ''
       }),

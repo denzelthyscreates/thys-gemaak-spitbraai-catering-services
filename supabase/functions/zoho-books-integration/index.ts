@@ -1,6 +1,65 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
+// ============= Input Validation Utilities =============
+
+function isValidUUID(uuid: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+}
+
+function isAllowedRedirectUri(uri: string): boolean {
+  const allowedDomains = [
+    'spitbraai.thysgemaak.com',
+    'thysgemaak.com',
+    'lovable.app',
+    'localhost'
+  ];
+  try {
+    const url = new URL(uri);
+    return allowedDomains.some(domain => 
+      url.hostname === domain || url.hostname.endsWith(`.${domain}`)
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isValidLength(text: string | undefined | null, maxLength: number): boolean {
+  if (!text) return true;
+  return text.length <= maxLength;
+}
+
+function escapeHtml(text: string | undefined | null): string {
+  if (!text) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+const ALLOWED_ACTIONS = ['create-estimate', 'convert-to-invoice', 'setup-oauth', 'exchange-code'] as const;
+type AllowedAction = typeof ALLOWED_ACTIONS[number];
+
+function isAllowedAction(action: unknown): action is AllowedAction {
+  return typeof action === 'string' && ALLOWED_ACTIONS.includes(action as AllowedAction);
+}
+
+class ValidationError extends Error {
+  constructor(message: string, public field?: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+
+// ============= End Validation Utilities =============
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -183,7 +242,57 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { action, bookingId, estimateId, redirectUri, code } = await req.json();
+    const body = await req.json();
+    const { action, bookingId, estimateId, redirectUri, code } = body;
+
+    // ============= Input Validation =============
+    
+    // Validate action
+    if (!isAllowedAction(action)) {
+      throw new ValidationError('Invalid action specified. Allowed: create-estimate, convert-to-invoice, setup-oauth, exchange-code', 'action');
+    }
+
+    // Validate bookingId if required
+    if (action === 'create-estimate') {
+      if (!isNonEmptyString(bookingId)) {
+        throw new ValidationError('Booking ID is required', 'bookingId');
+      }
+      if (!isValidUUID(bookingId)) {
+        throw new ValidationError('Invalid booking ID format', 'bookingId');
+      }
+    }
+
+    // Validate estimateId if required
+    if (action === 'convert-to-invoice') {
+      if (!isNonEmptyString(estimateId)) {
+        throw new ValidationError('Estimate ID is required', 'estimateId');
+      }
+      if (!isValidLength(estimateId, 100)) {
+        throw new ValidationError('Estimate ID is too long', 'estimateId');
+      }
+    }
+
+    // Validate redirectUri if required
+    if (action === 'setup-oauth' || action === 'exchange-code') {
+      if (!isNonEmptyString(redirectUri)) {
+        throw new ValidationError('Redirect URI is required', 'redirectUri');
+      }
+      if (!isAllowedRedirectUri(redirectUri)) {
+        throw new ValidationError('Invalid redirect URI. Must be from an allowed domain.', 'redirectUri');
+      }
+    }
+
+    // Validate code for exchange-code action
+    if (action === 'exchange-code') {
+      if (!isNonEmptyString(code)) {
+        throw new ValidationError('Authorization code is required', 'code');
+      }
+      if (!isValidLength(code, 500)) {
+        throw new ValidationError('Authorization code is too long', 'code');
+      }
+    }
+
+    // ============= End Input Validation =============
 
     if (action === 'create-estimate') {
       // Fetch booking data
@@ -203,7 +312,7 @@ const handler = async (req: Request): Promise<Response> => {
       // Create estimate in Zoho Books
       const estimateResult = await createZohoEstimate(booking as BookingData, accessToken);
       
-      console.log('Zoho estimate created:', estimateResult);
+      console.log('Zoho estimate created successfully');
 
       return new Response(JSON.stringify({ 
         success: true, 
@@ -221,7 +330,7 @@ const handler = async (req: Request): Promise<Response> => {
       // Convert estimate to invoice
       const invoiceResult = await convertEstimateToInvoice(estimateId, accessToken);
       
-      console.log('Estimate converted to invoice:', invoiceResult);
+      console.log('Estimate converted to invoice successfully');
 
       return new Response(JSON.stringify({ 
         success: true, 
@@ -243,16 +352,6 @@ const handler = async (req: Request): Promise<Response> => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-
-      if (!redirectUri) {
-        return new Response(JSON.stringify({ 
-          success: false,
-          error: 'Redirect URI is required'
-        }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
       
       // Return OAuth URL for setup with proper encoding
       const authUrl = `https://accounts.zoho.com/oauth/v2/auth?scope=ZohoBooks.fullaccess.all&client_id=${encodeURIComponent(zohoClientId)}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&access_type=offline&prompt=consent`;
@@ -268,10 +367,6 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
     } else if (action === 'exchange-code') {
-      if (!code) {
-        throw new Error('Authorization code is required');
-      }
-
       const tokenData = await exchangeCodeForTokens(code, redirectUri);
       
       return new Response(JSON.stringify({ 
@@ -287,18 +382,24 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
     } else {
-      throw new Error('Invalid action specified');
+      throw new ValidationError('Invalid action specified');
     }
 
   } catch (error: any) {
-    console.error('Error in Zoho Books integration:', error);
+    console.error('Error in Zoho Books integration:', error.name, error.message);
+    
+    const statusCode = error instanceof ValidationError ? 400 : 500;
+    const errorMessage = error instanceof ValidationError 
+      ? error.message 
+      : 'An error occurred processing your request';
+    
     return new Response(
       JSON.stringify({ 
-        error: error.message,
+        error: errorMessage,
         success: false 
       }),
       {
-        status: 500,
+        status: statusCode,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );

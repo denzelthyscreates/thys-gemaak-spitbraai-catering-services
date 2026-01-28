@@ -1,6 +1,46 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+// ============= Input Validation Utilities =============
+
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email) && email.length <= 255;
+}
+
+function isValidPhone(phone: string | undefined): boolean {
+  if (!phone) return true;
+  const phoneRegex = /^[\d\s+\-()]{7,20}$/;
+  return phoneRegex.test(phone);
+}
+
+function isValidLength(text: string | undefined | null, maxLength: number): boolean {
+  if (!text) return true;
+  return text.length <= maxLength;
+}
+
+function isValidPaymentType(type: unknown): type is 'deposit' | 'full' | 'balance' {
+  return type === 'deposit' || type === 'full' || type === 'balance';
+}
+
+function isPositiveNumber(value: unknown): value is number {
+  return typeof value === 'number' && value > 0 && isFinite(value);
+}
+
+function sanitizeForPayfast(text: string | undefined): string {
+  if (!text) return '';
+  // Remove any characters that could cause issues in PayFast form
+  return text.replace(/[<>'"&]/g, '').substring(0, 100);
+}
+
+class ValidationError extends Error {
+  constructor(message: string, public field?: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+
+// ============= End Validation Utilities =============
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -88,26 +128,47 @@ serve(async (req) => {
     }
 
     const requestBody = await req.json();
-    console.log('Request body:', requestBody);
-    
     const { amount, paymentType, bookingData }: PaymentRequest = requestBody;
 
-    // Validate input
-    if (!amount || amount < 5 || !paymentType || !bookingData) {
-      console.error('Invalid payment request:', { amount, paymentType, bookingData });
-      return new Response(
-        JSON.stringify({ 
-          success: false,
-          error: 'Invalid payment request',
-          formData: {},
-          paymentUrl: ''
-        }),
-        { 
-          status: 200, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+    // ============= Input Validation =============
+
+    // Validate amount
+    if (!isPositiveNumber(amount)) {
+      throw new ValidationError('Amount must be a positive number', 'amount');
     }
+    if (amount < 5) {
+      throw new ValidationError('Minimum payment amount is R5', 'amount');
+    }
+    if (amount > 1000000) {
+      throw new ValidationError('Amount exceeds maximum allowed', 'amount');
+    }
+
+    // Validate payment type
+    if (!isValidPaymentType(paymentType)) {
+      throw new ValidationError('Invalid payment type. Must be deposit, full, or balance', 'paymentType');
+    }
+
+    // Validate bookingData exists
+    if (!bookingData || typeof bookingData !== 'object') {
+      throw new ValidationError('Booking data is required', 'bookingData');
+    }
+
+    // Validate optional booking data fields
+    if (bookingData.client_name && !isValidLength(bookingData.client_name, 100)) {
+      throw new ValidationError('Client name is too long', 'client_name');
+    }
+
+    if (bookingData.client_email && !isValidEmail(bookingData.client_email)) {
+      throw new ValidationError('Invalid client email address', 'client_email');
+    }
+
+    if (bookingData.client_phone && !isValidPhone(bookingData.client_phone)) {
+      throw new ValidationError('Invalid client phone number', 'client_phone');
+    }
+
+    // ============= End Validation =============
+
+    console.log('Payment request validated for amount:', amount, 'type:', paymentType);
 
     // Get base URL for return URLs
     const baseUrl = req.headers.get('origin') || 'https://spitbraai.thysgemaak.com';
@@ -194,12 +255,15 @@ serve(async (req) => {
       }
     );
 
-  } catch (error) {
-    console.error('Payment processing error:', error);
+  } catch (error: any) {
+    console.error('Payment processing error:', error.name, error.message);
+    
+    const isValidationError = error instanceof ValidationError;
+    
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: 'Payment processing failed',
+        error: isValidationError ? error.message : 'Payment processing failed',
         formData: {},
         paymentUrl: ''
       }),

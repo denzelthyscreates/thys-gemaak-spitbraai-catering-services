@@ -1,6 +1,55 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
+// ============= Input Validation Utilities =============
+
+function escapeHtml(text: string | undefined | null): string {
+  if (!text) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function sanitizeForEmail(text: string | undefined | null): string {
+  if (!text) return '';
+  return escapeHtml(text).replace(/\n/g, '<br>');
+}
+
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email) && email.length <= 255;
+}
+
+function isValidPhone(phone: string): boolean {
+  const phoneRegex = /^[\d\s+\-()]{7,20}$/;
+  return phoneRegex.test(phone);
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isValidLength(text: string | undefined | null, maxLength: number): boolean {
+  if (!text) return true;
+  return text.length <= maxLength;
+}
+
+function isPositiveNumber(value: unknown): value is number {
+  return typeof value === 'number' && value > 0 && isFinite(value);
+}
+
+class ValidationError extends Error {
+  constructor(message: string, public field?: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+
+// ============= End Validation Utilities =============
+
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
@@ -557,24 +606,110 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { bookingData, bookingId, zohoEstimate } = await req.json();
 
-    console.log("Processing booking summary email for:", bookingId);
-    console.log("Recipient email:", bookingData.contact_email);
+    // ============= Input Validation =============
+    
+    if (!bookingData || typeof bookingData !== 'object') {
+      throw new ValidationError('Booking data is required', 'bookingData');
+    }
 
-    const htmlContent = generatePDFContent(bookingData, bookingId);
+    if (!isNonEmptyString(bookingId)) {
+      throw new ValidationError('Booking ID is required', 'bookingId');
+    }
+    if (!isValidLength(bookingId, 100)) {
+      throw new ValidationError('Booking ID is too long', 'bookingId');
+    }
+
+    // Validate required contact fields
+    if (!isNonEmptyString(bookingData.contact_name)) {
+      throw new ValidationError('Contact name is required', 'contact_name');
+    }
+    if (!isValidLength(bookingData.contact_name, 100)) {
+      throw new ValidationError('Contact name is too long', 'contact_name');
+    }
+
+    if (!isNonEmptyString(bookingData.contact_email)) {
+      throw new ValidationError('Contact email is required', 'contact_email');
+    }
+    if (!isValidEmail(bookingData.contact_email)) {
+      throw new ValidationError('Invalid contact email address', 'contact_email');
+    }
+
+    if (!isNonEmptyString(bookingData.contact_phone)) {
+      throw new ValidationError('Contact phone is required', 'contact_phone');
+    }
+    if (!isValidPhone(bookingData.contact_phone)) {
+      throw new ValidationError('Invalid contact phone number', 'contact_phone');
+    }
+
+    // Validate numeric fields
+    if (!isPositiveNumber(bookingData.number_of_guests)) {
+      throw new ValidationError('Number of guests must be a positive number', 'number_of_guests');
+    }
+    if (bookingData.number_of_guests > 10000) {
+      throw new ValidationError('Number of guests exceeds maximum allowed', 'number_of_guests');
+    }
+
+    if (!isPositiveNumber(bookingData.total_price)) {
+      throw new ValidationError('Total price must be a positive number', 'total_price');
+    }
+
+    // Validate length of text fields
+    if (!isValidLength(bookingData.additional_notes, 2000)) {
+      throw new ValidationError('Additional notes are too long', 'additional_notes');
+    }
+    if (!isValidLength(bookingData.venue_name, 200)) {
+      throw new ValidationError('Venue name is too long', 'venue_name');
+    }
+    if (!isValidLength(bookingData.venue_street_address, 500)) {
+      throw new ValidationError('Venue address is too long', 'venue_street_address');
+    }
+
+    // ============= Sanitize all user input for HTML email =============
+    const safeBookingData = {
+      ...bookingData,
+      contact_name: escapeHtml(bookingData.contact_name),
+      contact_email: escapeHtml(bookingData.contact_email),
+      contact_phone: escapeHtml(bookingData.contact_phone),
+      venue_name: escapeHtml(bookingData.venue_name),
+      venue_street_address: escapeHtml(bookingData.venue_street_address),
+      venue_city: escapeHtml(bookingData.venue_city),
+      venue_province: escapeHtml(bookingData.venue_province),
+      venue_postal_code: escapeHtml(bookingData.venue_postal_code),
+      address_line1: escapeHtml(bookingData.address_line1),
+      city: escapeHtml(bookingData.city),
+      province: escapeHtml(bookingData.province),
+      postal_code_address: escapeHtml(bookingData.postal_code_address),
+      additional_notes: sanitizeForEmail(bookingData.additional_notes),
+      event_type: escapeHtml(bookingData.event_type),
+      menu_package: escapeHtml(bookingData.menu_package),
+      season: escapeHtml(bookingData.season),
+      starters: escapeHtml(bookingData.starters),
+      sides: escapeHtml(bookingData.sides),
+      desserts: escapeHtml(bookingData.desserts),
+      extras: escapeHtml(bookingData.extras),
+      notes: sanitizeForEmail(bookingData.notes),
+    };
+    const safeBookingId = escapeHtml(bookingId);
+
+    // ============= End Validation =============
+
+    console.log("Processing booking summary email for:", safeBookingId);
+
+    const htmlContent = generatePDFContent(safeBookingData, safeBookingId);
     const totalAmount = bookingData.menu_selection?.travelFee 
       ? (bookingData.total_price * bookingData.number_of_guests) + bookingData.menu_selection.travelFee
       : bookingData.total_price * bookingData.number_of_guests;
 
-    const paymentSection = generatePaymentSection(bookingData, bookingId, totalAmount);
+    const paymentSection = generatePaymentSection(safeBookingData, safeBookingId, totalAmount);
     
     // Format extras with specific salad name for email display
-    const formattedExtras = formatExtrasWithSaladName(bookingData.extras || '', bookingData.menu_selection);
+    const formattedExtras = formatExtrasWithSaladName(safeBookingData.extras || '', bookingData.menu_selection);
 
     // Send email with enhanced content including working payment links and bank details
     const emailResponse = await resend.emails.send({
       from: "Thys Gemaak Spitbraai <no-reply@spitbraai.thysgemaak.com>",
-      to: [bookingData.contact_email],
-      subject: `We have received your spitbraai booking! - ${bookingId}`,
+      to: [bookingData.contact_email], // Use original validated email for delivery
+      subject: `We have received your spitbraai booking! - ${safeBookingId}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
           <div style="background-color: #22c55e; color: white; padding: 20px; text-align: center;">
@@ -582,18 +717,18 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           
           <div style="padding: 20px;">
-            <p>Dear ${bookingData.contact_name},</p>
+            <p>Dear ${safeBookingData.contact_name},</p>
             <p>Thank you for choosing Thys Gemaak Spitbraai! We have successfully received your booking request and are excited to cater your special event.</p>
             
             <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="margin-top: 0; color: #22c55e;">📋 Complete Booking Summary</h3>
-              <p><strong>Reference:</strong> ${bookingId}</p>
-              <p><strong>Event Type:</strong> ${getFullEventTypeName(bookingData.event_type)}</p>
-              <p><strong>Package:</strong> ${bookingData.menu_package}</p>
-              ${bookingData.season ? `<p><strong>Season:</strong> ${bookingData.season}</p>` : ''}
-              ${bookingData.starters ? `<p><strong>Starters:</strong> ${bookingData.starters}</p>` : ''}
-              ${bookingData.sides ? `<p><strong>Sides:</strong> ${bookingData.sides}</p>` : ''}
-              ${bookingData.desserts ? `<p><strong>Desserts:</strong> ${bookingData.desserts}</p>` : ''}
+              <p><strong>Reference:</strong> ${safeBookingId}</p>
+              <p><strong>Event Type:</strong> ${getFullEventTypeName(safeBookingData.event_type)}</p>
+              <p><strong>Package:</strong> ${safeBookingData.menu_package}</p>
+              ${safeBookingData.season ? `<p><strong>Season:</strong> ${safeBookingData.season}</p>` : ''}
+              ${safeBookingData.starters ? `<p><strong>Starters:</strong> ${safeBookingData.starters}</p>` : ''}
+              ${safeBookingData.sides ? `<p><strong>Sides:</strong> ${safeBookingData.sides}</p>` : ''}
+              ${safeBookingData.desserts ? `<p><strong>Desserts:</strong> ${safeBookingData.desserts}</p>` : ''}
               ${formattedExtras ? `<p><strong>Extras:</strong> ${formattedExtras}</p>` : ''}
               <p><strong>Cutlery & Crockery:</strong> ${bookingData.menu_selection?.includeCutlery ? 'Included' : 'Not included'}</p>
               <p><strong>Date:</strong> ${new Date(bookingData.event_date).toLocaleDateString('en-ZA', {
@@ -603,7 +738,7 @@ const handler = async (req: Request): Promise<Response> => {
                 day: 'numeric'
               })}</p>
               <p><strong>Guests:</strong> ${bookingData.number_of_guests}</p>
-              <p><strong>Venue:</strong> ${bookingData.venue_street_address}, ${bookingData.venue_city}</p>
+              <p><strong>Venue:</strong> ${safeBookingData.venue_street_address}, ${safeBookingData.venue_city}</p>
               <p style="font-size: 18px; color: #22c55e;"><strong>Total Amount: R${totalAmount}</strong></p>
             </div>
 
@@ -612,10 +747,10 @@ const handler = async (req: Request): Promise<Response> => {
               <h3 style="color: #166534; margin-top: 0;">📋 Professional Quote Generated</h3>
               <p>We've automatically generated a professional quote for your booking in our system:</p>
               <div style="background-color: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb;">
-                <p><strong>Quote Number:</strong> ${zohoEstimate.estimate_number || 'Pending'}</p>
+                <p><strong>Quote Number:</strong> ${escapeHtml(zohoEstimate.estimate_number) || 'Pending'}</p>
                 <p><strong>Quote Total:</strong> R${zohoEstimate.total || totalAmount}</p>
-                <p><strong>Status:</strong> ${zohoEstimate.status || 'Draft'}</p>
-                ${zohoEstimate.estimate_url ? `<p><a href="${zohoEstimate.estimate_url}" style="color: #22c55e; text-decoration: none;" target="_blank">🔗 View Professional Quote</a></p>` : ''}
+                <p><strong>Status:</strong> ${escapeHtml(zohoEstimate.status) || 'Draft'}</p>
+                ${zohoEstimate.estimate_url ? `<p><a href="${escapeHtml(zohoEstimate.estimate_url)}" style="color: #22c55e; text-decoration: none;" target="_blank">🔗 View Professional Quote</a></p>` : ''}
               </div>
               <p style="font-size: 14px; color: #166534; margin-bottom: 0;">This quote will be finalized after we confirm all details with you.</p>
             </div>
@@ -647,7 +782,7 @@ const handler = async (req: Request): Promise<Response> => {
             <ul>
               <li><strong>Email:</strong> spitbookings@thysgemaak.com</li>
               <li><strong>Phone:</strong> +27 60 461 3766</li>
-              <li><strong>Booking Reference:</strong> ${bookingId}</li>
+              <li><strong>Booking Reference:</strong> ${safeBookingId}</li>
             </ul>
             
             <p>We look forward to making your event memorable!</p>
@@ -662,7 +797,7 @@ const handler = async (req: Request): Promise<Response> => {
       `,
       attachments: [
         {
-          filename: `Spitbraai-Booking-Summary-${bookingId}.html`,
+          filename: `Spitbraai-Booking-Summary-${safeBookingId}.html`,
           content: btoa(htmlContent),
           content_type: "text/html"
         }
@@ -674,23 +809,23 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Email sending failed: ${emailResponse.error.message}`);
     }
 
-    console.log("Customer email sent successfully:", emailResponse.data);
+    console.log("Customer email sent successfully");
 
-    // Send staff notification email
+    // Send staff notification email with sanitized data
     try {
       console.log("Sending staff notification email...");
       
       const staffEmailResponse = await resend.emails.send({
         from: "Thys Gemaak Booking System <no-reply@spitbraai.thysgemaak.com>",
         to: ["spitbookings@thysgemaak.com"],
-        subject: `🚨 NEW BOOKING ENQUIRY - ${bookingId} - ${bookingData.contact_name}`,
-        html: generateStaffNotificationEmail(bookingData, bookingId)
+        subject: `🚨 NEW BOOKING ENQUIRY - ${safeBookingId} - ${safeBookingData.contact_name}`,
+        html: generateStaffNotificationEmail(safeBookingData, safeBookingId)
       });
 
       if (staffEmailResponse.error) {
         console.error("Staff notification email error:", staffEmailResponse.error);
       } else {
-        console.log("Staff notification email sent successfully:", staffEmailResponse.data);
+        console.log("Staff notification email sent successfully");
       }
     } catch (staffEmailError) {
       console.error("Staff email sending exception:", staffEmailError);
@@ -711,14 +846,19 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
   } catch (error: any) {
-    console.error("Error in send-booking-summary function:", error);
+    console.error("Error in send-booking-summary function:", error.name, error.message);
+    
+    const statusCode = error instanceof ValidationError ? 400 : 500;
+    const errorMessage = error instanceof ValidationError 
+      ? error.message 
+      : "Failed to send booking summary email";
+    
     return new Response(
       JSON.stringify({ 
-        error: error.message,
-        details: "Failed to send booking summary email"
+        error: errorMessage
       }),
       {
-        status: 500,
+        status: statusCode,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       }
     );
