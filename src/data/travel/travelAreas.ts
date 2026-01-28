@@ -268,6 +268,21 @@ export const travelAreas: TravelArea[] = [
     fee: 3000
   },
   {
+    name: 'Little Brak River',
+    postalCodes: ['6503'],
+    fee: 3000
+  },
+  {
+    name: 'Hartenbos',
+    postalCodes: ['6520'],
+    fee: 3000
+  },
+  {
+    name: 'Groot Brak Rivier',
+    postalCodes: ['6525'],
+    fee: 3000
+  },
+  {
     name: 'Oudtshoorn',
     postalCodes: ['6620'],
     fee: 3250
@@ -278,6 +293,16 @@ export const travelAreas: TravelArea[] = [
     fee: 3500
   },
   {
+    name: 'Wilderness',
+    postalCodes: ['6560'],
+    fee: 3500
+  },
+  {
+    name: 'Sedgefield',
+    postalCodes: ['6573'],
+    fee: 3750
+  },
+  {
     name: 'Knysna',
     postalCodes: ['6570'],
     fee: 3750
@@ -286,5 +311,15 @@ export const travelAreas: TravelArea[] = [
     name: 'Plettenberg Bay',
     postalCodes: ['6600'],
     fee: 4000
+  },
+  {
+    name: "Nature's Valley",
+    postalCodes: ['6602'],
+    fee: 4000
+  },
+  {
+    name: 'Storms River',
+    postalCodes: ['6308'],
+    fee: 4250
   }
 ];
