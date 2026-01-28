@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import BookingFlowContainer from '../components/booking/BookingFlowContainer';
 import { Toaster } from '../components/ui/toaster';
 import { MenuProvider } from '../contexts/menu';
+import SecurityAnnouncementBanner from '../components/SecurityAnnouncementBanner';
 
 const Booking = () => {
   const [searchParams] = useSearchParams();
@@ -44,6 +45,7 @@ const Booking = () => {
     <MenuProvider>
       <div className="flex flex-col min-h-screen">
         <Navbar />
+        <SecurityAnnouncementBanner />
         <main className="flex-grow py-16">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">

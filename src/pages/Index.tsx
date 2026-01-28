@@ -9,6 +9,7 @@ import Footer from '../components/Footer';
 import UploadGallery from '../components/gallery/UploadGallery';
 import ScrollToTop from '../components/ScrollToTop';
 import { Toaster } from '../components/ui/toaster';
+import SecurityAnnouncementBanner from '../components/SecurityAnnouncementBanner';
 
 const Index = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -80,6 +81,7 @@ const Index = () => {
       />
       
       <Navbar />
+      <SecurityAnnouncementBanner />
       <main className="flex-grow">
         <Hero />
         <div id="about"><About /></div>

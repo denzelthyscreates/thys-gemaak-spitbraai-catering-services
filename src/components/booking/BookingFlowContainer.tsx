@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import MenuBuilder from '../MenuBuilder';
 import BookingFormWithSummary from './BookingFormWithSummary';
 import BookingSummary from './BookingSummary';
+import AuthPrompt from './AuthPrompt';
+import { useAuth } from '@/contexts/auth';
 
 export type BookingStep = 'menuBuilder' | 'bookingForm' | 'bookingConfirmed';
 
@@ -13,6 +15,7 @@ interface BookingFlowContainerProps {
 const BookingFlowContainer: React.FC<BookingFlowContainerProps> = ({
   initialMenuSelection
 }) => {
+  const { user, loading } = useAuth();
   const [currentStep, setCurrentStep] = useState<BookingStep>(
     initialMenuSelection ? 'bookingForm' : 'menuBuilder'
   );
@@ -58,6 +61,20 @@ const BookingFlowContainer: React.FC<BookingFlowContainerProps> = ({
         );
       
       case 'bookingForm':
+        // Check if user is authenticated before showing booking form
+        if (loading) {
+          return (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Checking authentication...</p>
+            </div>
+          );
+        }
+        
+        if (!user) {
+          return <AuthPrompt onBackToMenu={handleBackToMenu} />;
+        }
+        
         return (
           <BookingFormWithSummary
             menuSelection={menuSelection}
