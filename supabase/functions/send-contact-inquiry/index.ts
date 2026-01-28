@@ -1,6 +1,57 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+
+// ============= Input Validation Utilities =============
+
+function escapeHtml(text: string | undefined | null): string {
+  if (!text) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function sanitizeForEmail(text: string | undefined | null): string {
+  if (!text) return '';
+  return escapeHtml(text).replace(/\n/g, '<br>');
+}
+
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email) && email.length <= 255;
+}
+
+function isValidPhone(phone: string | undefined): boolean {
+  if (!phone) return true; // Optional field
+  const phoneRegex = /^[\d\s+\-()]{7,20}$/;
+  return phoneRegex.test(phone);
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isValidLength(text: string | undefined | null, maxLength: number): boolean {
+  if (!text) return true;
+  return text.length <= maxLength;
+}
+
+const VALID_INQUIRY_TYPES = ['general', 'booking', 'pricing', 'menu', 'availability', 'other', 'General Inquiry', 'Booking Request', 'Pricing Question', 'Menu Information', 'Other'];
+
+function isValidInquiryType(type: unknown): boolean {
+  return typeof type === 'string' && VALID_INQUIRY_TYPES.some(t => t.toLowerCase() === type.toLowerCase());
+}
+
+class ValidationError extends Error {
+  constructor(message: string, public field?: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+
+// ============= End Validation Utilities =============
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -27,25 +78,67 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const inquiryData: ContactInquiryRequest = await req.json();
-    console.log("Contact inquiry received:", inquiryData);
+    console.log("Contact inquiry received for:", inquiryData.email);
 
     const { name, email, phone, inquiryType, message } = inquiryData;
 
+    // ============= Input Validation =============
+    
+    if (!isNonEmptyString(name)) {
+      throw new ValidationError('Name is required', 'name');
+    }
+    if (!isValidLength(name, 100)) {
+      throw new ValidationError('Name must be less than 100 characters', 'name');
+    }
+
+    if (!isNonEmptyString(email)) {
+      throw new ValidationError('Email is required', 'email');
+    }
+    if (!isValidEmail(email)) {
+      throw new ValidationError('Invalid email address', 'email');
+    }
+
+    if (!isValidPhone(phone)) {
+      throw new ValidationError('Invalid phone number format', 'phone');
+    }
+
+    if (!isNonEmptyString(inquiryType)) {
+      throw new ValidationError('Inquiry type is required', 'inquiryType');
+    }
+    if (!isValidInquiryType(inquiryType)) {
+      throw new ValidationError('Invalid inquiry type', 'inquiryType');
+    }
+
+    if (!isNonEmptyString(message)) {
+      throw new ValidationError('Message is required', 'message');
+    }
+    if (!isValidLength(message, 2000)) {
+      throw new ValidationError('Message must be less than 2000 characters', 'message');
+    }
+
+    // ============= Sanitize for HTML Email =============
+    const safeName = escapeHtml(name);
+    const safePhone = escapeHtml(phone);
+    const safeInquiryType = escapeHtml(inquiryType);
+    const safeMessage = sanitizeForEmail(message);
+
+    // ============= End Validation =============
+
     // Send confirmation email to customer
-    console.log("Sending confirmation email to customer:", email);
+    console.log("Sending confirmation email to customer");
     const customerEmailResponse = await resend.emails.send({
       from: "Thysgemaak Spitbraai <noreply@spitbraai.thysgemaak.com>",
       to: [email],
       subject: "Thank you for your inquiry - Thysgemaak Spitbraai",
       html: `
         <h2>Thank you for contacting Thysgemaak Spitbraai!</h2>
-        <p>Dear ${name},</p>
-        <p>We have received your inquiry regarding: <strong>${inquiryType}</strong></p>
+        <p>Dear ${safeName},</p>
+        <p>We have received your inquiry regarding: <strong>${safeInquiryType}</strong></p>
         <p>Our team will review your message and get back to you within 24 hours during business hours.</p>
         
         <div style="background-color: #f5f5f5; padding: 15px; margin: 20px 0; border-left: 4px solid #d4af37;">
           <h3>Your Message:</h3>
-          <p style="margin: 0;">${message.replace(/\n/g, '<br>')}</p>
+          <p style="margin: 0;">${safeMessage}</p>
         </div>
         
         <p>If you have any urgent questions, please feel free to call us directly.</p>
@@ -65,21 +158,21 @@ const handler = async (req: Request): Promise<Response> => {
     const businessEmailResponse = await resend.emails.send({
       from: "Thysgemaak Website <noreply@spitbraai.thysgemaak.com>",
       to: ["spitbookings@thysgemaak.com"],
-      subject: `New Contact Inquiry: ${inquiryType} - ${name}`,
+      subject: `New Contact Inquiry: ${safeInquiryType} - ${safeName}`,
       html: `
         <h2>New Contact Inquiry Received</h2>
         
         <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
           <h3>Contact Information:</h3>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
-          <p><strong>Inquiry Type:</strong> ${inquiryType}</p>
+          <p><strong>Name:</strong> ${safeName}</p>
+          <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+          <p><strong>Phone:</strong> ${safePhone || 'Not provided'}</p>
+          <p><strong>Inquiry Type:</strong> ${safeInquiryType}</p>
         </div>
         
         <div style="background-color: #fff3cd; padding: 15px; border-left: 4px solid #d4af37; margin: 20px 0;">
           <h3>Message:</h3>
-          <p style="margin: 0; white-space: pre-wrap;">${message}</p>
+          <p style="margin: 0; white-space: pre-wrap;">${safeMessage}</p>
         </div>
         
         <p style="margin-top: 30px;">
@@ -110,14 +203,19 @@ const handler = async (req: Request): Promise<Response> => {
 
   } catch (error: any) {
     console.error("=== CONTACT INQUIRY ERROR ===");
-    console.error("Error details:", error);
+    console.error("Error type:", error.name);
+    console.error("Error message:", error.message);
+    
+    const statusCode = error instanceof ValidationError ? 400 : 500;
+    const errorMessage = error instanceof ValidationError 
+      ? error.message 
+      : "Failed to process contact inquiry";
     
     return new Response(
       JSON.stringify({ 
-        error: error.message || "Failed to process contact inquiry",
-        details: error
+        error: errorMessage
       }), {
-      status: 500,
+      status: statusCode,
       headers: { 
         "Content-Type": "application/json", 
         ...corsHeaders 
