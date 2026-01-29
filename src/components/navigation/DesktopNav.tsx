@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { User, Settings } from 'lucide-react';
 import NavLink from './NavLink';
 import { useAuth } from '@/contexts/auth';
+import { useAdminCheck } from '@/hooks/useAdminCheck';
 
 interface NavItem {
   name: string;
@@ -17,6 +18,7 @@ interface DesktopNavProps {
 
 const DesktopNav = ({ isScrolled }: DesktopNavProps) => {
   const { user } = useAuth();
+  const { isAdmin } = useAdminCheck();
   
   const navItems: NavItem[] = [
     { name: 'Home', path: '#home', isHashLink: true },
@@ -45,6 +47,16 @@ const DesktopNav = ({ isScrolled }: DesktopNavProps) => {
       </ul>
       
       <div className="flex items-center gap-3">
+        {isAdmin && (
+          <Link 
+            to="/admin"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-secondary hover:text-secondary/80 transition-colors"
+          >
+            <Settings className="h-4 w-4" />
+            Admin
+          </Link>
+        )}
+        
         <Link 
           to="/auth"
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors"

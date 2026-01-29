@@ -1,9 +1,10 @@
 
 import React from 'react';
-import { X, Menu, User } from 'lucide-react';
+import { X, Menu, User, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import NavLink from './NavLink';
 import { useAuth } from '@/contexts/auth';
+import { useAdminCheck } from '@/hooks/useAdminCheck';
 
 interface MobileNavProps {
   isMenuOpen: boolean;
@@ -12,6 +13,7 @@ interface MobileNavProps {
 
 const MobileNav = ({ isMenuOpen, toggleMenu }: MobileNavProps) => {
   const { user } = useAuth();
+  const { isAdmin } = useAdminCheck();
   
   const navItems = [
     { name: 'Home', path: '#home', isHashLink: true },
@@ -58,6 +60,19 @@ const MobileNav = ({ isMenuOpen, toggleMenu }: MobileNavProps) => {
                 </NavLink>
               </li>
             ))}
+            
+            {isAdmin && (
+              <li className="w-full slide-in-bottom delay-600">
+                <Link
+                  to="/admin"
+                  onClick={toggleMenu}
+                  className="flex items-center justify-center gap-2 w-full py-3 text-lg font-medium text-secondary hover:text-secondary/80 transition-colors"
+                >
+                  <Settings className="h-5 w-5" />
+                  Admin Dashboard
+                </Link>
+              </li>
+            )}
             
             <li className="w-full mt-4 slide-in-bottom delay-600">
               <Link
