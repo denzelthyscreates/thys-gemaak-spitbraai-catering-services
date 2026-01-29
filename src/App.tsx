@@ -10,6 +10,7 @@ import { AuthProvider } from "@/contexts/auth";
 import Index from './pages/Index';
 import Booking from './pages/Booking';
 import Auth from './pages/Auth';
+import Admin from './pages/Admin';
 import NotFound from './pages/NotFound';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
@@ -39,6 +40,7 @@ const App = () => {
               <Route path="/" element={<Index />} />
               <Route path="/booking" element={<Booking />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/admin/*" element={<Admin />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
               <Route path="/cookie-policy" element={<CookiePolicy />} />
