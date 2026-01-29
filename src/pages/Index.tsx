@@ -81,7 +81,9 @@ const Index = () => {
       />
       
       <Navbar />
-      <SecurityAnnouncementBanner />
+      <div className="pt-[60px]">
+        <SecurityAnnouncementBanner />
+      </div>
       <main className="flex-grow">
         <Hero />
         <div id="about"><About /></div>
