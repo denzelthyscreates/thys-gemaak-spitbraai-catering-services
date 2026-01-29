@@ -5,12 +5,16 @@ import { ProcessedEvent } from './types.ts';
 export class DatabaseService {
   private static getSupabaseClient() {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
+    // Use SERVICE_ROLE_KEY to bypass RLS - required for admin-only tables
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
-    console.log('Supabase URL exists:', !!supabaseUrl);
-    console.log('Supabase key exists:', !!supabaseKey);
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing required Supabase environment variables (SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY)');
+    }
     
-    return createClient(supabaseUrl ?? '', supabaseKey ?? '');
+    console.log('Database service initialized with service role access');
+    
+    return createClient(supabaseUrl, supabaseKey);
   }
 
   static async updateSyncStatus(status: 'pending' | 'success' | 'error', eventsSynced?: number, errorMessage?: string) {
