@@ -12,7 +12,7 @@ const Auth = () => {
   return (
     <>
       <Navbar />
-      <div className="container-width py-16">
+      <div className="container-width py-16 pt-24">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-4xl md:text-5xl font-serif font-semibold tracking-tight text-foreground mb-6">
             {user ? 'Your Account' : 'Sign In or Create Account'}

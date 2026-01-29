@@ -83,8 +83,7 @@ const Index = () => {
       <Navbar />
       <div className="pt-[60px]">
         <SecurityAnnouncementBanner />
-      </div>
-      <main className="flex-grow">
+        <main className="flex-grow">
         <Hero />
         <div id="about"><About /></div>
         <div id="services"><Services /></div>
@@ -110,8 +109,9 @@ const Index = () => {
           </div>
         </section>
         
-        <div id="contact"><Contact /></div>
-      </main>
+          <div id="contact"><Contact /></div>
+        </main>
+      </div>
       <Footer />
       <ScrollToTop />
       <Toaster />
