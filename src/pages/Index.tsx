@@ -66,7 +66,9 @@ const Index = () => {
     }} />
       
       <Navbar />
-      <SecurityAnnouncementBanner />
+      <div className="pt-[60px] md:pt-[68px]">
+        <SecurityAnnouncementBanner />
+      </div>
       <main className="flex-grow py-[10px]">
         <Hero />
         <div id="about"><About /></div>
