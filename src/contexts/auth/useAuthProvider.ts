@@ -12,21 +12,8 @@ export const useAuthProvider = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if Supabase credentials are available
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-    
-    if (!supabaseUrl || !supabaseAnonKey) {
-      setLoading(false);
-      setSupabaseReady(false);
-      toast({
-        title: "Configuration Error",
-        description: "Supabase credentials are missing. Authentication features will not work.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
+    // Supabase is configured via src/lib/supabase.ts with hardcoded fallback values
+    // No need to check VITE_* env vars as they may not be available in production
     setSupabaseReady(true);
 
     // Check for existing session
