@@ -18,9 +18,8 @@ const Brand = ({ isScrolled }: BrandProps) => {
         alt="Thys Gemaak Spitbraai Catering Services Logo" 
         className="h-10 md:h-12 w-auto transition-transform duration-300 group-hover:scale-105 flex-shrink-0"
       />
-      <span className="font-montserrat font-semibold tracking-tight transition-colors duration-300 text-foreground text-sm sm:text-base md:text-lg lg:text-xl truncate">
-        <span className="sm:hidden">Thys Gemaak</span>
-        <span className="hidden sm:inline lg:hidden">Thys Gemaak Spitbraai</span>
+      <span className="font-montserrat font-semibold tracking-tight transition-colors duration-300 text-foreground text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl truncate">
+        <span className="lg:hidden">Thys Gemaak Spitbraai</span>
         <span className="hidden lg:inline">Thys Gemaak Spitbraai Catering Services</span>
       </span>
     </Link>
