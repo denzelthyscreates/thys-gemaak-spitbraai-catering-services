@@ -2,7 +2,6 @@ import React from 'react';
 import { useAuth } from '@/contexts/auth';
 import AuthForm from '@/components/auth/AuthForm';
 import UserProfile from '@/components/auth/UserProfile';
-import { BootstrapAdminButton } from '@/components/auth/BootstrapAdminButton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
@@ -47,12 +46,7 @@ const Auth = () => {
               <p className="text-lg font-medium">Loading your account information...</p>
             </div>
           ) : user ? (
-            <>
-              <UserProfile />
-              <div className="max-w-md mx-auto mt-6">
-                <BootstrapAdminButton />
-              </div>
-            </>
+            <UserProfile />
           ) : (
             <div className="max-w-md mx-auto">
               <AuthForm />
