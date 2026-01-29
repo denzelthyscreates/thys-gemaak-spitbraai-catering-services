@@ -7,12 +7,13 @@ import { Button } from '@/components/ui/button';
 const STORAGE_KEY = 'securityAnnouncementDismissed';
 
 export const SecurityAnnouncementBanner = () => {
-  const [isDismissed, setIsDismissed] = useState(true);
-
-  useEffect(() => {
-    const dismissed = localStorage.getItem(STORAGE_KEY);
-    setIsDismissed(dismissed === 'true');
-  }, []);
+  const [isDismissed, setIsDismissed] = useState(() => {
+    // Initialize from localStorage immediately to prevent flash
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(STORAGE_KEY) === 'true';
+    }
+    return false;
+  });
 
   const handleDismiss = () => {
     localStorage.setItem(STORAGE_KEY, 'true');
