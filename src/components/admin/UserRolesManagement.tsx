@@ -27,12 +27,29 @@ const roleColors: Record<string, string> = {
 
 export function UserRolesManagement() {
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
+  const [userEmails, setUserEmails] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newUserId, setNewUserId] = useState('');
   const [newRole, setNewRole] = useState<'admin' | 'moderator' | 'user'>('user');
   const [adding, setAdding] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+
+  const fetchUserEmails = async (userIds: string[]) => {
+    if (userIds.length === 0) return;
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('get-user-emails', {
+        body: { user_ids: userIds },
+      });
+      
+      if (!error && data?.user_emails) {
+        setUserEmails(data.user_emails);
+      }
+    } catch (error) {
+      console.error('Error fetching user emails:', error);
+    }
+  };
 
   const fetchUserRoles = async () => {
     setLoading(true);
@@ -44,6 +61,12 @@ export function UserRolesManagement() {
 
       if (error) throw error;
       setUserRoles(data || []);
+      
+      // Fetch emails for all users
+      if (data && data.length > 0) {
+        const userIds = data.map(r => r.user_id);
+        await fetchUserEmails(userIds);
+      }
     } catch (error) {
       console.error('Error fetching user roles:', error);
       toast.error('Failed to load user roles');
@@ -196,9 +219,14 @@ export function UserRolesManagement() {
               {userRoles.map((userRole) => (
                 <TableRow key={userRole.id}>
                   <TableCell>
-                    <code className="text-xs bg-muted px-2 py-1 rounded">
-                      {userRole.user_id}
-                    </code>
+                    <div className="flex flex-col gap-1">
+                      <span className="font-medium">
+                        {userEmails[userRole.user_id] || 'Loading...'}
+                      </span>
+                      <code className="text-xs text-muted-foreground">
+                        {userRole.user_id}
+                      </code>
+                    </div>
                   </TableCell>
                   <TableCell>
                     <Badge className={roleColors[userRole.role]}>

@@ -84,31 +84,31 @@ const Index = () => {
       <div className="pt-[60px]">
         <SecurityAnnouncementBanner />
         <main className="flex-grow">
-        <Hero />
-        <div id="about"><About /></div>
-        <div id="services"><Services /></div>
-        <div id="testimonials"><Testimonials /></div>
-        
-        <section id="gallery" className="section py-16 bg-muted/30 scroll-mt-20">
-          <div className="container-width">
-            <div className="text-center max-w-3xl mx-auto mb-12">
-              <span className="inline-block px-4 py-1.5 mb-6 text-xl font-medium rounded-full bg-primary/10 text-primary">
-                Our Gallery
-              </span>
-              <h2 className="text-4xl md:text-5xl font-serif font-semibold tracking-tight text-foreground mb-6">
-                Our Event Showcase
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Browse through photos from our recent catering events and spitbraai experiences.
-              </p>
+          <Hero />
+          <div id="about"><About /></div>
+          <div id="services"><Services /></div>
+          <div id="testimonials"><Testimonials /></div>
+          
+          <section id="gallery" className="section py-16 bg-muted/30 scroll-mt-20">
+            <div className="container-width">
+              <div className="text-center max-w-3xl mx-auto mb-12">
+                <span className="inline-block px-4 py-1.5 mb-6 text-xl font-medium rounded-full bg-primary/10 text-primary">
+                  Our Gallery
+                </span>
+                <h2 className="text-4xl md:text-5xl font-serif font-semibold tracking-tight text-foreground mb-6">
+                  Our Event Showcase
+                </h2>
+                <p className="text-lg text-muted-foreground">
+                  Browse through photos from our recent catering events and spitbraai experiences.
+                </p>
+              </div>
+              
+              <div className="mt-12">
+                <UploadGallery />
+              </div>
             </div>
-            
-            <div className="mt-12">
-              <UploadGallery />
-            </div>
-          </div>
-        </section>
-        
+          </section>
+          
           <div id="contact"><Contact /></div>
         </main>
       </div>
