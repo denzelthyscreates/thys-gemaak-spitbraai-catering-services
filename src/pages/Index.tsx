@@ -81,7 +81,7 @@ const Index = () => {
       />
       
       <Navbar />
-      <div className="pt-[60px]">
+      <div className="pt-[72px] md:pt-[80px]">
         <SecurityAnnouncementBanner />
         <main className="flex-grow">
           <Hero />
