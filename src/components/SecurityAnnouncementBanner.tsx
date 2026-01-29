@@ -22,7 +22,7 @@ export const SecurityAnnouncementBanner = () => {
   if (isDismissed) return null;
 
   return (
-    <div className="bg-primary text-primary-foreground">
+    <div className="fixed top-[60px] md:top-[72px] left-0 right-0 z-40 bg-primary text-primary-foreground shadow-md">
       <div className="container-width py-3">
         <div className="flex items-start md:items-center justify-between gap-4">
           <div className="flex items-start md:items-center gap-3 flex-1">
