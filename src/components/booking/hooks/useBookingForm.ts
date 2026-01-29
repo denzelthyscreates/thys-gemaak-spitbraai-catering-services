@@ -55,14 +55,12 @@ export const useBookingForm = (menuSelection: any) => {
     setIsSubmitting(true);
 
     try {
-      // Get current user for authenticated bookings
-      const { data: { user } } = await supabase.auth.getUser();
-      
       // Generate a shorter booking reference
       const bookingReference = generateBookingReference();
       console.log("Generated booking reference:", bookingReference);
 
-      // Prepare booking data with proper user ID handling
+      // Prepare booking data - user_id is set server-side by database trigger
+      // to prevent identity spoofing attacks
       const bookingData = {
         contact_name: data.name,
         contact_email: data.email,
@@ -93,9 +91,8 @@ export const useBookingForm = (menuSelection: any) => {
         notes: data.additionalNotes || '',
         referral_source: data.referralSource || null,
         status: 'pending',
-        // Use authenticated user ID or generate a unique anonymous ID for this booking
-        user_id: user?.id || crypto.randomUUID(),
         booking_reference: bookingReference
+        // Note: user_id is NOT included here - it's set server-side by the enforce_booking_user_id trigger
       };
 
       console.log("=== ATTEMPTING SUPABASE INSERT ===");
