@@ -25,14 +25,12 @@ export const SecurityAnnouncementBanner = () => {
   return (
     <div className="bg-primary text-primary-foreground shadow-md">
       <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3">
-        <div className="flex items-center justify-between gap-2 sm:gap-4">
-          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2 sm:gap-4">
+          <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
             <Shield className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-            <p className="text-xs sm:text-sm md:text-base truncate sm:whitespace-normal">
+            <p className="text-xs sm:text-sm md:text-base whitespace-normal break-words leading-snug">
               <span className="font-semibold">Your security matters!</span>{' '}
-              <span className="hidden md:inline">
-                Account creation is now required to protect your booking information.
-              </span>
+              <span>Account creation is now required to protect your booking information.</span>
             </p>
           </div>
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
