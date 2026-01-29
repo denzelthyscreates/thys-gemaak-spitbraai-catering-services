@@ -29,7 +29,7 @@ const MobileNav = ({ isMenuOpen, toggleMenu }: MobileNavProps) => {
       {/* Mobile Menu Button */}
       <button
         onClick={toggleMenu}
-        className="md:hidden flex items-center p-2"
+        className="md:hidden flex items-center p-2 flex-shrink-0"
         aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
       >
         {isMenuOpen ? (
