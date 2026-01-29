@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import { initializeConsentedScripts } from "@/utils/cookieConsent";
+import { AuthProvider } from "@/contexts/auth";
 import Index from './pages/Index';
 import Booking from './pages/Booking';
 import Auth from './pages/Auth';
@@ -29,26 +30,28 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/booking" element={<Booking />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/terms-of-service" element={<TermsOfService />} />
-            <Route path="/cookie-policy" element={<CookiePolicy />} />
-            <Route path="/payment-success" element={<PaymentSuccess />} />
-            <Route path="/payment-cancelled" element={<PaymentCancelled />} />
-            <Route path="/zoho-setup" element={<ZohoSetup />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <CookieConsent />
-        </BrowserRouter>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/booking" element={<Booking />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} />
+              <Route path="/cookie-policy" element={<CookiePolicy />} />
+              <Route path="/payment-success" element={<PaymentSuccess />} />
+              <Route path="/payment-cancelled" element={<PaymentCancelled />} />
+              <Route path="/zoho-setup" element={<ZohoSetup />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <CookieConsent />
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };
