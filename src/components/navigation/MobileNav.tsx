@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { X, Menu } from 'lucide-react';
+import { X, Menu, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import NavLink from './NavLink';
+import { useAuth } from '@/contexts/auth';
 
 interface MobileNavProps {
   isMenuOpen: boolean;
@@ -10,6 +11,8 @@ interface MobileNavProps {
 }
 
 const MobileNav = ({ isMenuOpen, toggleMenu }: MobileNavProps) => {
+  const { user } = useAuth();
+  
   const navItems = [
     { name: 'Home', path: '#home', isHashLink: true },
     { name: 'About', path: '/', isHashLink: true },
@@ -57,6 +60,17 @@ const MobileNav = ({ isMenuOpen, toggleMenu }: MobileNavProps) => {
             ))}
             
             <li className="w-full mt-4 slide-in-bottom delay-600">
+              <Link
+                to="/auth"
+                onClick={toggleMenu}
+                className="flex items-center justify-center gap-2 w-full py-3 text-lg font-medium text-foreground hover:text-primary transition-colors"
+              >
+                <User className="h-5 w-5" />
+                {user ? 'My Account' : 'Sign In'}
+              </Link>
+            </li>
+            
+            <li className="w-full slide-in-bottom delay-700">
               <Link
                 to="/booking"
                 onClick={toggleMenu}
