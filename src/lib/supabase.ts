@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Get environment variables with fallback to hardcoded values for development
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://pcvmdyhzufupgckszrdy.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjdm1keWh6dWZ1cGdja3N6cmR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMxMTI0ODEsImV4cCI6MjA1ODY4ODQ4MX0.hNNiDqgi8MDavGcP7Bwc2KR59CTsdWAw8g4gdSr_Kq0';
+// Get environment variables - no hardcoded fallbacks for security
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Check if environment variables are available
 const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey);
@@ -95,7 +95,7 @@ export const createBooking = async (bookingData: any) => {
     user_id: user?.id || null
   };
   
-  console.log('Creating booking with data:', bookingWithUserId);
+  console.log('Creating booking for event type:', bookingWithUserId.event_type);
   
   const { data, error } = await supabase
     .from('bookings')

@@ -388,9 +388,16 @@ export const getSystemeFormHtml = () => {
                     }
                 }
                 
-                // Update the summary section
+                // Update the summary section using safe DOM manipulation
                 if (summaryHTML) {
-                    menuSummaryContent.innerHTML = summaryHTML;
+                    // Use DOMParser for safe HTML insertion instead of innerHTML
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString('<div>' + summaryHTML + '</div>', 'text/html');
+                    menuSummaryContent.textContent = '';
+                    var children = doc.body.firstChild.childNodes;
+                    for (var i = 0; i < children.length; i++) {
+                        menuSummaryContent.appendChild(document.importNode(children[i], true));
+                    }
                 } else {
                     document.getElementById('menuSummarySection').style.display = 'none';
                 }

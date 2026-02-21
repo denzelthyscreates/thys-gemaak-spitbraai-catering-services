@@ -51,18 +51,18 @@ const ContactForm = () => {
     setIsSubmitting(true);
     
     try {
-      console.log('Submitting contact form:', data);
+      console.log('Submitting contact inquiry:', { inquiryType: data.inquiryType, timestamp: new Date().toISOString() });
       
       const { data: response, error } = await supabase.functions.invoke('send-contact-inquiry', {
         body: data
       });
 
       if (error) {
-        console.error('Contact form submission error:', error);
+        console.error('Contact form submission failed');
         throw error;
       }
 
-      console.log('Contact form submitted successfully:', response);
+      console.log('Contact inquiry submitted successfully');
       
       toast({
         title: "Message Sent!",
