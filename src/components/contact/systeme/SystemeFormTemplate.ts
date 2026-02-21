@@ -310,6 +310,13 @@ export const getSystemeFormHtml = () => {
                     var results = regex.exec(location.search);
                     return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
                 }
+
+                // HTML escape function to prevent XSS
+                function escapeHtml(text) {
+                    var div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                }
                 
                 // List of hidden fields to populate from URL parameters
                 var hiddenFields = [
@@ -343,14 +350,16 @@ export const getSystemeFormHtml = () => {
                             return str.toUpperCase();
                         });
                         
-                        // Add to summary if value exists
+                        // Add to summary if value exists (escape all user-controlled values)
                         if (value && field !== 'postalCode' && field !== 'areaName') {
+                            var safeValue = escapeHtml(value);
+                            var safeDisplayName = escapeHtml(displayName);
                             if (field === 'totalPrice') {
-                                summaryHTML += '<div><strong>' + displayName + ':</strong> R' + value + '</div>';
+                                summaryHTML += '<div><strong>' + safeDisplayName + ':</strong> R' + safeValue + '</div>';
                             } else if (field === 'includeCutlery') {
-                                summaryHTML += '<div><strong>Cutlery & Crockery:</strong> ' + (value === 'true' ? 'Yes' : 'No') + '</div>';
+                                summaryHTML += '<div><strong>Cutlery &amp; Crockery:</strong> ' + (value === 'true' ? 'Yes' : 'No') + '</div>';
                             } else {
-                                summaryHTML += '<div><strong>' + displayName + ':</strong> ' + value + '</div>';
+                                summaryHTML += '<div><strong>' + safeDisplayName + ':</strong> ' + safeValue + '</div>';
                             }
                         }
                     }
@@ -362,13 +371,20 @@ export const getSystemeFormHtml = () => {
                 var travelFee = getUrlParameter('travelFee');
                 
                 if (price && guests) {
-                    var total = parseFloat(price) * parseInt(guests);
-                    summaryHTML += '<div style="margin-top: 10px;"><strong>Event Total:</strong> R' + total.toFixed(2) + '</div>';
-                    
-                    if (travelFee && parseFloat(travelFee) > 0) {
-                        summaryHTML += '<div><strong>Travel Fee:</strong> R' + parseFloat(travelFee).toFixed(2) + '</div>';
-                        var grandTotal = total + parseFloat(travelFee);
-                        summaryHTML += '<div><strong>Grand Total:</strong> R' + grandTotal.toFixed(2) + '</div>';
+                    var parsedPrice = parseFloat(price);
+                    var parsedGuests = parseInt(guests);
+                    if (!isNaN(parsedPrice) && !isNaN(parsedGuests)) {
+                        var total = parsedPrice * parsedGuests;
+                        summaryHTML += '<div style="margin-top: 10px;"><strong>Event Total:</strong> R' + total.toFixed(2) + '</div>';
+                        
+                        if (travelFee) {
+                            var parsedTravelFee = parseFloat(travelFee);
+                            if (!isNaN(parsedTravelFee) && parsedTravelFee > 0) {
+                                summaryHTML += '<div><strong>Travel Fee:</strong> R' + parsedTravelFee.toFixed(2) + '</div>';
+                                var grandTotal = total + parsedTravelFee;
+                                summaryHTML += '<div><strong>Grand Total:</strong> R' + grandTotal.toFixed(2) + '</div>';
+                            }
+                        }
                     }
                 }
                 
