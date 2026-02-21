@@ -1,116 +1,104 @@
 
 
-## Plan: Require Authentication for Bookings with Security Announcement
+# 2026 Menu Price Update Plan
 
-This plan implements secure booking (requiring user accounts) while clearly communicating to customers why this change benefits them.
-
----
-
-### Overview
-
-We will add a prominent security announcement banner and require users to sign in or create an account before making a booking. This follows industry best practices for transparency when introducing security measures.
+## Summary
+Update all menu prices, names, and descriptions to match the 2026 pricing from your uploaded menu images. This includes price changes to existing items, new menu options, and two entirely new categories.
 
 ---
 
-### Best Practices for Security Announcements
+## 1. Price and Name Updates (existing items)
 
-When introducing authentication requirements, transparency is key. Here's what the implementation will follow:
+The following changes will be made in `src/data/menuData.ts`:
 
-1. **Be transparent about the "why"** - Explain that this protects their personal data (name, email, phone, address)
-2. **Highlight the benefits** - Account creation means they can view their booking history and manage their events
-3. **Use positive framing** - Frame it as "protecting you" rather than "restricting access"
-4. **Make it non-intrusive** - Use a dismissible banner, not a blocking popup
-5. **Provide easy action** - Include a direct link to create an account
-
----
-
-### Implementation Steps
-
-#### 1. Create a Security Announcement Banner Component
-
-A new `SecurityAnnouncementBanner` component will:
-- Display at the top of pages (below the navbar)
-- Use the brand colors for a cohesive look
-- Include a shield icon to reinforce security messaging
-- Be dismissible (stored in localStorage so it doesn't reappear)
-- Link directly to the sign-in/sign-up page
-
-**Message Example:**
-> "Your security matters to us. To protect your personal information, we now require a quick account creation before booking. This ensures only you can access your booking details and history."
-
-#### 2. Add Authentication Route to App.tsx
-
-Add the `/auth` route that already exists in `Auth.tsx` but is currently missing from the router.
-
-#### 3. Update Booking Flow to Require Authentication
-
-Modify `BookingFlowContainer.tsx` to:
-- Check if user is authenticated before showing the booking form
-- Redirect unauthenticated users to sign in first
-- Show a friendly message explaining why authentication is needed
-
-#### 4. Add Login/Signup Prompts at Key Points
-
-- Add a "Sign in to book" call-to-action in the menu builder summary
-- Update the booking form to show an auth prompt if not logged in
+| Menu Item | Field | Old Value | New Value |
+|-----------|-------|-----------|-----------|
+| Essential Celebration (birthday) | withoutCutlery | R149 | R159 |
+| Deluxe Celebration (birthday) | withoutCutlery | R165 | R175 |
+| Ultimate Birthday Feast | price | R195 | R200 |
+| Ultimate Birthday Feast | withoutCutlery | R175 | R195 |
+| Luxury Wedding Experience | price | R195 | R220 |
+| Luxury Wedding Experience | withoutCutlery | R175 | R200 |
+| Classic Wedding Celebration | withoutCutlery | R149 | R159 |
+| Classic Spitbraai (standard) | withoutCutlery | R149 | R159 |
+| Year-End Celebration | price | R160 | R170 |
+| Year-End Celebration | withoutCutlery | R140 | R160 |
+| Matric Farewell Essential | name | "...2025" | "...2026" |
+| Matric Farewell Essential | withoutCutlery | R149 | R159 |
+| Matric Farewell Premium | name | "...2025" | "...2026" |
+| Matric Farewell Premium | withoutCutlery | R175 | R185 |
+| Cheese Table | price | R1900 | R2500 |
+| Fruit Table | price | R900 | R1500 |
 
 ---
 
-### Files to Create/Modify
+## 2. New Standard Menu Variants
 
-| File | Action | Purpose |
-|------|--------|---------|
-| `src/components/SecurityAnnouncementBanner.tsx` | Create | New announcement banner component |
-| `src/App.tsx` | Modify | Add `/auth` route |
-| `src/pages/Index.tsx` | Modify | Add banner below Navbar |
-| `src/pages/Booking.tsx` | Modify | Add banner and auth check |
-| `src/components/booking/BookingFlowContainer.tsx` | Modify | Redirect to auth if not logged in |
-| `src/components/menu/summary/PricingSection.tsx` | Modify | Update CTA to mention sign-in |
+The 2026 menu shows the Standard Menu now has Classic Menu 1/2/3 (each R169 with different sides) plus a Deluxe option at R185. Currently there's only one standard option.
 
----
+New items to add to `menuData.ts` under `eventType: 'standard'`:
 
-### Technical Details
+- **Classic Menu 1** -- R169 (without cutlery R159): Lamb Spit main with Garlic Bread, Curry Noodle and Green Salad
+- **Classic Menu 2** -- R169 (without cutlery R159): Lamb Spit main with Garlic Bread, Three Bean and Green Salad
+- **Classic Menu 3** -- R169 (without cutlery R159): Lamb Spit main with Garlic Bread, Baby Potatoes and Baby Carrots
+- **Deluxe Celebration Experience** -- R185 (without cutlery R175): Lamb Spit Main, Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads/Sides
 
-**SecurityAnnouncementBanner Component Structure:**
-```text
-+------------------------------------------------------------------+
-| [Shield Icon] Your security matters! We now require account     X |
-|              creation to protect your booking information.         |
-|              [Create Account / Sign In]                            |
-+------------------------------------------------------------------+
-```
-
-**Banner Features:**
-- Uses existing Alert component styling with custom security variant
-- Dismissible with X button, stores preference in localStorage
-- Responsive design (stacks vertically on mobile)
-- Uses brand primary color (#0066a4) for trust association
-
-**Authentication Flow:**
-```text
-User clicks "Book Your Experience"
-         |
-         v
-    Is logged in? ----No----> Show Auth Prompt
-         |                         |
-        Yes                   Sign in/Sign up
-         |                         |
-         v                         v
-   Show Booking Form <-------------+
-```
-
-**LocalStorage Keys:**
-- `securityAnnouncementDismissed`: boolean - tracks if user dismissed the banner
+The existing single "Classic Spitbraai Selection" will be replaced by these 4 options.
 
 ---
 
-### User Experience
+## 3. New: Braai Only Catering
 
-1. **First-time visitors** see the security announcement banner on the homepage
-2. **When they try to book**, they're prompted to create an account with a clear explanation
-3. **After signing in**, they can proceed with booking normally
-4. **Returning users** who dismissed the banner won't see it again
-5. **Logged-in users** go straight to booking without interruption
+Add a new event type `braaionly` with one menu option:
 
-This approach balances security with user experience by being transparent about why the change was made and making the account creation process as frictionless as possible.
+- **Braai Only Catering** -- R160: Lamb Chop, Drumstick and Sausage with Garlic Bread, Two Salads (Potato or Green Salad or Curry Noodle Salad)
+
+This requires:
+- Adding the event type in `EventTypeSelector.tsx` (with a suitable icon like `Flame`)
+- Adding the menu option in `menuData.ts`
+
+---
+
+## 4. New: Platter Menu
+
+Add a new event type `platters` with all platter items. These are flat-priced items (not per-person), so they work more like the current "extras" but as standalone orders:
+
+| Platter | Price |
+|---------|-------|
+| Mixed Fruit Platter | R390 |
+| Savory Platter | R450 |
+| Mixed Meat Platter | R580 |
+| Cheese Platter | R480 |
+| Cold Meat Platter | R450 |
+| Chicken Platter | R480 |
+| Custom Platter - Cocktail Burgers (20 guests) | R350 |
+| Custom Platter - Chicken Wraps (20 guests) | R350 |
+| Cheese Table (30 guests) | R2500 |
+| Fruit Table (30 guests) | R1500 |
+
+This requires:
+- Adding the event type in `EventTypeSelector.tsx`
+- Adding all platter menu items in `menuData.ts`
+
+---
+
+## 5. New Extra: Chicken Drumstick
+
+Add a new extra option:
+- **Chicken Drumstick** -- R15 per person
+
+---
+
+## 6. Label Updates
+
+- In `MenuPackages.tsx`: Update "Matric Farewell 2025 Packages" to "Matric Farewell 2026 Packages"
+
+---
+
+## Files to Modify
+
+1. **`src/data/menuData.ts`** -- All price updates, new menu items, new platter items, new braai-only item, new chicken drumstick extra
+2. **`src/components/menu/EventTypeSelector.tsx`** -- Add "Braai Only Catering" and "Platters" event types
+3. **`src/components/menu/MenuPackages.tsx`** -- Add group configs for new event types, update matric label to 2026
+4. **`src/types/menu.ts`** -- Update `eventType` union type to include `'braaionly'` and `'platters'`
 
