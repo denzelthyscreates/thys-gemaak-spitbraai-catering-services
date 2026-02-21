@@ -53,7 +53,7 @@ export const MenuPackages = ({ menuOptions }: MenuPackagesProps) => {
         key: "yearend"
       },
       matric: {
-        title: "Matric Farewell 2025 Packages",
+        title: "Matric Farewell 2026 Packages",
         menus: filteredMenuOptions.filter(menu => menu.eventType === 'matric'),
         bgColor: "bg-green-50",
         borderColor: "border-green-200",
@@ -65,6 +65,20 @@ export const MenuPackages = ({ menuOptions }: MenuPackagesProps) => {
         bgColor: "bg-gray-50",
         borderColor: "border-gray-200",
         key: "standard"
+      },
+      braaionly: {
+        title: "Braai Only Catering",
+        menus: filteredMenuOptions.filter(menu => menu.eventType === 'braaionly'),
+        bgColor: "bg-red-50",
+        borderColor: "border-red-200",
+        key: "braaionly"
+      },
+      platters: {
+        title: "Platter Menu",
+        menus: filteredMenuOptions.filter(menu => menu.eventType === 'platters'),
+        bgColor: "bg-amber-50",
+        borderColor: "border-amber-200",
+        key: "platters"
       }
     };
 

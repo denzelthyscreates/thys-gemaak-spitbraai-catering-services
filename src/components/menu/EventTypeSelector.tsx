@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Building, Calendar, CalendarCheck, GraduationCap, PartyPopper, Users } from 'lucide-react';
+import { Building, Calendar, CalendarCheck, Flame, GraduationCap, PartyPopper, Users, UtensilsCrossed } from 'lucide-react';
 import { useMenu } from '@/contexts/menu';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 
@@ -47,6 +47,18 @@ const eventTypes: EventType[] = [
     name: 'Family Gathering',
     icon: <Users className="h-8 w-8 text-gray-500" />,
     description: 'Standard packages for any gathering'
+  },
+  {
+    id: 'braaionly',
+    name: 'Braai Only Catering',
+    icon: <Flame className="h-8 w-8 text-red-500" />,
+    description: 'Traditional braai with chops, drumsticks and sausage'
+  },
+  {
+    id: 'platters',
+    name: 'Platter Menu',
+    icon: <UtensilsCrossed className="h-8 w-8 text-amber-500" />,
+    description: 'Individually priced platters for any occasion'
   }
 ];
 
