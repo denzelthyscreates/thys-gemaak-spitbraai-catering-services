@@ -39,8 +39,8 @@ export const useBookingForm = (menuSelection: any) => {
 
   const onSubmit = async (data: BookingFormValues) => {
     console.log("=== BOOKING SUBMISSION STARTED ===");
-    console.log("Form data received:", data);
-    console.log("Menu selection:", menuSelection);
+    console.log("Event type:", data.eventType, "Guests:", data.numberOfGuests);
+    console.log("Has menu selection:", !!menuSelection);
 
     if (!menuSelection) {
       console.error("ERROR: No menu selection provided");
@@ -96,7 +96,7 @@ export const useBookingForm = (menuSelection: any) => {
       };
 
       console.log("=== ATTEMPTING SUPABASE INSERT ===");
-      console.log("Booking data to insert:", bookingData);
+      console.log("Event type:", bookingData.event_type, "Package:", bookingData.menu_package);
 
       // Check if Supabase client is available
       if (!supabase) {
@@ -112,8 +112,8 @@ export const useBookingForm = (menuSelection: any) => {
         .single();
 
       console.log("=== SUPABASE INSERT RESPONSE ===");
-      console.log("Inserted data:", insertedData);
-      console.log("Error:", error);
+      console.log("Insert success:", !!insertedData);
+      console.log("Has error:", !!error);
 
       if (error) {
         console.error("=== SUPABASE INSERT ERROR DETAILS ===");
@@ -147,7 +147,6 @@ export const useBookingForm = (menuSelection: any) => {
       console.log("=== BOOKING CREATED SUCCESSFULLY ===");
       console.log("Booking ID:", insertedData.id);
       console.log("Booking Reference:", insertedData.booking_reference || bookingReference);
-      console.log("Created booking:", insertedData);
 
       // Use the custom reference from the inserted data or fallback to generated one
       const finalBookingReference = insertedData.booking_reference || bookingReference;
@@ -164,8 +163,7 @@ export const useBookingForm = (menuSelection: any) => {
         });
 
         console.log("=== ZOHO QUOTE RESPONSE ===");
-        console.log("Zoho data:", zohoData);
-        console.log("Zoho error:", zohoError);
+        console.log("Zoho success:", !zohoError);
 
         let zohoEstimate = null;
         if (zohoError) {
@@ -176,8 +174,8 @@ export const useBookingForm = (menuSelection: any) => {
         }
 
         // Send the summary email (with or without Zoho data)
-        console.log("=== ATTEMPTING TO SEND EMAIL ===");
-        console.log("Sending email to:", insertedData.contact_email);
+        console.log("=== SENDING CONFIRMATION EMAIL ===");
+        console.log("Sending email for booking:", insertedData.id);
         
         const { data: emailData, error: emailError } = await supabase.functions.invoke('send-booking-summary', {
           body: {
@@ -188,8 +186,7 @@ export const useBookingForm = (menuSelection: any) => {
         });
 
         console.log("=== EMAIL SEND RESPONSE ===");
-        console.log("Email data:", emailData);
-        console.log("Email error:", emailError);
+        console.log("Email sent:", !emailError);
 
         if (emailError) {
           console.error("Email sending failed:", emailError);
