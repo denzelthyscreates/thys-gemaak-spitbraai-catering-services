@@ -52,6 +52,16 @@ const getFullEventTypeName = (eventType: string | undefined) => {
   return eventTypeMap[eventType] || eventType;
 };
 
+function escapeHtml(text: string | undefined | null): string {
+  if (!text) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 const getMenuInclusions = (menuPackage: string, includeCutlery: boolean) => {
   const inclusions: string[] = [];
   
@@ -193,15 +203,15 @@ const generateEnhancedPDFContent = (bookingData: BookingData, bookingId: string)
         <div class="section-title">CONTACT INFORMATION</div>
         <div class="info-row">
             <span class="label">Name:</span>
-            <span class="value">${bookingData.contact_name}</span>
+            <span class="value">${escapeHtml(bookingData.contact_name)}</span>
         </div>
         <div class="info-row">
             <span class="label">Email:</span>
-            <span class="value">${bookingData.contact_email}</span>
+            <span class="value">${escapeHtml(bookingData.contact_email)}</span>
         </div>
         <div class="info-row">
             <span class="label">Phone:</span>
-            <span class="value">${bookingData.contact_phone}</span>
+            <span class="value">${escapeHtml(bookingData.contact_phone)}</span>
         </div>
     </div>
 
@@ -209,41 +219,41 @@ const generateEnhancedPDFContent = (bookingData: BookingData, bookingId: string)
         <div class="section-title">EVENT DETAILS</div>
         <div class="info-row">
             <span class="label">Event Type:</span>
-            <span class="value">${fullEventType}</span>
+            <span class="value">${escapeHtml(fullEventType)}</span>
         </div>
         <div class="info-row">
             <span class="label">Menu Package:</span>
-            <span class="value">${bookingData.menu_package}</span>
+            <span class="value">${escapeHtml(bookingData.menu_package)}</span>
         </div>
         <div class="info-row">
             <span class="label">Event Date:</span>
-            <span class="value">${eventDate}</span>
+            <span class="value">${escapeHtml(eventDate)}</span>
         </div>
         <div class="info-row">
             <span class="label">Number of Guests:</span>
-            <span class="value">${bookingData.number_of_guests}</span>
+            <span class="value">${escapeHtml(String(bookingData.number_of_guests))}</span>
         </div>
     </div>
 
     <div class="section">
         <div class="section-title">VENUE DETAILS</div>
         <div class="venue-details">
-            ${bookingData.venue_name ? `<div class="info-row"><span class="label">Venue Name:</span><span class="value">${bookingData.venue_name}</span></div>` : ''}
+            ${bookingData.venue_name ? `<div class="info-row"><span class="label">Venue Name:</span><span class="value">${escapeHtml(bookingData.venue_name)}</span></div>` : ''}
             <div class="info-row">
                 <span class="label">Address:</span>
-                <span class="value">${bookingData.venue_street_address}</span>
+                <span class="value">${escapeHtml(bookingData.venue_street_address)}</span>
             </div>
             <div class="info-row">
                 <span class="label">City:</span>
-                <span class="value">${bookingData.venue_city}</span>
+                <span class="value">${escapeHtml(bookingData.venue_city)}</span>
             </div>
             <div class="info-row">
                 <span class="label">Province:</span>
-                <span class="value">${bookingData.venue_province}</span>
+                <span class="value">${escapeHtml(bookingData.venue_province)}</span>
             </div>
             <div class="info-row">
                 <span class="label">Postal Code:</span>
-                <span class="value">${bookingData.venue_postal_code}</span>
+                <span class="value">${escapeHtml(bookingData.venue_postal_code)}</span>
             </div>
         </div>
     </div>
@@ -252,19 +262,19 @@ const generateEnhancedPDFContent = (bookingData: BookingData, bookingId: string)
         <div class="section-title">BILLING ADDRESS</div>
         <div class="info-row">
             <span class="label">Address:</span>
-            <span class="value">${bookingData.address_line1}</span>
+            <span class="value">${escapeHtml(bookingData.address_line1)}</span>
         </div>
         <div class="info-row">
             <span class="label">City:</span>
-            <span class="value">${bookingData.city}</span>
+            <span class="value">${escapeHtml(bookingData.city)}</span>
         </div>
         <div class="info-row">
             <span class="label">Province:</span>
-            <span class="value">${bookingData.province}</span>
+            <span class="value">${escapeHtml(bookingData.province)}</span>
         </div>
         <div class="info-row">
             <span class="label">Postal Code:</span>
-            <span class="value">${bookingData.postal_code_address}</span>
+            <span class="value">${escapeHtml(bookingData.postal_code_address)}</span>
         </div>
     </div>
 
@@ -273,13 +283,13 @@ const generateEnhancedPDFContent = (bookingData: BookingData, bookingId: string)
         <div class="menu-details">
             <div class="info-row">
                 <span class="label">Package:</span>
-                <span class="value">${bookingData.menu_package}</span>
+                <span class="value">${escapeHtml(bookingData.menu_package)}</span>
             </div>
-            ${bookingData.season ? `<div class="info-row"><span class="label">Season:</span><span class="value">${bookingData.season}</span></div>` : ''}
-            ${bookingData.starters ? `<div class="info-row"><span class="label">Starters:</span><span class="value">${bookingData.starters}</span></div>` : ''}
-            ${bookingData.sides ? `<div class="info-row"><span class="label">Sides:</span><span class="value">${bookingData.sides}</span></div>` : ''}
-            ${bookingData.desserts ? `<div class="info-row"><span class="label">Desserts:</span><span class="value">${bookingData.desserts}</span></div>` : ''}
-            ${bookingData.extras ? `<div class="info-row"><span class="label">Extras:</span><span class="value">${bookingData.extras}</span></div>` : ''}
+            ${bookingData.season ? `<div class="info-row"><span class="label">Season:</span><span class="value">${escapeHtml(bookingData.season)}</span></div>` : ''}
+            ${bookingData.starters ? `<div class="info-row"><span class="label">Starters:</span><span class="value">${escapeHtml(bookingData.starters)}</span></div>` : ''}
+            ${bookingData.sides ? `<div class="info-row"><span class="label">Sides:</span><span class="value">${escapeHtml(bookingData.sides)}</span></div>` : ''}
+            ${bookingData.desserts ? `<div class="info-row"><span class="label">Desserts:</span><span class="value">${escapeHtml(bookingData.desserts)}</span></div>` : ''}
+            ${bookingData.extras ? `<div class="info-row"><span class="label">Extras:</span><span class="value">${escapeHtml(bookingData.extras)}</span></div>` : ''}
             <div class="info-row">
                 <span class="label">Cutlery & Crockery:</span>
                 <span class="value">${menuSelection?.includeCutlery ? 'Included' : 'Not included'}</span>
@@ -289,7 +299,7 @@ const generateEnhancedPDFContent = (bookingData: BookingData, bookingId: string)
         <div class="inclusions">
             <h4 style="margin: 0 0 10px 0; color: #22c55e;">What's Included in Your Package:</h4>
             <ul>
-                ${menuInclusions.map(inclusion => `<li>${inclusion}</li>`).join('')}
+                ${menuInclusions.map(inclusion => `<li>${escapeHtml(inclusion)}</li>`).join('')}
             </ul>
         </div>
     </div>
@@ -317,7 +327,7 @@ const generateEnhancedPDFContent = (bookingData: BookingData, bookingId: string)
     <div class="section">
         <div class="section-title">ADDITIONAL NOTES</div>
         <div style="background-color: #f8fafc; padding: 15px; border-radius: 6px;">
-            ${bookingData.additional_notes}
+            ${escapeHtml(bookingData.additional_notes)}
         </div>
     </div>
     ` : ''}
