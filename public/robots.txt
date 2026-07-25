@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /auth
+Disallow: /zoho-setup
+
+Sitemap: https://spitbraai.thysgemaak.com/sitemap.xml

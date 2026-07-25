@@ -1,0 +1,16 @@
+# Thys Gemaak Spitbraai Catering Services
+
+> Premium South African spitbraai catering for private, corporate, and large-scale events, based in Stellenbosch and serving the Western Cape.
+
+Thys Gemaak Spitbraai combines traditional spit-roasting with professional catering service. We build custom menu packages by guest count, event type, and season, and handle travel to venues across the Cape Winelands and greater Cape Town.
+
+## Pages
+
+- [Home](/): Overview of our spitbraai catering services, showcase gallery, and testimonials.
+- [Booking](/booking): Configure your menu, guest count, and event date, then submit a booking request.
+
+## Optional
+
+- [Privacy Policy](/privacy-policy): How we handle personal information under POPIA.
+- [Terms of Service](/terms-of-service): Terms governing bookings and payments.
+- [Cookie Policy](/cookie-policy): Cookie categories and consent options.
