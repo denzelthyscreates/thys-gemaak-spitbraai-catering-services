@@ -37,7 +37,7 @@ const PaymentSuccess = () => {
           
           <img 
             src="https://res.cloudinary.com/dlsjdyti8/image/upload/t_Thumbnail/v1747774078/2025-05-20_TGS_full_round_gswynv.png" 
-            alt="Thys Gemaak Spitbraai Logo" 
+            alt="Thys Gemaak Spitbraai brand mark" 
             className="h-20 mx-auto mb-4"
           />
           
