@@ -28,20 +28,22 @@ Your current backend contains:
 7. **Update external webhooks**: PayFast ITN/notify URLs, Zoho OAuth redirect URI, and Google Calendar settings all point at the old project's function URLs and must be repointed to the new ones.
 8. **Verify**: sign-up/sign-in, booking creation (trigger sets `user_id`), availability updates, a PayFast sandbox payment round-trip, booking summary email, and admin dashboard access.
 
-## Risks and things to decide before starting
+## Your answers, folded in
 
-- **Downtime / dual-write window**: bookings placed during the cutover on the old project would be lost unless you freeze bookings while migrating.
-- **User re-authentication is almost certain.**
-- **PayFast in production**: the webhook URL change must be coordinated so no live payment is confirmed against the dead backend.
-- Keep the old Supabase project alive read-only for a while as a fallback.
+- **Driver**: free-tier auto-pausing. Lovable Cloud does not pause projects, so this genuinely solves your problem — worth the migration.
+- **Traffic**: none live, so we can do a straight cutover with no freeze window and no dual-write.
+- **Passwords**: users will re-register or reset — that removes the hardest part of the migration.
+- **Secrets**: you can read the values back. In the Supabase dashboard go to **Project Settings → Edge Functions → Secrets**; each secret has a reveal/eye toggle that shows the plaintext value. Copy them out before disconnecting. (The CLI only shows hashes, so use the dashboard.) You only need to re-enter the 11 real ones — `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_DB_URL`, `SUPABASE_SERVICE_ROLE_KEY` and `LOVABLE_API_KEY` are auto-provisioned in the new backend.
 
-## Alternative worth considering
+Secrets to copy: PAYFAST_MERCHANT_ID, PAYFAST_MERCHANT_KEY, PAYFAST_PASSPHRASE, PAYFAST_RECEIVER_ID, ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET, ZOHO_ORGANIZATION_ID, GOOGLE_CALENDAR_ID, GOOGLE_SERVICE_ACCOUNT_KEY, RESEND_API_KEY, FACEBOOK_ACCESS_TOKEN.
 
-If the motivation is billing, dashboard convenience, or not managing an external account, that is a real win. If the current setup works fine, the safer path is staying on Supabase — the two are the same technology, and the migration cost here is mostly the auth users and the live payment integrations, not the database.
+## Remaining risks
 
-## Questions before I start
+- Zoho tokens in `zoho_tokens` may need re-authorising if the redirect URI changes.
+- PayFast and Google Calendar settings point at the old function URLs and must be repointed.
+- Keep the old Supabase project around (unpaused once) until the new one is verified, then let it go.
 
-- What's driving the switch (billing, convenience, something broken)?
-- Do you have all 16 secret values available to re-enter?
-- Is there live booking/payment traffic right now, or can we take a maintenance window?
-- Is it acceptable for existing users to reset their passwords?
+## Also worth cleaning up during the move
+
+`src/lib/supabase.ts` reads `VITE_SUPABASE_ANON_KEY`, while Lovable Cloud writes `VITE_SUPABASE_PUBLISHABLE_KEY`. I'll point the client at the publishable key so the app doesn't break on the new backend.
+
