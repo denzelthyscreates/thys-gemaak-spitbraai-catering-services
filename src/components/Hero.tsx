@@ -46,9 +46,9 @@ const Hero = () => {
           <span className="inline-block px-4 py-1.5 mb-4 text-base font-medium rounded-full bg-primary/20 text-white hidden md:inline-block">
             Enhanced Spitbraai Experience
           </span>
-          <div className="text-2xl font-serif font-semibold tracking-tight text-white mb-5" aria-hidden="true">
+          <h1 className="text-2xl font-serif font-semibold tracking-tight text-white mb-5">
             Premium South African Spitbraai for Every Occasion
-          </div>
+          </h1>
           <div className="flex flex-col gap-3 w-auto items-center mb-2">
             <a href="#contact" className="button-primary px-6 transform transition-transform hover:scale-105">
               Book Your Experience
