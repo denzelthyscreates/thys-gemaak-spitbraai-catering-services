@@ -1,104 +1,47 @@
+# Switching from your own Supabase project to Lovable Cloud
 
+## What this actually means
 
-# 2026 Menu Price Update Plan
+Lovable Cloud runs on Supabase under the hood, but as a project Lovable provisions and manages for you. So this is not a "flip a switch" change — it is a **migration to a brand new backend project**, then repointing the app at it.
 
-## Summary
-Update all menu prices, names, and descriptions to match the 2026 pricing from your uploaded menu images. This includes price changes to existing items, new menu options, and two entirely new categories.
+There is no automated migration path. Everything below is a manual rebuild plus a data copy.
 
----
+## What has to move
 
-## 1. Price and Name Updates (existing items)
+Your current backend contains:
 
-The following changes will be made in `src/data/menuData.ts`:
+- **Database**: 6 tables (bookings, blocked_dates, calendar_sync, event_availability, user_roles, zoho_tokens), the `app_role` enum, 3 functions (`has_role`, `enforce_booking_user_id`, `update_event_availability_on_booking`), 2 triggers, plus all RLS policies and grants (including the recent security hardening).
+- **21 migration files** in `supabase/migrations/`.
+- **11 edge functions**: bootstrap-admin, generate-booking-pdf, get-user-emails, google-calendar-sync, payfast-payment/paynow/webhook, send-booking-summary, send-contact-inquiry, zoho-books-integration, plus `_shared`.
+- **16 secrets**: PayFast (4), Zoho (3), Google Calendar (2), Resend, Facebook token, and the auto-managed Supabase ones.
+- **Auth users** — every existing signed-up account, including whoever holds the admin role.
+- **Live data** — real bookings, availability, Zoho tokens.
 
-| Menu Item | Field | Old Value | New Value |
-|-----------|-------|-----------|-----------|
-| Essential Celebration (birthday) | withoutCutlery | R149 | R159 |
-| Deluxe Celebration (birthday) | withoutCutlery | R165 | R175 |
-| Ultimate Birthday Feast | price | R195 | R200 |
-| Ultimate Birthday Feast | withoutCutlery | R175 | R195 |
-| Luxury Wedding Experience | price | R195 | R220 |
-| Luxury Wedding Experience | withoutCutlery | R175 | R200 |
-| Classic Wedding Celebration | withoutCutlery | R149 | R159 |
-| Classic Spitbraai (standard) | withoutCutlery | R149 | R159 |
-| Year-End Celebration | price | R160 | R170 |
-| Year-End Celebration | withoutCutlery | R140 | R160 |
-| Matric Farewell Essential | name | "...2025" | "...2026" |
-| Matric Farewell Essential | withoutCutlery | R149 | R159 |
-| Matric Farewell Premium | name | "...2025" | "...2026" |
-| Matric Farewell Premium | withoutCutlery | R175 | R185 |
-| Cheese Table | price | R1900 | R2500 |
-| Fruit Table | price | R900 | R1500 |
+## Migration steps
 
----
+1. **Disconnect Supabase / enable Lovable Cloud** on the project. This provisions a fresh backend and rewrites `.env` and `src/integrations/supabase/client.ts`.
+2. **Recreate the schema** by running one consolidated migration that reproduces the current end state (enum, 6 tables, grants, RLS policies, functions, triggers) rather than replaying 21 historical migrations.
+3. **Redeploy the edge functions** — the code is already in the repo, so they deploy automatically; `supabase/config.toml` gets the new project ref and keeps the four `verify_jwt = false` entries.
+4. **Re-add all 16 secrets** in the new backend. Values are not transferable automatically — you need the PayFast, Zoho, Google service account, Resend and Facebook credentials on hand.
+5. **Export and import data**: dump the 6 tables from the old project (Cloud/SQL editor export), then insert into the new one. Order matters because of foreign keys and the booking triggers — bookings should be imported with triggers temporarily disabled so availability counts are not double-counted.
+6. **Auth users**: passwords cannot be exported. Options are (a) ask everyone to re-register or use password reset against the new project, or (b) recreate accounts server-side and force a reset email. Admin role rows in `user_roles` must be re-pointed at the new user IDs — `bootstrap-admin` can re-seed the first admin.
+7. **Update external webhooks**: PayFast ITN/notify URLs, Zoho OAuth redirect URI, and Google Calendar settings all point at the old project's function URLs and must be repointed to the new ones.
+8. **Verify**: sign-up/sign-in, booking creation (trigger sets `user_id`), availability updates, a PayFast sandbox payment round-trip, booking summary email, and admin dashboard access.
 
-## 2. New Standard Menu Variants
+## Risks and things to decide before starting
 
-The 2026 menu shows the Standard Menu now has Classic Menu 1/2/3 (each R169 with different sides) plus a Deluxe option at R185. Currently there's only one standard option.
+- **Downtime / dual-write window**: bookings placed during the cutover on the old project would be lost unless you freeze bookings while migrating.
+- **User re-authentication is almost certain.**
+- **PayFast in production**: the webhook URL change must be coordinated so no live payment is confirmed against the dead backend.
+- Keep the old Supabase project alive read-only for a while as a fallback.
 
-New items to add to `menuData.ts` under `eventType: 'standard'`:
+## Alternative worth considering
 
-- **Classic Menu 1** -- R169 (without cutlery R159): Lamb Spit main with Garlic Bread, Curry Noodle and Green Salad
-- **Classic Menu 2** -- R169 (without cutlery R159): Lamb Spit main with Garlic Bread, Three Bean and Green Salad
-- **Classic Menu 3** -- R169 (without cutlery R159): Lamb Spit main with Garlic Bread, Baby Potatoes and Baby Carrots
-- **Deluxe Celebration Experience** -- R185 (without cutlery R175): Lamb Spit Main, Drumstick, Garlic Bread, Juice + 1 Refill, 2 Salads/Sides
+If the motivation is billing, dashboard convenience, or not managing an external account, that is a real win. If the current setup works fine, the safer path is staying on Supabase — the two are the same technology, and the migration cost here is mostly the auth users and the live payment integrations, not the database.
 
-The existing single "Classic Spitbraai Selection" will be replaced by these 4 options.
+## Questions before I start
 
----
-
-## 3. New: Braai Only Catering
-
-Add a new event type `braaionly` with one menu option:
-
-- **Braai Only Catering** -- R160: Lamb Chop, Drumstick and Sausage with Garlic Bread, Two Salads (Potato or Green Salad or Curry Noodle Salad)
-
-This requires:
-- Adding the event type in `EventTypeSelector.tsx` (with a suitable icon like `Flame`)
-- Adding the menu option in `menuData.ts`
-
----
-
-## 4. New: Platter Menu
-
-Add a new event type `platters` with all platter items. These are flat-priced items (not per-person), so they work more like the current "extras" but as standalone orders:
-
-| Platter | Price |
-|---------|-------|
-| Mixed Fruit Platter | R390 |
-| Savory Platter | R450 |
-| Mixed Meat Platter | R580 |
-| Cheese Platter | R480 |
-| Cold Meat Platter | R450 |
-| Chicken Platter | R480 |
-| Custom Platter - Cocktail Burgers (20 guests) | R350 |
-| Custom Platter - Chicken Wraps (20 guests) | R350 |
-| Cheese Table (30 guests) | R2500 |
-| Fruit Table (30 guests) | R1500 |
-
-This requires:
-- Adding the event type in `EventTypeSelector.tsx`
-- Adding all platter menu items in `menuData.ts`
-
----
-
-## 5. New Extra: Chicken Drumstick
-
-Add a new extra option:
-- **Chicken Drumstick** -- R15 per person
-
----
-
-## 6. Label Updates
-
-- In `MenuPackages.tsx`: Update "Matric Farewell 2025 Packages" to "Matric Farewell 2026 Packages"
-
----
-
-## Files to Modify
-
-1. **`src/data/menuData.ts`** -- All price updates, new menu items, new platter items, new braai-only item, new chicken drumstick extra
-2. **`src/components/menu/EventTypeSelector.tsx`** -- Add "Braai Only Catering" and "Platters" event types
-3. **`src/components/menu/MenuPackages.tsx`** -- Add group configs for new event types, update matric label to 2026
-4. **`src/types/menu.ts`** -- Update `eventType` union type to include `'braaionly'` and `'platters'`
-
+- What's driving the switch (billing, convenience, something broken)?
+- Do you have all 16 secret values available to re-enter?
+- Is there live booking/payment traffic right now, or can we take a maintenance window?
+- Is it acceptable for existing users to reset their passwords?
