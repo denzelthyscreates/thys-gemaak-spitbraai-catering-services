@@ -1,8 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Get environment variables - no hardcoded fallbacks for security
+// Get environment variables - no hardcoded fallbacks for security.
+// Accept both key names: Lovable Cloud writes VITE_SUPABASE_PUBLISHABLE_KEY,
+// while the older external-Supabase setup used VITE_SUPABASE_ANON_KEY.
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseAnonKey =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+  import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Check if environment variables are available
 const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey);
