@@ -20,7 +20,7 @@ Your current backend contains:
 ## Migration steps
 
 1. **Copy the 11 external secret values** from the old Supabase dashboard (Project Settings → Edge Functions → Secrets, reveal each value). Keep them somewhere safe locally — **do not paste them into chat**.
-2. **Disconnect Supabase / enable Lovable Cloud** on the project. This provisions a fresh backend and rewrites `.env` and `src/integrations/supabase/client.ts`.
+2. **Disconnect Supabase / enable Lovable Cloud**: In the Lovable editor go to **More > Cloud**, click **Disconnect** next to the connected Supabase project, then click **Enable Cloud**. This provisions a fresh backend and rewrites `.env` and `supabase/config.toml`.
 3. **Recreate the schema** by running one consolidated migration that reproduces the current end state (enum, 6 tables, grants, RLS policies, functions, triggers) rather than replaying 21 historical migrations.
 4. **Redeploy the edge functions** — the code is already in the repo, so they deploy automatically; `supabase/config.toml` gets the new project ref and keeps the four `verify_jwt = false` entries.
 5. **Re-add the 11 external secrets** via Lovable's secure secret form. I will request them after Cloud is enabled; the values go straight into the encrypted store and never pass through the chat.
