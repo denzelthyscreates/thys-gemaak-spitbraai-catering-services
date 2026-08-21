@@ -1,6 +1,5 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { AvailabilityData } from './types';
+import { AvailabilityData, ProcessedEvent } from './types';
 
 /**
  * Service for managing calendar availability data
@@ -25,15 +24,13 @@ export class AvailabilityService {
     console.log('Raw availability data from database:', data);
 
     return data.map(item => {
-      const mappedItem = {
+      const mappedItem: AvailabilityData = {
         date: item.date,
         isAvailable: item.is_available,
         bookedEvents: item.booked_events,
-        maxEvents: item.max_events,
-        googleCalendarEvents: Array.isArray(item.google_calendar_events) 
-          ? item.google_calendar_events 
-          : [],
-        notes: item.notes
+        googleCalendarEvents: Array.isArray(item.google_calendar_events)
+          ? (item.google_calendar_events as unknown as ProcessedEvent[])
+          : []
       };
       
       // Log each item to see what's being marked as unavailable
