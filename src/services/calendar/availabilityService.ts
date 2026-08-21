@@ -28,7 +28,6 @@ export class AvailabilityService {
         date: item.date,
         isAvailable: item.is_available,
         bookedEvents: item.booked_events,
-        maxEvents: item.max_events,
         googleCalendarEvents: Array.isArray(item.google_calendar_events)
           ? (item.google_calendar_events as unknown as ProcessedEvent[])
           : [],
