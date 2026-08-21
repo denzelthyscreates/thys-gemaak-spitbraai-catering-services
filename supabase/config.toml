@@ -1,13 +1,1 @@
-project_id = "pcvmdyhzufupgckszrdy"
-
-[functions.payfast-payment]
-verify_jwt = false
-
-[functions.payfast-paynow]
-verify_jwt = false
-
-[functions.payfast-webhook]
-verify_jwt = false
-
-[functions.bootstrap-admin]
-verify_jwt = false
+project_id = "jxwqpoxgaskdfgvfjjab"
