@@ -30,8 +30,7 @@ export class AvailabilityService {
         bookedEvents: item.booked_events,
         googleCalendarEvents: Array.isArray(item.google_calendar_events)
           ? (item.google_calendar_events as unknown as ProcessedEvent[])
-          : [],
-        notes: item.notes ?? undefined
+          : []
       };
       
       // Log each item to see what's being marked as unavailable
