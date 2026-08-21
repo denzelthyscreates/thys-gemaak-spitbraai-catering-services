@@ -1,6 +1,5 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { AvailabilityData } from './types';
+import { AvailabilityData, ProcessedEvent } from './types';
 
 /**
  * Service for managing calendar availability data
